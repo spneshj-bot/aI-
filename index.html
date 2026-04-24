@@ -1122,13 +1122,37 @@
       (키는 이 브라우저 메모리에만 저장됩니다)
     </p>
     <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">API 제공자</label>
-    <select id="api-provider" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:6px; margin-bottom:10px; font-family:inherit;">
+    <select id="api-provider" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:6px; margin-bottom:12px; font-family:inherit;" onchange="onProviderChange()">
       <option value="none">사용 안 함 (DB만 사용)</option>
       <option value="claude">Claude (Anthropic)</option>
       <option value="openai">OpenAI (ChatGPT)</option>
     </select>
-    <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">API 키</label>
-    <input id="api-key" type="password" placeholder="sk-ant-... 또는 sk-..." style="width:100%; padding:8px; border:1px solid var(--line); border-radius:6px; margin-bottom:14px; font-family:inherit; font-size:13px;">
+
+    <!-- 🔒 호출 방식 선택 -->
+    <div id="api-mode-section" style="display:none; background:var(--highlight-soft); padding:10px 12px; border-radius:8px; margin-bottom:12px; border-left:3px solid var(--gold);">
+      <label style="display:block; font-size:11.5px; font-weight:700; color:var(--navy); margin-bottom:6px;">🔐 호출 방식</label>
+      <label style="display:flex; align-items:flex-start; gap:6px; font-size:12px; margin-bottom:6px; cursor:pointer;">
+        <input type="radio" name="api-mode" value="proxy" checked onchange="onApiModeChange()" style="margin-top:2px; flex-shrink:0;">
+        <span>
+          <strong style="color:var(--ok);">서버 프록시 (권장)</strong><br/>
+          <span style="color:var(--muted); font-size:11px;">API 키가 서버 환경변수에만 저장되어 안전합니다. (/api/openai, /api/claude 엔드포인트 필요)</span>
+        </span>
+      </label>
+      <label style="display:flex; align-items:flex-start; gap:6px; font-size:12px; cursor:pointer;">
+        <input type="radio" name="api-mode" value="direct" onchange="onApiModeChange()" style="margin-top:2px; flex-shrink:0;">
+        <span>
+          <strong style="color:var(--warn);">브라우저 직접 호출 (개발용)</strong><br/>
+          <span style="color:var(--muted); font-size:11px;">API 키를 브라우저에 입력. 개인 PC 개발·테스트 전용.</span>
+        </span>
+      </label>
+    </div>
+
+    <!-- API 키 입력 (직접 호출 모드에서만 표시) -->
+    <div id="api-key-section" style="display:none;">
+      <label style="display:block; font-size:12px; font-weight:600; margin-bottom:4px;">API 키</label>
+      <input id="api-key" type="password" placeholder="sk-ant-... 또는 sk-..." style="width:100%; padding:8px; border:1px solid var(--line); border-radius:6px; margin-bottom:14px; font-family:inherit; font-size:13px;">
+    </div>
+
     <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; margin-bottom:14px;">
       <input id="api-fallback" type="checkbox" checked>
       DB에서 찾지 못한 경우에만 AI 호출 (비용 절약)
@@ -3173,6 +3197,7 @@ const AI_CONFIG = {
   provider: 'none',  // none / claude / openai
   apiKey: '',
   fallbackOnly: true,
+  useProxy: true,  // 🔒 true: 서버 프록시 경유 (안전) · false: 브라우저에서 직접 호출 (개발용)
   supabaseUrl: '',
   supabaseKey: ''
 };
@@ -3187,6 +3212,31 @@ function toggleSettings() {
     document.getElementById('api-fallback').checked = AI_CONFIG.fallbackOnly;
     document.getElementById('sb-url').value = AI_CONFIG.supabaseUrl;
     document.getElementById('sb-key').value = AI_CONFIG.supabaseKey;
+    // 프록시 모드 라디오 선택
+    const modeRadio = document.querySelector(`input[name="api-mode"][value="${AI_CONFIG.useProxy ? 'proxy' : 'direct'}"]`);
+    if (modeRadio) modeRadio.checked = true;
+    onProviderChange();
+  }
+}
+
+// provider 변경 시 API 모드 섹션 표시/숨김
+function onProviderChange() {
+  const provider = document.getElementById('api-provider').value;
+  const modeSection = document.getElementById('api-mode-section');
+  if (modeSection) {
+    modeSection.style.display = provider === 'none' ? 'none' : 'block';
+  }
+  onApiModeChange();
+}
+
+// API 모드(프록시/직접) 변경 시 API 키 입력란 표시/숨김
+function onApiModeChange() {
+  const provider = document.getElementById('api-provider').value;
+  const modeRadio = document.querySelector('input[name="api-mode"]:checked');
+  const mode = modeRadio ? modeRadio.value : 'proxy';
+  const keySection = document.getElementById('api-key-section');
+  if (keySection) {
+    keySection.style.display = (provider !== 'none' && mode === 'direct') ? 'block' : 'none';
   }
 }
 
@@ -3194,6 +3244,8 @@ function saveApiSettings() {
   AI_CONFIG.provider = document.getElementById('api-provider').value;
   AI_CONFIG.apiKey = document.getElementById('api-key').value.trim();
   AI_CONFIG.fallbackOnly = document.getElementById('api-fallback').checked;
+  const modeRadio = document.querySelector('input[name="api-mode"]:checked');
+  AI_CONFIG.useProxy = modeRadio ? modeRadio.value === 'proxy' : true;
   AI_CONFIG.supabaseUrl = document.getElementById('sb-url').value.trim().replace(/\/$/, '');
   AI_CONFIG.supabaseKey = document.getElementById('sb-key').value.trim();
   toggleSettings();
@@ -3208,9 +3260,16 @@ function saveApiSettings() {
   const div = document.createElement('div');
   div.className = 'msg ai';
   const parts = [];
-  parts.push(AI_CONFIG.provider === 'none'
-    ? '📘 DB 전용 모드 (240개 구·군 사업 + 155개 공약)'
-    : `🤖 ${AI_CONFIG.provider === 'claude' ? 'Claude' : 'OpenAI'} API 연결됨`);
+  if (AI_CONFIG.provider === 'none') {
+    parts.push('📘 DB 전용 모드 (240개 구·군 사업 + 155개 공약)');
+  } else {
+    const providerName = AI_CONFIG.provider === 'claude' ? 'Claude' : 'OpenAI';
+    if (AI_CONFIG.useProxy) {
+      parts.push(`🔒 ${providerName} API (서버 프록시 모드) — 안전한 실운영용`);
+    } else {
+      parts.push(`⚠️ ${providerName} API (브라우저 직접 호출) — 개발/테스트용`);
+    }
+  }
   parts.push(AI_CONFIG.supabaseUrl
     ? '☁️ Supabase 영속 저장 활성'
     : '💾 로컬 메모리 저장');
@@ -3326,9 +3385,28 @@ async function updateStatusOnSupabase(id, status) {
 }
 
 /* =========================================================
-   Claude API 호출
+   Claude API 호출 — 프록시 우선, 직접 호출 폴백
    ========================================================= */
 async function callClaudeAPI(userMessage, contextData) {
+  // 프록시 모드: API 키 불필요, 서버 환경변수에 저장된 키 사용 (권장)
+  if (AI_CONFIG.useProxy) {
+    try {
+      const response = await fetch('/api/claude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage, context: contextData })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return '⚠️ ' + (data.error || 'AI 서비스 오류');
+      }
+      return data.answer || '답변을 생성하지 못했습니다.';
+    } catch (e) {
+      return '⚠️ 프록시 호출 오류: ' + e.message + '\n💡 서버 프록시가 설정되지 않았다면 설정(⚙️)에서 직접 호출 모드로 전환하세요.';
+    }
+  }
+
+  // 직접 호출 모드 (개발/테스트용): 브라우저에서 API 키 사용
   const systemPrompt = `당신은 '부산 AI 시민정책 비서'입니다. 박형준 부산시장의 2026 본선 공약과 민선 8기 시정 성과에 대해 부산시민에게 친절하고 정확하게 답변합니다.
 
 # 답변 원칙
@@ -3363,7 +3441,7 @@ ${contextData || '관련 DB 정보 없음. 가능하면 답변하지 말고 담�
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 800,
-        temperature: 0.3, // 사실 기반 답변을 위해 낮게
+        temperature: 0.3,
         system: systemPrompt,
         messages: [{ role: 'user', content: userMessage }]
       })
@@ -3379,9 +3457,28 @@ ${contextData || '관련 DB 정보 없음. 가능하면 답변하지 말고 담�
 }
 
 /* =========================================================
-   OpenAI API 호출 (선택)
+   OpenAI API 호출 — 프록시 우선, 직접 호출 폴백
    ========================================================= */
 async function callOpenAIAPI(userMessage, contextData) {
+  // 프록시 모드
+  if (AI_CONFIG.useProxy) {
+    try {
+      const response = await fetch('/api/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage, context: contextData })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return '⚠️ ' + (data.error || 'AI 서비스 오류');
+      }
+      return data.answer || '답변을 생성하지 못했습니다.';
+    } catch (e) {
+      return '⚠️ 프록시 호출 오류: ' + e.message;
+    }
+  }
+
+  // 직접 호출 모드
   const systemPrompt = `당신은 부산 AI 시민정책 비서입니다. 박형준 부산시장 공약에 대해 시민에게 친절하고 명확하게 3~5문장으로 답변하세요.
 
 [참고 DB]
