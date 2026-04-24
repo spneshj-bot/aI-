@@ -1,12 +1,6 @@
 {
-  "version": 2,
-  "public": true,
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/", "destination": "/busan_ai_assistant.html" },
-    { "source": "/chat", "destination": "/busan_ai_assistant.html" },
-    { "source": "/admin", "destination": "/busan_ai_assistant.html" }
-  ],
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
@@ -14,11 +8,11 @@
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=()" }
+        { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(self), camera=()" }
       ]
     },
     {
-      "source": "/busan_ai_assistant.html",
+      "source": "/index.html",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]
