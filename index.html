@@ -672,6 +672,202 @@
     margin-top: 4px;
   }
 
+  /* "더 자세히" CTA 버튼 */
+  .pledge-detail-cta {
+    background: var(--gold);
+    color: var(--navy);
+    border: 0;
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 10px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .pledge-detail-cta:hover {
+    background: var(--gold-soft);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(201, 162, 73, 0.35);
+  }
+  .pledge-detail-cta.pdc-mini {
+    padding: 6px 12px;
+    font-size: 11.5px;
+    background: transparent;
+    color: var(--navy);
+    border: 1px solid var(--line);
+  }
+  .pledge-detail-cta.pdc-mini:hover {
+    background: var(--highlight-soft);
+    border-color: var(--gold);
+  }
+  [data-theme="dark"] .pledge-detail-cta.pdc-mini {
+    color: var(--gold);
+  }
+
+  /* 상세 카드 컨테이너 */
+  .pledge-detail-card-wrap {
+    margin-top: 10px;
+    animation: pdcSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes pdcSlideIn {
+    from { opacity: 0; transform: translateY(-8px); max-height: 0; }
+    to { opacity: 1; transform: translateY(0); max-height: 2000px; }
+  }
+  .pledge-detail-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--gold);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .pdc-header {
+    background: var(--highlight-soft);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .pdc-badge {
+    display: inline-block;
+    font-size: 10px;
+    background: var(--navy);
+    color: var(--gold);
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .pdc-title {
+    font-family: 'Gowun Batang', serif;
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0;
+  }
+  [data-theme="dark"] .pdc-title { color: var(--text); }
+  .pdc-body { padding: 14px 16px; }
+  .pdc-field {
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--line);
+  }
+  .pdc-field:last-child { border-bottom: 0; }
+  .pdc-field-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 3px;
+    letter-spacing: 0.3px;
+  }
+  [data-theme="dark"] .pdc-field-label { color: var(--gold); }
+  .pdc-field-value {
+    font-size: 13px;
+    color: var(--text-sub);
+    line-height: 1.6;
+  }
+  .pdc-structure ul {
+    margin: 6px 0 0 0;
+    padding-left: 18px;
+  }
+  .pdc-structure li {
+    font-size: 12.5px;
+    color: var(--text-sub);
+    line-height: 1.7;
+    margin-bottom: 2px;
+  }
+
+  /* 공약 상세 이미지 */
+  .pdc-image {
+    margin: 0 -16px 12px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  .pdc-image img {
+    width: 100%;
+    height: auto;
+    max-height: 280px;
+    object-fit: cover;
+    display: block;
+  }
+  .pdc-image-caption {
+    padding: 6px 16px;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    background: var(--highlight-soft);
+    font-style: italic;
+  }
+
+  /* 지도 링크 버튼들 */
+  .pdc-maps { padding: 10px 0; }
+  .pdc-map-links {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .pdc-map-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border-radius: 100px;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid var(--line);
+  }
+  .pdc-map-btn::before {
+    content: '📍';
+    font-size: 10px;
+  }
+  .pdc-map-btn.kakao {
+    background: #FEE500;
+    color: #3A2929;
+    border-color: #FEE500;
+  }
+  .pdc-map-btn.kakao:hover { background: #FDD900; transform: translateY(-1px); }
+  .pdc-map-btn.naver {
+    background: #03C75A;
+    color: white;
+    border-color: #03C75A;
+  }
+  .pdc-map-btn.naver:hover { background: #02B050; transform: translateY(-1px); }
+  .pdc-map-btn.google {
+    background: white;
+    color: #4285F4;
+    border-color: #4285F4;
+  }
+  .pdc-map-btn.google:hover { background: #4285F4; color: white; transform: translateY(-1px); }
+  [data-theme="dark"] .pdc-map-btn.google {
+    background: transparent;
+    color: #8BB4F8;
+    border-color: #8BB4F8;
+  }
+
+  /* 관련 링크 리스트 */
+  .pdc-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .pdc-link-item {
+    font-size: 12px;
+    color: var(--navy);
+    text-decoration: none;
+    padding: 4px 0;
+  }
+  .pdc-link-item:hover {
+    color: var(--gold);
+    text-decoration: underline;
+  }
+  [data-theme="dark"] .pdc-link-item { color: var(--gold); }
+
   /* 15대 분야 탐색 그리드 */
   .category-grid {
     display: grid;
@@ -2124,23 +2320,47 @@ function searchPledges(keyword) {
   if (!keyword) return [];
   const kw = keyword.toLowerCase();
   const hits = [];
-  // 하이라이트 공약 우선 검색
+
+  // === STEP 1: 분야명 직접 매칭 (예: "체육건강", "활력경제") ===
+  // 15대 분야명이 질문에 포함되어 있으면 해당 분야의 모든 공약을 반환
+  const catNames = Object.keys(PLEDGE_CATEGORIES);
+  const matchedCats = catNames.filter(cat => kw.includes(cat.toLowerCase()));
+  if (matchedCats.length > 0) {
+    matchedCats.forEach(catName => {
+      const cat = PLEDGE_CATEGORIES[catName];
+      cat.items.forEach(item => {
+        hits.push({ type: 'item', category: catName, icon: cat.icon, ...item });
+      });
+    });
+    // 분야명 직접 매칭 시에는 관련 하이라이트도 함께
+    PLEDGE_HIGHLIGHTS.forEach(h => {
+      if (matchedCats.includes(h.category)) {
+        hits.push({ type: 'highlight', ...h });
+      }
+    });
+    return hits.slice(0, 30); // 분야 전체는 최대 30건까지 (관광매력 26건 커버)
+  }
+
+  // === STEP 2: 하이라이트 공약 검색 (제목·요약·상세·키워드) ===
   PLEDGE_HIGHLIGHTS.forEach(h => {
-    const hay = (h.title + h.summary + h.detail + h.keywords.join(' ')).toLowerCase();
+    const hay = (h.title + h.summary + h.detail + h.keywords.join(' ') + h.category).toLowerCase();
     if (hay.includes(kw) || h.keywords.some(k => kw.includes(k.toLowerCase()))) {
       hits.push({ type: 'highlight', ...h });
     }
   });
-  // 15대 분야 세부 공약 검색
+
+  // === STEP 3: 15대 분야 세부 공약 검색 (name·desc·tag·분야명·아이콘설명) ===
   Object.entries(PLEDGE_CATEGORIES).forEach(([catName, cat]) => {
     cat.items.forEach(item => {
-      const hay = (item.name + item.desc + item.tag).toLowerCase();
+      // 분야명·desc도 검색 대상에 포함
+      const hay = (item.name + item.desc + item.tag + catName + (cat.desc || '')).toLowerCase();
       if (hay.includes(kw)) {
         hits.push({ type: 'item', category: catName, icon: cat.icon, ...item });
       }
     });
   });
-  return hits.slice(0, 10); // 최대 10건
+
+  return hits.slice(0, 15);
 }
 
 // 분야별 전체 반환
@@ -2156,6 +2376,1878 @@ function getAllCategories() {
     name, id: cat.id, icon: cat.icon, desc: cat.desc, count: cat.items.length
   }));
 }
+
+/* =========================================================
+   공약별 상세 정보 DB (PLEDGE_DETAILS)
+   - 출처: 공약집 버전1, 시정대시민보고회(2026.3.24), 업무보고 5종
+   - 각 공약 key는 PLEDGE_HIGHLIGHTS의 title 또는 PLEDGE_CATEGORIES item의 name
+   - 필드: location(위치), budget(사업비), timeline(추진일정), status(현재상태),
+           target(대상), effect(기대효과), org(주관), note(특이사항)
+   ========================================================= */
+const PLEDGE_DETAILS = {
+  // ========== 대표공약 10건 ==========
+  "청년 종잣돈 (FSA+YFF) — 부산찬스": {
+    location: "부산광역시 전역 (BNK부산은행 협력 운용)",
+    budget: "10년간 청년 1인당 최대 1억원 자산 형성 설계, 추가 시민세금 0원",
+    timeline: "2026년 하반기 설계 확정 → 2027년 1월 시범 운영 → 단계적 확대",
+    status: "정책 설계 완료(YFF v15.6), 3자환류 완결판. 금융권 Q&A 12문 대응 완료",
+    target: "만 18세 부산 거주 청년 전원 (매년 약 2.5만명 대상)",
+    structure: [
+      "첫씨앗계좌(FSA): 만 18세 1,000만원 지급",
+      "청년미래기금(YFF): 월 20만원 적립 + 시 매칭 80%",
+      "시민펀드: 시민·기업·도시공사 3자 환류 설계",
+      "취업보너스: 1년 근속 200만, 3년 근속 추가 300만",
+      "정착 프리미엄: 부산 정착 시 100만원",
+      "금교 인센티브: 3단계 600만 (각 200만)",
+      "봉사·정주 보너스: 각 300만원"
+    ],
+    effect: "청년 순유출 막고 부산 정착 인센티브 제공. 10년 평균 수익률 4.30% 목표",
+    org: "부산시 청년정책담당관 + BNK부산은행 + 부산도시공사",
+    note: "슬로건 '부모찬스 대신 부산찬스'. 30년 환수 +25.5조 설계",
+    mapQuery: "BNK부산은행 본점"
+  },
+
+  "가덕도 신공항 적기 개항": {
+    location: "강서구 가덕도",
+    budget: "총사업비 10.5조원 (국비)",
+    timeline: "2026 하반기 우선시공분 착공 / 접근철도 2026 하반기 착공 / 2035 개항",
+    status: "입찰 정상화 완료. 부지조성 우선시공분 착공(26하), 접근철도 예산 6,890억 확보",
+    target: "부산·울산·경남 1,000만 인구, 동남권 관광·물류",
+    effect: "부전역~가덕신공항 KTX 26분. 글로벌 관문도시 핵심 인프라. 강서구 발전 동력",
+    org: "국토교통부 + 부산시 + 가덕도신공항건설공단",
+    note: "문재인 정부 특별법 통과(2021), 윤석열 정부 사업 승인. 민선 8기 핵심 성과",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Gadeokdo_Island_Busan.jpg/800px-Gadeokdo_Island_Busan.jpg",
+    imageCaption: "가덕도 전경 (© Wikimedia Commons)",
+    mapQuery: "부산 강서구 가덕도"
+  },
+
+  "BuTX 초광역권 철도망": {
+    location: "가덕도 ↔ 부전역 ↔ 오시리아 54km",
+    budget: "총사업비 5조원 이상 (민간투자사업)",
+    timeline: "2026.6 민간투자 심의 / 2027~2028 실시설계 / 가덕신공항과 동시 개통 목표",
+    status: "KDI 민자적격성 통과(2025.10), 2026.6 심의 예정",
+    target: "부산 전역 및 동남권 광역 통근자",
+    effect: "가덕도~부전 20분, 가덕도~오시리아 전체 54km. 수소전동차 도입으로 친환경",
+    org: "부산시 교통국 + 국토부 + 민간 컨소시엄",
+    note: "가덕신공항과 동시 개통 목표. 공항 접근성과 도심 통근을 동시 해결",
+    mapQuery: "부산 부전역"
+  },
+
+  "시민 행복소득": {
+    location: "부산 전역 16개 구·군",
+    budget: "총 1,380억원 (5년간)",
+    timeline: "2026 하반기 조례 제정 → 2027 상반기 시범 → 2028 전면 시행",
+    status: "정책 설계 단계, 조례안 준비 중",
+    target: "약 9만명(5년 누적). 연금 공백기 은퇴자·가족돌봄청년·돌봄 제외자·일시적 실업자·국민연금 저소득 지역가입자",
+    criteria: "중위소득 75% 이하 및 순재산 3억원 이하",
+    method: "현금 + 동백전 + 바우처 조합 지급",
+    effect: "복지 사각지대 해소. 일할수록 소득 증가하는 선순환 구조",
+    org: "부산시 복지국 + 부산사회서비스원",
+    note: "기본소득과 다른 '복합소득' 모델. 근로 의욕 유지 설계",
+    mapQuery: "부산시청"
+  },
+
+  "글로벌허브도시특별법 제정": {
+    location: "중앙정부 (국회)",
+    budget: "법 통과 후 특례에 따라 재정·규제·행정 특례 적용",
+    timeline: "국회 소위 통과 완료 → 본회의 통과 촉구 → 조기 시행",
+    status: "국회 소위 통과 모멘텀 확보. 본회의 통과 및 후속 입법 추진 중",
+    target: "부산시 및 연계 사업",
+    effect: "재정특례·규제완화·행정특례 확보. 가덕신공항·제2센텀·BuTX 연계 가속화",
+    org: "부산시 글로벌허브도시특별법 TF + 부산지역 국회의원",
+    note: "민선 8기 최대 과제. 본회의 통과가 부산 미래의 열쇠",
+    mapQuery: "부산시청"
+  },
+
+  "제2 센텀시티 조성": {
+    location: "해운대구 센텀2지구 (603만평 그린벨트 해제 부지)",
+    budget: "총사업비 약 5조원, 30조원 경제효과",
+    timeline: "1-2공구 2025.11 착공 / 실시계획 ~2026.6 / 단계별 준공",
+    status: "1-2공구 착공 완료. 실시계획 수립 중",
+    target: "AI·디지털·첨단산업 기업 유치, 3만 일자리 창출",
+    effect: "부산 미래산업 심장. '제2의 판교' 넘어서는 혁신거점",
+    org: "부산시 투자유치과 + 센텀도시개발공사",
+    note: "17년 숙원사업. 민선 8기 핵심 치적. 해운대 25.5% 득표 지역",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Centum_City_Busan.jpg/800px-Centum_City_Busan.jpg",
+    imageCaption: "해운대 센텀 일대 (© Wikimedia Commons)",
+    mapQuery: "부산 해운대구 센텀2지구"
+  },
+
+  "시민 모두의 AI 놀이터": {
+    location: "부산 16개 구·군 생활권 단위",
+    budget: "구축비 20억원 + 운영비 10억원/년",
+    timeline: "2026 시범 1호점 → 2027~2028 구·군별 확산",
+    status: "2026 1호점 부지 선정 중",
+    target: "영유아부터 어르신까지 전세대",
+    structure: [
+      "1층: AI 특화 들락날락 + 하하센터",
+      "2~3층: AI 교육장",
+      "운동장: AI 체험장 (로봇·드론 등)",
+      "영유아: 들락날락 프로그램",
+      "10~20대: AI 윤리·AI 개발자 교육",
+      "전연령: AI 세미나·강연",
+      "고령자: 키오스크·ChatGPT 등 디지털 소외 해소"
+    ],
+    effect: "AI 시대 전세대 포용. 세대 간 디지털 격차 해소",
+    org: "부산시 디지털경제혁신실 + 교육청 협력",
+    note: "민선 8기 AI 대전환 선도도시 브랜드 강화",
+    mapQuery: "부산시청"
+  },
+
+  "북항 해양관광 메가프로젝트": {
+    location: "부산 중구·동구 북항 일원",
+    budget: "1단계 2조원 / 2단계 4조636억원 / 3단계 별도",
+    timeline: "1단계 1-3단계 2026 준공 / 2단계 2026 용역 준공 / 3단계 기본구상 2026.6",
+    status: "1단계 마무리 공사 중. 2단계 용역 진행 중. 3단계 기본구상 용역 진행",
+    target: "부산 시민 + 국내외 관광객 (외국인 300만+ 연계)",
+    feature: "오페라하우스·국제전시컨벤션·상업·공원·보행데크·친수공간",
+    effect: "146년 폐쇄 해안의 시민 개방. 원도심 도시구조 대전환",
+    org: "부산시 해양수산물류국 + BPA + 해양수산부",
+    note: "20년 숙원. 민선 8기 최대 랜드마크. 북항 일대 유동인구 급증",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Busan_Port.jpg/800px-Busan_Port.jpg",
+    imageCaption: "부산 북항 (© Wikimedia Commons)",
+    mapQuery: "부산 북항재개발 사업지구"
+  },
+
+  "산업은행 부산 이전": {
+    location: "부산국제금융센터(BIFC) 일원",
+    budget: "법 통과 후 본사 이전 비용",
+    timeline: "22대 국회 법안 통과 총력 / BIFC 3단계 준공 2025.12 / 정주여건 패키지 준비",
+    status: "국회 청원 달성. 법안 통과 위해 22대 국회 총력 설득 진행 중",
+    target: "KDB 산업은행 + 동남권투자은행 신설",
+    effect: "글로벌 금융허브 완성. GFCI 세계 24위(아시아 8위) 달성 기반",
+    org: "부산시 금융혁신담당관 + 부산지역 국회의원",
+    note: "민선 8기 금융중심지 브랜드 핵심. 산은 임직원 정주여건 패키지 준비 완료",
+    mapQuery: "부산 남구 문현금융단지 BIFC"
+  },
+
+  "경부선 지하화 및 상부개발": {
+    location: "경부선 원도심 통과 구간 (부산역~구포역)",
+    budget: "15,000억원 (기부대양여 방식)",
+    timeline: "선도사업 선정 완료 → ~2026.12 기술용역 준공 → 기본계획 → 실시설계 → 보상 → 착공",
+    status: "국토부 선도사업 선정 완료. 30년 만의 돌파",
+    target: "원도심 주민 및 통과 교통",
+    effect: "철도 단절 해소, 원도심 동서축 재연결. 서면 상권 확대 효과",
+    org: "국토교통부 + 부산시 도시균형발전실 + 한국철도공단",
+    note: "30년 숙원사업. 선도사업 선정 자체가 역사적 성과",
+    mapQuery: "부산 경부선 부산역 구포역"
+  },
+
+  // ========== 세부공약 주요 항목 ==========
+  "시민 행복펀드": {
+    location: "부산 전역",
+    budget: "투자형·기부형 2단 구조. 초기 조성 1,000억원 목표",
+    timeline: "2026 하반기 조례 제정 → 2027 출범",
+    status: "펀드 설계 단계",
+    structure: [
+      "(투자형) 부산시민성장펀드: 시민이 자발적 자금을 모아 공공 프로젝트·첨단 전략산업에 투자",
+      "(기부형) 부산시민공익펀드: 고자산가·고연금자의 자발적 기부로 창업펀드 조성"
+    ],
+    effect: "시민 주도 금융 생태계 조성. 미래세대·일자리 창출 투자",
+    org: "부산시 금융혁신담당관 + BNK부산은행",
+    note: "동백전기반 그린에너지 시민펀드와 연계",
+    mapQuery: "부산시청"
+  },
+
+  "투자유치 50조 확대": {
+    location: "부산 전역 (제2센텀·에코델타·강서특구 등)",
+    budget: "투자유치 목표 50조원 (민선 8기 28배 증가한 8조 → 민선 9기 50조 확대)",
+    timeline: "2026~2030년 연차 목표 설정 추진",
+    status: "민선 8기 성과 8조(28배 증가) 달성, 확대 추진 중",
+    target: "국내외 첨단기업 (AI·반도체·바이오·해양산업 등)",
+    effect: "좋은 일자리 100만 시대 달성 기반",
+    org: "부산시 투자유치과",
+    note: "세븐브릿지 투어 등 글로벌 투자유치 캠페인 지속",
+    mapQuery: "부산시청"
+  },
+
+  "RE100 선도산업단지 조성": {
+    location: "강서·사상·기장 산업단지 일원",
+    budget: "초기 인프라 투자 500억원 + 민간투자",
+    timeline: "2026 기본계획 → 2027 착공 → 2030 단지 완공",
+    status: "기본계획 수립 중",
+    target: "글로벌 기업 (RE100 이행 의무)",
+    effect: "재생에너지 100% 산업단지로 글로벌 기업 유치 기반",
+    org: "부산시 산업입지과 + 환경부 협력",
+    note: "탄소중립 국제규범 대응 선제 투자",
+    mapQuery: "부산 강서구 에코델타"
+  },
+
+  "방산첨단전략 특화단지": {
+    location: "기장·강서 해양방산 거점",
+    budget: "총사업비 1,000억원 이상 (정부 지원금 + 민간투자)",
+    timeline: "2026 지정 추진 → 2027 착공",
+    status: "국방부·방사청 협의 진행 중",
+    target: "해양방산 첨단전략 기업",
+    effect: "해양방산 글로벌 거점 확보",
+    org: "부산시 전략산업과 + 국방부·방사청",
+    note: "해양방산 첨단 클러스터와 연계",
+    mapQuery: "부산 기장군"
+  },
+
+  "M.AX 혁신단지 조성": {
+    location: "기존 부산 산업단지 전역 (사상·강서·기장)",
+    budget: "총사업비 1,500억원 (3개소)",
+    timeline: "2026~2030 단계별 조성",
+    status: "기본계획 수립 및 일부 설계 진행 중",
+    target: "기존 제조업 중소·중견기업",
+    structure: [
+      "AI·로봇 융합 제조 클러스터 재편",
+      "입주기업 AI·로봇 도입 비용 지원",
+      "제조 공정 데이터 수집·분석 플랫폼",
+      "M.AX 전문인력 양성 프로그램"
+    ],
+    effect: "기존 산업단지 AI 대전환. 제조업 경쟁력 확보",
+    org: "부산시 산업입지과 + 부산테크노파크",
+    note: "부산 제조업 디지털전환(M.AX) 브랜드",
+    mapQuery: "부산 사상 산업단지"
+  },
+
+  "부산어린이병원 개원": {
+    location: "부산 중심부 (부지 선정 완료)",
+    budget: "총사업비 약 1,500억원",
+    timeline: "2026 설계 → 2027 착공 → 2029~2030 개원",
+    status: "설계 단계",
+    target: "동남권 어린이 환자 (부울경 어린이 의료 사각 해소)",
+    effect: "어린이 전문의료 허브. 필수의료 기능 중심 운영",
+    org: "부산시 보건의료과 + 보건복지부 + 대학병원",
+    note: "지방정부 주도 첫 어린이 전문병원 시도",
+    mapQuery: "부산시"
+  },
+
+  "부산 케어 안심주택 5천호 공급": {
+    location: "부산 16개 구·군 분산 공급",
+    budget: "매년 1,000호×5년 = 총 5,000호",
+    timeline: "2026 1차 공급 시작 → 2030 5천호 완료",
+    status: "1차 공급 준비 중",
+    target: "돌봄 필요 어르신·장애인·저소득 가구",
+    effect: "주거 + 돌봄 일체형 복지주택. 통합돌봄 체계 기반",
+    org: "부산시 주택정책과 + 부산도시공사 + 복지국",
+    note: "'케어' 컨셉 주택. 24시간 돌봄체계와 연계",
+    mapQuery: "부산시"
+  },
+
+  "출산·난임 비용 대폭 경감": {
+    location: "부산 전역",
+    budget: "연 300억원 규모 확대",
+    timeline: "2026 조례 개정 → 2027 전면 시행",
+    status: "조례안 준비 중",
+    target: "출산·난임 가정",
+    effect: "출산 의료비 90% 이상 부산시 부담. 난임시술 지원 확대",
+    org: "부산시 여성가족국 + 보건의료과",
+    note: "아이 키움 비용 제로 프로젝트와 연계"
+  },
+
+  "아이 키움 비용 제로": {
+    location: "부산 전역",
+    budget: "연 1,000억원 이상 (어린이집·교육·의료 통합)",
+    timeline: "2026~2030 단계별 확대",
+    status: "'3~5세 어린이집 전면 무상' 민선 8기 달성 → 확대 추진",
+    target: "부산 거주 영유아·초등 자녀 가정",
+    effect: "양육 필수 비용 사실상 제로화",
+    org: "부산시 여성가족국 + 교육청",
+    note: "민선 8기 '3~5세 무상보육' 성과 확대"
+  },
+
+  "노인간병휴직제 도입": {
+    location: "부산 전역 (관내 기업·공공기관 대상)",
+    budget: "조례 기반 인센티브 지원",
+    timeline: "2026 조례 제정 → 2027 시행",
+    status: "조례안 준비 단계",
+    target: "부모·배우자 간병 필요 근로자",
+    effect: "노인 가족간병을 위한 법적 휴직 보장. 돌봄 부담 경감",
+    org: "부산시 노동정책담당관 + 복지국",
+    note: "전국 지자체 최초 시도"
+  },
+
+  // 교통편리 주요 공약
+  "낙동강 교량 삼총사 건설": {
+    location: "강서구 (대저대교·엄궁대교·장낙대교)",
+    budget: "총사업비 1조원 이상",
+    timeline: "2025 착공 / 2030 순차 완공",
+    status: "10년 표류 끝 착공 진행 중",
+    target: "서부산 주민 및 에코델타·가덕신공항 접근",
+    structure: [
+      "대저대교: L=8.24km 4차로 (강서구~삼락동)",
+      "엄궁대교: 사업 진행 중",
+      "장낙대교: 사업 진행 중"
+    ],
+    effect: "낙동강 횡단 교통축 완성. 에코델타·신공항 접근 핵심",
+    org: "부산시 도로정책과 + 환경부 협의",
+    note: "민선 8기 '1,680억 예산 확보로 재건축 신호탄'",
+    mapQuery: "부산 강서구 대저대교"
+  },
+
+  "BuTX 등 초광역권 철도망 구축": { _ref: "대표공약", _target: "BuTX 초광역권 철도망" },
+  "가덕도신공항 적기 개항": { _ref: "대표공약", _target: "가덕도 신공항 적기 개항" },
+
+  "도시철도망 조기 확충": {
+    location: "부산 전역",
+    budget: "총사업비 수조원 (노선별 별도)",
+    timeline: "각 노선별 2026~2035 단계 추진",
+    status: "오륙도선 트램 착공 / 하단~녹산선 추진 / 송도선 조기 착공",
+    structure: [
+      "오륙도선 트램",
+      "하단~녹산선",
+      "송도선(노면전차)",
+      "정관선 조기 착공",
+      "태종대~북항~문현~용호 트램",
+      "중구·영도구 트램"
+    ],
+    effect: "부산 도시철도 대중교통 분담률 향상",
+    org: "부산시 도시철도건설본부",
+    note: "교통 빅뱅. 15분 도시 정책과 연계"
+  },
+
+  "경부선 지하화 및 상부개": { _ref: "대표공약", _target: "경부선 지하화 및 상부개발" },
+
+  // 문화품격 주요 공약
+  "페스티벌시티 부산 (아시아축제수도)": {
+    location: "부산 전역 (주요 공연장·해변·원도심)",
+    budget: "연 500억원 이상",
+    timeline: "연중 상시 운영 / 2028 세계디자인수도 연계",
+    status: "BIFF·불꽃축제·G-STAR 원패스 시범 운영",
+    structure: [
+      "BIFF (국제영화제)",
+      "불꽃축제",
+      "G-STAR (게임쇼)",
+      "세븐브릿지 랜드마크 이벤트",
+      "심야관광 인프라"
+    ],
+    effect: "365일 축제가 끊이지 않는 '아시아의 에든버러'",
+    org: "부산시 문화체육국 + 관광공사",
+    note: "2028 세계디자인수도 선정 시너지",
+    mapQuery: "부산 해운대 영화의전당"
+  },
+
+  "원도심 B-컬쳐 클러스터": {
+    location: "중구·동구 원도심 일원",
+    budget: "총사업비 800억원",
+    timeline: "2026 기본계획 → 2027 착공 → 2029 완공",
+    status: "기본계획 수립 중",
+    target: "청년 예술가·문화 창업자·시민 관람객",
+    effect: "원도심 문화 재생 핵심. 예술유통도시 부산 브랜드",
+    org: "부산시 문화예술과",
+    note: "빈집 활용 아트하우스와 연계",
+    mapQuery: "부산 중구 동구 원도심"
+  },
+
+  // 관광매력 주요 공약
+  "영도 K-pop 아레나 건립": {
+    location: "영도구 해안가 부지 (부지 선정 완료)",
+    budget: "총사업비 약 3,000억원",
+    timeline: "2026 실시설계 → 2027 착공 → 2030 준공",
+    status: "설계 준비 중",
+    target: "K-pop 팬 및 국제 관광객",
+    effect: "동아시아 K-pop 허브. 영도 관광 핵심 앵커시설",
+    org: "부산시 관광진흥과 + 영도구",
+    note: "영도 관광·문화·교통 종합 개발 축",
+    mapQuery: "부산 영도구 해안가"
+  },
+
+  "영도 감지 국제관광 단지 조성": {
+    location: "영도구 감지해안",
+    budget: "총사업비 5조원 이상 (민간투자 포함)",
+    timeline: "2026~2035 단계별 개발",
+    status: "기본구상 수립 중",
+    target: "국제 관광객",
+    effect: "감지해안 일원을 세계적 해양 휴양지로",
+    org: "부산시 + 영도구 + 민간투자자",
+    note: "영도 모노레일·K-pop 아레나와 통합 패키지",
+    mapQuery: "부산 영도구 감지해안"
+  },
+
+  "MICE 4.0 (산업육성형 B2B엔진)": {
+    location: "벡스코 및 제3전시장 예정지",
+    budget: "벡스코 제3전시장 6.4만㎡ 사업비 2,412억원 (국 70%, 시 30%)",
+    timeline: "제3전시장 2026 착공 / 2029 준공 / MICE 탤런트 부산 동시 진행",
+    status: "제3전시장 착공 준비 중",
+    target: "글로벌 MICE 기업·방문객",
+    effect: "경제효과 25,810억원. 산업 연계형 MICE 신모델",
+    org: "부산시 관광MICE산업과 + 벡스코",
+    note: "유네스코 세계유산위원회(26.7) 유치와 시너지",
+    mapQuery: "부산 해운대 벡스코"
+  },
+
+  // AI전환 주요 공약
+  "AI기반 스마트 돌봄": {
+    location: "부산 16개 구·군 취약계층 가구",
+    budget: "연 100억원 (장비 보급 + 운영)",
+    timeline: "2026 시범 → 2027~2030 단계적 확산",
+    status: "장비 규격 검토 및 시범가구 선정 중",
+    target: "독거노인·장애인·돌봄 필요 가구",
+    structure: [
+      "AI 디스플레이 & 스마트 거울: 음성·수어·터치 등 장애 유형별 맞춤 입력, 건강정보·민원·복지 안내",
+      "AI 카메라: 낙상·이상행동 감지 및 보호자 자동 알림",
+      "AI 스피커: 복약·일정 알림, 말벗, 긴급 SOS"
+    ],
+    effect: "비대면 스마트 돌봄 체계. 공공 복지서비스 연계 강화",
+    org: "부산시 복지국 + 디지털경제혁신실",
+    note: "취약계층 접근성·안전성 동시 향상",
+    mapQuery: "부산시"
+  },
+
+  "부산산업 AI전환(AX)": {
+    location: "부산 전역 전략산업 기업",
+    budget: "초기 지원 500억원 + 단계 확대",
+    timeline: "2026~2030 전략산업 기업 AX 완료 목표",
+    status: "전략산업 선도기업 선정 중",
+    target: "해양·제조·바이오 등 부산 전략산업 대상 기업",
+    structure: [
+      "AX 전환 지원: 선정 기업에 AI 기반 운영시스템 도입비 지원",
+      "AX 전문 컨설팅: AI 수준 진단 + 맞춤 로드맵 수립",
+      "AX 인프라: AI 전환 테스트베드·데이터 공유 플랫폼 운영",
+      "선도-중소기업 AX 기술 확산 체계"
+    ],
+    effect: "산업 경쟁력 강화, 디지털 전환 선도",
+    org: "부산시 디지털경제혁신실 + 부산테크노파크",
+    note: "M.AX 혁신단지와 연계",
+    mapQuery: "부산테크노파크"
+  },
+
+  // 해양개척 주요 공약
+  "북극항로 모항 유치 조성": {
+    location: "부산항",
+    budget: "인프라 투자 2,000억원",
+    timeline: "2026 기본구상 → 2030 북극항로 상용화 대응",
+    status: "해수부 협의 진행 중",
+    target: "글로벌 해운·물류 기업",
+    effect: "북극항로 시대 부산이 아시아 모항",
+    org: "부산시 해양수산물류국 + 해수부 + BPA",
+    note: "K-북극항로 기술허브 부산과 연계",
+    mapQuery: "부산항"
+  },
+
+  "수소중심 H-포트 부산항 조성": {
+    location: "부산항 (북항·신항)",
+    budget: "인프라 투자 1조원 이상",
+    timeline: "2026 기본계획 → 2030 수소항만 단계 구축",
+    status: "해수부 정책 연계 추진 중",
+    target: "수소선박 기항 유치",
+    effect: "세계 첫 수소중심 항만. 탄소중립 선도",
+    org: "부산시 + 해수부 + BPA",
+    note: "수소선박 특화단지·친환경선박 전환 700과 연계",
+    mapQuery: "부산항"
+  },
+
+  // 도심개조 주요 공약
+  "제2센텀시티 조성": { _ref: "대표공약", _target: "제2 센텀시티 조성" },
+
+  "산업은행 이전 및 동남권투자은행 설립": { _ref: "대표공약", _target: "산업은행 부산 이전" },
+
+  "낙동오원 프로젝트": {
+    location: "낙동강 일원 5대 거점 (강서·북구·사상·사하·기장 일부)",
+    budget: "총사업비 3조원 이상 (단계별)",
+    timeline: "2026 기본구상 → 2027 착공 → 2035 완공",
+    status: "기본구상 용역 중",
+    target: "서부산 주민 + 생태 관광객",
+    effect: "낙동강 수변 5대 거점 개발. 지역 균형의 상징",
+    org: "부산시 도시균형발전실 + 환경부",
+    note: "국가도시공원·국가정원 지정 추진 연계",
+    mapQuery: "부산 낙동강 하구"
+  },
+
+  "국가도시공원·국가정원 지정": {
+    location: "낙동강 하구 일대",
+    budget: "지정 후 국가 예산 투입 (수천억원 규모)",
+    timeline: "2026 지정 신청 → 2027~2028 지정 완료",
+    status: "지정 신청서 준비 단계",
+    target: "국민 + 국제 관광객",
+    effect: "전국 최대급 국가도시공원. 부산 생태 브랜드",
+    org: "부산시 녹지정책과 + 환경부·국토부",
+    note: "부산 생태 이미지 국가급으로 상승",
+    mapQuery: "부산 낙동강 하구"
+  },
+
+  // 지속환경
+  "CF 도시 부산 (cooling·Fresh)": {
+    location: "부산 전역",
+    budget: "그린 인프라 투자 5,000억원 이상",
+    timeline: "2026~2035 단계적 조성",
+    status: "기본계획 수립 중",
+    target: "전 시민 + 미래세대",
+    effect: "쿨링·프레시 시티. 기후위기 적응 도시 선도",
+    org: "부산시 환경정책과",
+    note: "만개정원이 있는 도시 부산과 연계"
+  },
+
+  // 시민참여
+  "항만 운영권 이관": {
+    location: "부산항만공사(BPA) → 부산시",
+    budget: "권한 이관 (재정 중립)",
+    timeline: "단계적 건의 → 법령 개정 추진",
+    status: "대정부 건의 진행 중",
+    target: "BPA 운영권 및 해양 이용권한",
+    structure: [
+      "BPA 운영권 이관 공식 건의",
+      "해양 공간 계획·개발·이용 권한 지자체 강화",
+      "항만 수익 지역 재투자 체계",
+      "해양자치 법·제도 기반 구축"
+    ],
+    effect: "해양수도 부산의 항만 자치권 확보",
+    org: "부산시 해양수산물류국 + 국회 건의",
+    note: "해양자치 실현의 핵심 과제",
+    mapQuery: "부산항만공사 BPA"
+  },
+
+  // 양성평등 주요 공약
+  "여성미래역량 취·창업 도약 지원": {
+    location: "부산 전역",
+    budget: "연 200억원 이상",
+    timeline: "2026 확대 → 2030까지 지속",
+    status: "현행 사업 확대 개편 중",
+    target: "여성 구직자·창업 준비자",
+    effect: "여성 경제활동 참여율 제고",
+    org: "부산시 여성가족국 + 부산여성가족개발원",
+    note: "여성경력이음 재취업 연계와 통합 운영"
+  }
+};
+
+/* 공약명 → 상세 자료 조회 (별칭 처리) */
+function getPledgeDetail(pledgeName) {
+  if (!pledgeName) return null;
+  const detail = PLEDGE_DETAILS[pledgeName];
+  if (!detail) return null;
+  // _ref 처리 (대표공약 참조)
+  if (detail._ref === '대표공약' && detail._target) {
+    return PLEDGE_DETAILS[detail._target] || null;
+  }
+  if (detail._ref === '대표공약' && !detail._target) {
+    return detail; // 자기 자신이 대표공약
+  }
+  return detail;
+}
+
+/* 상세 카드용 HTML 렌더링 */
+/* =========================================================
+   공약 상세 정보 2차 확장 (121건)
+   - 공약집 버전1 + 업무보고 5종 + 시정보고회 기반
+   - 각 공약명에 대한 세부 자료
+   ========================================================= */
+const PLEDGE_DETAILS_EXT = {
+
+  // ========== 활력경제 (5건) ==========
+  "청년 종잣돈 지원사업 (FSA+YFF)": { _ref: "대표공약", _target: "청년 종잣돈 (FSA+YFF) — 부산찬스" },
+  "소상공인 상생카드 도입": {
+    location: "부산 전역 소상공 가맹점",
+    budget: "연 500억원 규모 캐시백 재원",
+    timeline: "2026 하반기 도입 → 2027 전면 시행",
+    status: "동백전 기반 설계 진행 중",
+    target: "부산 전체 소상공인 및 시민 소비자",
+    effect: "동백전 기반 매출 지원으로 지역 자금 선순환, 소상공인 매출 10% 증대 목표",
+    org: "부산시 민생경제과 + 동백전 운영사",
+    note: "기존 동백전 시스템과 연계, 별도 카드 없이 앱으로 운영"
+  },
+  "제조숙련자 전직지원 프로젝트": {
+    location: "부산 제조 산단 전역 (사상·강서·기장)",
+    budget: "연 150억원",
+    timeline: "2026 시범 → 2027~2030 단계 확대",
+    status: "퇴직·전직 수요조사 진행",
+    target: "제조업 퇴직자·전직 희망자 (연 2,000명 목표)",
+    effect: "숙련자 재취업률 70%. 숙련 노하우 지역 내 재순환",
+    org: "부산시 일자리경제과 + 부산테크노파크",
+    note: "AI·로봇 전환으로 인한 전직 수요 선제 대응"
+  },
+  "지하상가점포 명예퇴점제": {
+    location: "부산 도심 주요 지하상가 (남포·서면·부전 등)",
+    budget: "장기운영 점포당 평균 2,000만원 지원",
+    timeline: "2026 조례 제정 → 2027 시행",
+    status: "조례안 준비 중",
+    target: "20년 이상 장기 운영 소상공인",
+    effect: "품위 있는 퇴점 및 업종 전환·청년 창업 유입",
+    org: "부산시 민생경제과 + 각 구청",
+    note: "지하도상가 소통협력 공간 조성과 연계"
+  },
+  "동백전기반 그린에너지 시민펀드": {
+    location: "부산 전역",
+    budget: "초기 조성 500억원 목표",
+    timeline: "2026 조례 제정 → 2027 출범",
+    status: "펀드 설계 단계",
+    target: "동백전 이용 시민 자발적 참여",
+    effect: "시민 주도 친환경 에너지 전환 재원 마련",
+    org: "부산시 에너지산업과 + 동백전 운영사",
+    note: "RE100 산단·H-포트와 재원 연계"
+  },
+
+  // ========== 청년산학 (8건) ==========
+  "오션스타트업 벨트 조성": {
+    location: "영도·북항·신항 일원 해양 스타트업 집적지",
+    budget: "총사업비 1,000억원",
+    timeline: "2026 지정 → 2027~2030 단계 확대",
+    status: "기본계획 수립 중",
+    target: "해양 스타트업 100개사 집적 목표",
+    effect: "해양 신산업 창업 허브. 오션테크 유니콘 배출 기반",
+    org: "부산시 해양수산물류국 + 부산창조경제혁신센터",
+    note: "부산기술창업투자원(민선 8기 성과)과 연계"
+  },
+  "분산에너지 복합실증 플랫폼 구축": {
+    location: "강서·기장 실증 부지",
+    budget: "총사업비 486억원 (지역전략사업 선정)",
+    timeline: "2026 실시설계 → 2027 구축 → 2028 운영",
+    status: "지역전략사업 선정 완료",
+    target: "분산에너지 기업·연구기관",
+    effect: "분산에너지 특화지역 선점. 자족도시 에너지 모델",
+    org: "부산시 에너지산업과 + 한국에너지공단",
+    note: "분산에너지 특별법 2024 시행 대응",
+    mapQuery: "부산 강서구"
+  },
+  "특성화캠퍼스 기반 숙련인재양성": {
+    location: "부산 주요 대학 (부산대·동아대·부경대 등)",
+    budget: "대학당 연 50억원",
+    timeline: "2026 지정 → 2027~ 단계 운영",
+    status: "협의 진행 중",
+    target: "분야별 특성화 대학 학생",
+    effect: "분야별 숙련 인재 연 3,000명 배출",
+    org: "부산시 청년정책담당관 + 교육부 + 참여 대학",
+    note: "지역혁신중심대학 지원사업(RIS)과 연계"
+  },
+  "청년친화형 지역 주력산업 연구타운": {
+    location: "센텀·노포 일원",
+    budget: "총사업비 1,500억원",
+    timeline: "2026~2029 조성",
+    status: "기본구상 진행",
+    target: "청년 연구자·스타트업",
+    effect: "청년이 참여하는 주력산업 연구 클러스터",
+    org: "부산시 전략산업과 + 부산테크노파크",
+    note: "권역별 5대 창업벨트와 연계"
+  },
+  "전기차 구매 추가보조금": {
+    location: "부산 전역 (친환경 자동차 구매자)",
+    budget: "연 100억원",
+    timeline: "2026 상시 운영",
+    status: "기존 보조금 확대 시행 중",
+    target: "전기차 신규 구매 부산시민 (연 5,000대)",
+    effect: "부산시 전기차 보급률 상위권 유지",
+    org: "부산시 대기정책과",
+    note: "CF 도시 부산 정책과 연계"
+  },
+  "부산정착 청년지원금": {
+    location: "부산 전역 (청년 거주지)",
+    budget: "연 200억원",
+    timeline: "2026 확대 시행",
+    status: "기존 사업 확대 운영",
+    target: "부산 신규 정착 청년 (연 1만명)",
+    effect: "청년 유입 증가 및 정주 인센티브 제공",
+    org: "부산시 청년정책담당관",
+    note: "청년 종잣돈(FSA+YFF)과 통합 운영"
+  },
+  "자립사각지대 청년지원": {
+    location: "부산 전역",
+    budget: "연 80억원",
+    timeline: "2026 시범 → 2027 전면 시행",
+    status: "대상자 발굴 체계 구축 중",
+    target: "가족돌봄청년·자립준비청년·고립청년",
+    effect: "사각지대 청년 자립 지원",
+    org: "부산시 청년정책담당관 + 복지국",
+    note: "시민 행복소득 대상과 연계"
+  },
+  "원전 해체 인재 허브 부산": {
+    location: "기장군 고리 일원",
+    budget: "총사업비 1,500억원",
+    timeline: "2026~2030 인재 양성 체계 구축",
+    status: "정부 원전해체센터 유치 추진",
+    target: "원전 해체 전문인력 양성 (500명/년)",
+    effect: "전 세계 원전해체 시장 대응. 기장 일자리 허브",
+    org: "부산시 원자력방재과 + 산업통상자원부",
+    note: "고리1호기 해체와 연계",
+    mapQuery: "부산 기장군 고리"
+  },
+
+  // ========== AI전환 (7건) ==========
+  "AI·디지털 격차 해소": {
+    location: "부산 전역 (복지관·하하센터·들락날락)",
+    budget: "연 50억원",
+    timeline: "2026 상시 운영",
+    status: "계층별 교육 프로그램 운영 중",
+    structure: [
+      "계층별 맞춤 교육: 어르신·장애인·저소득층 기초 디지털",
+      "청년·직장인 AI 실무 역량 강화",
+      "디지털 멘토단: 청년 디지털 서포터즈 1:1 지원",
+      "교육 이수자 멘토 전환 선순환 체계"
+    ],
+    target: "전세대 시민",
+    effect: "세대·계층 간 디지털 격차 해소",
+    org: "부산시 디지털경제혁신실 + 부산정보산업진흥원",
+    note: "AI 놀이터 운영장과 통합 연계"
+  },
+  "B-AI 시티 프로젝트": {
+    location: "부산 전역",
+    budget: "총사업비 5,000억원 (5년)",
+    timeline: "2026 비전 선포 → 2030 B-AI 시티 완성",
+    status: "기본전략 수립 중",
+    target: "AI 전환 전 산업·전 시민",
+    effect: "부산을 세계 AI 도시로 브랜딩",
+    org: "부산시 디지털경제혁신실",
+    note: "GSCI 글로벌 스마트도시 지수 아시아 2위 기반"
+  },
+  "AI 청년 등대 / AI 디딤돌": {
+    location: "부산 주요 대학·창업허브",
+    budget: "연 100억원",
+    timeline: "2026~2030 운영",
+    status: "기본계획 수립",
+    target: "AI 분야 청년 (연 2,000명 양성)",
+    effect: "AI 청년 인재 사다리 구축",
+    org: "부산시 디지털경제혁신실 + 부산정보산업진흥원",
+    note: "포용 AI 인재사다리와 연계"
+  },
+  "부산 마스터 시(AI)민 프로젝트": {
+    location: "부산 전역",
+    budget: "연 30억원",
+    timeline: "2026 시범 → 2027~ 확대",
+    status: "교육 커리큘럼 설계 중",
+    target: "AI에 관심 있는 시민 누구나",
+    effect: "시민이 AI 전문가로 성장하는 평생교육",
+    org: "부산시 평생교육진흥원 + 디지털경제혁신실",
+    note: "AI 놀이터와 연계 운영"
+  },
+  "AI 엑스포트 부산 202x": {
+    location: "벡스코 + 부산항",
+    budget: "1회 개최당 100억원",
+    timeline: "2027 첫 개최 → 격년 개최",
+    status: "개최 구상 단계",
+    target: "국내외 AI 기업·바이어",
+    effect: "부산 AI 수출산업 브랜드 확립",
+    org: "부산시 + 한국무역협회 + KOTRA",
+    note: "MICE 4.0과 연계"
+  },
+  "포용 AI 인재사다리 프로젝트": {
+    location: "부산 전역",
+    budget: "연 50억원",
+    timeline: "2026 시범 → 2028 전면 시행",
+    status: "대상자 발굴 체계 구축 중",
+    target: "저소득층·장애인·경력단절 여성 등 AI 진입 약자",
+    effect: "AI 시대 포용적 기회 확대",
+    org: "부산시 디지털경제혁신실 + 복지국",
+    note: "단계별 교육·훈련·취업 연계 파이프라인"
+  },
+  "Busan AI Runway": {
+    location: "센텀 유니콘타워",
+    budget: "총사업비 1,000억원",
+    timeline: "2026 런칭 → 2030 글로벌 확장",
+    status: "기본 설계 진행",
+    target: "AI 스타트업 100개사/년 액셀러레이팅",
+    effect: "AI 스타트업 가속 플랫폼. 유니콘 배출 기반",
+    org: "부산시 + 부산창조경제혁신센터 + 민간 VC",
+    note: "권역별 5대 창업벨트의 AI 특화 거점"
+  },
+
+  // ========== 해양개척 (9건) ==========
+  "부산바다가 곧 배터리·해수전지실증": {
+    location: "기장 해수 실증 부지",
+    budget: "총사업비 500억원",
+    timeline: "2026 실증 → 2028 상용화",
+    status: "실증 설계 완료",
+    target: "에너지저장(ESS) 기업·연구기관",
+    effect: "해수 기반 친환경 배터리 기술 선점",
+    org: "부산시 해양수산물류국 + 산업부",
+    note: "국내 첫 해수전지 실증"
+  },
+  "첨단 수산·바이오 벨트": {
+    location: "기장·해운대·남구 해양바이오 집적지",
+    budget: "총사업비 2,000억원",
+    timeline: "2026~2030 단계 조성",
+    status: "기본계획 수립 중",
+    target: "수산·해양바이오 기업 100개사",
+    effect: "수산과 바이오 결합 첨단 클러스터",
+    org: "부산시 해양수산물류국 + 수산과학원",
+    note: "스마트양식 빅데이터센터와 연계"
+  },
+  "수소선박 특화단지 조성": {
+    location: "영도·강서 조선소 일원",
+    budget: "총사업비 3,000억원",
+    timeline: "2026 지정 → 2030 단지 완공",
+    status: "정부 공모 참여 준비",
+    target: "수소추진선박 건조·수리 기업",
+    effect: "글로벌 수소선박 산업 허브",
+    org: "부산시 해양수산물류국 + 산업부",
+    note: "H-포트 부산항과 연계"
+  },
+  "해양위성 산업생태계 구축·육성": {
+    location: "해운대 센텀·영도",
+    budget: "총사업비 1,000억원",
+    timeline: "2026~2030",
+    status: "해양수산부 협력 체계 구축",
+    target: "해양위성 데이터 활용 기업",
+    effect: "해양위성 데이터 산업 선점",
+    org: "부산시 + 해수부 + KIOST",
+    note: "한국형 해양위성 발사 시점 연계"
+  },
+  "K-북극항로 기술허브 부산": {
+    location: "부산항 + 영도 조선소",
+    budget: "총사업비 2,500억원",
+    timeline: "2026~2030",
+    status: "기본구상 진행",
+    target: "북극항로 선박·기술 개발 기업",
+    effect: "북극항로 기술 표준·선박 건조 허브",
+    org: "부산시 + 해수부 + 조선업계",
+    note: "북극항로 모항 유치와 패키지"
+  },
+  "해양방산 첨단 클러스터": {
+    location: "기장·강서 방산 집적지",
+    budget: "총사업비 2,000억원",
+    timeline: "2026~2030 조성",
+    status: "방사청 협의 진행",
+    target: "해양방산 기업 50개사",
+    effect: "해양방위산업 글로벌 클러스터",
+    org: "부산시 + 방위사업청 + 국방부",
+    note: "방산첨단전략 특화단지와 연계"
+  },
+  "해양반도체 기업 100개": {
+    location: "부산 전역 (해양 특화 R&D 시설)",
+    budget: "총사업비 1,500억원",
+    timeline: "2026~2030 기업 유치·육성",
+    status: "기업 발굴·유치 진행",
+    target: "해양 특화 반도체 기업 100개사",
+    effect: "해양반도체 니치 시장 선점",
+    org: "부산시 디지털경제혁신실 + 산업부",
+    note: "동남권 반도체 특화 전략"
+  },
+  "동해가스전 CCS 실증": {
+    location: "동해 가스전 (울산·부산 앞바다)",
+    budget: "총사업비 2조원 (정부 주도)",
+    timeline: "2026~2030 실증 → 2035 상용화",
+    status: "정부 국책사업 진행 중",
+    target: "국가 탄소중립 핵심 사업",
+    effect: "탄소포집저장(CCS) 실증 세계 최대급",
+    org: "산업부 + 한국석유공사 + 부산시",
+    note: "CF 도시 부산 정책 기반 인프라"
+  },
+  "해양 서비스산업 클러스터": {
+    location: "북항·문현 금융허브 일원",
+    budget: "총사업비 5,000억원",
+    timeline: "2026~2030 단계 조성",
+    status: "기본구상 진행",
+    target: "해양 물류·금융·법률·보험 서비스 기업",
+    effect: "해양 특화 서비스 산업 집적",
+    org: "부산시 해양수산물류국 + 금융혁신담당관",
+    note: "산업은행 이전·해사법원 유치와 연계"
+  },
+
+  // ========== 도심개조 (11건) ==========
+  "사이언스파크 조성 (53사이전)": {
+    location: "53사 이전 부지 (부산진구 일원)",
+    budget: "총사업비 3,000억원",
+    timeline: "2026 부지 인수 → 2028 착공 → 2032 완공",
+    status: "국방부 협의 진행",
+    target: "첨단 과학기술 연구기관·기업",
+    effect: "부산 중심부 새 과학기술 거점",
+    org: "부산시 + 국방부 + 과학기술정보통신부",
+    note: "원도심 산업 재생의 핵심 앵커",
+    mapQuery: "부산진구 53사 부지"
+  },
+  "도심복합환승센터 (부전·노포·하단)": {
+    location: "부전역·노포역·하단역 3곳",
+    budget: "총사업비 1조원 (3개소 합산)",
+    timeline: "2026 설계 → 2028 착공 → 2032 준공",
+    status: "부전역 우선 추진",
+    target: "일일 환승객 30만명",
+    effect: "도심 3대 환승 허브. 광역교통 연결성 극대화",
+    org: "부산시 교통국 + 도시철도건설본부",
+    note: "BuTX·도시철도망 확충과 시너지",
+    mapQuery: "부산 부전역"
+  },
+  "원도심학교의 재탄생": {
+    location: "중구·서구·동구·영도구 공동화 학교 부지",
+    budget: "학교당 300억원 규모",
+    timeline: "2026 시범 3개교 → 2030 확산",
+    status: "교육청 협의 진행",
+    target: "원도심 공동화 학교",
+    effect: "학교를 문화·교육·복지 복합 거점으로 전환",
+    org: "부산시 도시균형발전실 + 교육청",
+    note: "원도심 B-컬쳐 클러스터와 연계"
+  },
+  "지하도상가 소통협력 공간 조성": {
+    location: "남포·서면·부전 등 주요 지하상가",
+    budget: "1개소당 100억원",
+    timeline: "2026~2030 단계적 리모델링",
+    status: "기본설계 진행",
+    target: "지하상가 상인·방문객",
+    effect: "상권 활성화 + 시민 휴게·교류 공간",
+    org: "부산시 민생경제과 + 부산도시공사",
+    note: "지하상가점포 명예퇴점제와 연계"
+  },
+  "우리동네 구독권": {
+    location: "부산 16개 구·군 생활권",
+    budget: "연 200억원 (동네상권 지원)",
+    timeline: "2026 시범 3개 권역 → 2028 전면",
+    status: "플랫폼 설계 진행",
+    target: "동네 소상공인·주민",
+    effect: "월정액 구독으로 동네 상권 순환",
+    org: "부산시 민생경제과 + 동백전",
+    note: "우리동네 살림페스타와 연계"
+  },
+  "공원 접근성 및 활용성 강화": {
+    location: "부산 내 모든 도시공원 (약 170개소)",
+    budget: "연 300억원",
+    timeline: "2026~2030 상시",
+    status: "공원별 우선순위 조사 완료",
+    target: "전 시민",
+    effect: "보행·대중교통 공원 접근성 개선, 활용률 2배",
+    org: "부산시 녹지정책과 + 각 구·군",
+    note: "15분 도시 정책과 연계"
+  },
+  "맑은물·맑은공기": {
+    location: "부산 전역",
+    budget: "연 500억원 (상수도·대기)",
+    timeline: "2026~2030 상시 투자",
+    status: "진행 중",
+    target: "전 시민",
+    effect: "7대 특광역시 공기질 1위 지속, 수돗물 직접 음용 확대",
+    org: "부산시 환경정책과 + 상수도사업본부",
+    note: "민선 8기 '공기질 1위' 성과 확대"
+  },
+  "생명·문화·번영의 동천 귀환": {
+    location: "동구·남구 동천 일대",
+    budget: "총사업비 3,000억원",
+    timeline: "2026 기본계획 → 2030 생태하천 완공",
+    status: "기본구상 진행",
+    target: "동천 유역 주민·방문객",
+    effect: "동천을 생태·문화 하천으로 재생",
+    org: "부산시 환경정책과 + 동구·남구",
+    note: "도심하천 생태하천 전환과 패키지"
+  },
+  "도심하천 생태하천 전환": {
+    location: "부산 내 도심하천 12개",
+    budget: "하천당 200~500억원",
+    timeline: "2026~2035 단계적",
+    status: "우선 하천 선정 완료",
+    target: "하천 유역 주민",
+    effect: "도심 내 수변 생태공간 조성",
+    org: "부산시 환경정책과 + 각 구·군",
+    note: "낙동오원·동천 귀환과 통합"
+  },
+  "2차 공공기관 이전": {
+    location: "부산 유치 유력 후보지",
+    budget: "이전 기관 규모별 별도",
+    timeline: "정부 정책 발표 시 즉시 대응",
+    status: "대정부 건의 지속",
+    target: "수도권 공공기관 2차 이전 대상",
+    effect: "금융·해양·문화 분야 공공기관 집적",
+    org: "부산시 글로벌허브도시특별법 TF",
+    note: "글로벌허브도시특별법과 연계"
+  },
+  "시민이익이 실현되는 부울경 행정통합 추진": {
+    location: "부산·울산·경남",
+    budget: "통합 후 행정·재정 효율화",
+    timeline: "중장기 추진 (정치적 모멘텀 필요)",
+    status: "지속 논의 진행",
+    target: "부울경 800만 시민",
+    effect: "메가시티 경쟁력 확보",
+    org: "부산시 + 울산시 + 경상남도",
+    note: "광주전남 통합 이슈 반면교사 삼아 구조적 설계"
+  },
+
+  // ========== 교통편리 (10건) ==========
+  "유럽·북미 노선 확대": {
+    location: "김해공항 + 가덕신공항",
+    budget: "노선별 인센티브 지원",
+    timeline: "가덕신공항 개항 전후 집중",
+    status: "항공사 유치 협의 진행",
+    target: "국제 직항 수요",
+    effect: "부산발 유럽·북미 직항 노선 상시 운영",
+    org: "부산시 공항정책과 + 국토부",
+    note: "거점항공사 유치와 패키지"
+  },
+  "거점항공사 유치": {
+    location: "부산 (김해·가덕신공항 허브)",
+    budget: "유치 인센티브 별도",
+    timeline: "2026~2028 유치 추진",
+    status: "통합 LCC 본사 부산 유치 추진 중",
+    target: "국내·외 항공사",
+    effect: "부산 기반 항공사의 글로벌 노선 운영",
+    org: "부산시 공항정책과",
+    note: "민선 8기 가덕신공항 연계 핵심 과제"
+  },
+  "신공항 연결철도 개통": {
+    location: "부전역 ↔ 가덕신공항",
+    budget: "국비 6,890억 확보",
+    timeline: "2026 하반기 착공 → 2035 신공항과 동시 개통",
+    status: "접근철도 착공 준비",
+    target: "가덕신공항 이용객",
+    effect: "부전역~가덕신공항 KTX 26분",
+    org: "국토교통부 + 부산시",
+    note: "가덕신공항 적기 개항의 핵심 인프라"
+  },
+  "공항연결도로 확충 (감천~가덕)": {
+    location: "감천 ↔ 가덕 구간",
+    budget: "총사업비 4,024억원 (국비 2,414)",
+    timeline: "2026 설계 → 2030 개통",
+    status: "실시설계 준비",
+    target: "서부산 주민 + 공항 이용객",
+    effect: "서부산 ↔ 가덕신공항 접근성 확보",
+    org: "국토부 + 부산시 도로정책과",
+    note: "가덕신공항·BuTX와 삼각 연결"
+  },
+  "도시철 급행노선 신설": {
+    location: "양산~서면~장산 급행 (11개역)",
+    budget: "사업비 4,991억원",
+    timeline: "2026~2032 추진",
+    status: "타당성 검토 진행",
+    target: "광역 통근자",
+    effect: "광역 통근 30분대 단축",
+    org: "부산시 도시철도건설본부 + 국토부",
+    note: "사업규모 L=11.7km"
+  },
+  "부산 남북관통 대심도": {
+    location: "부산 남북 종단 대심도 도로",
+    budget: "총사업비 2조원 이상",
+    timeline: "2026 기본구상 → 2035 개통",
+    status: "타당성 검토",
+    target: "부산 남북 이동 운전자",
+    effect: "부산 종단 20분대 돌파",
+    org: "부산시 도로정책과 + 국토부",
+    note: "대심도 공법으로 지상 환경 보전"
+  },
+  "광역 교통망 완성": {
+    location: "부울경 광역권",
+    budget: "광역 철도·도로 총 10조원 이상",
+    timeline: "2026~2035 단계적",
+    status: "광역권 교통망 계획 수립",
+    target: "부울경 800만 시민",
+    effect: "부울경 1시간 생활권",
+    org: "부산시·울산시·경남도 공동",
+    note: "KTX울산역~양산 웅상~부산 노포 광역철도 47.6km 포함"
+  },
+  "대학생 교통비 할인": {
+    location: "부산 전역",
+    budget: "연 300억원",
+    timeline: "2026 하반기 시행",
+    status: "조례 준비",
+    target: "부산 거주 대학생 (약 15만명)",
+    effect: "대학생 교통비 50% 감면",
+    org: "부산시 교통국",
+    note: "동백패스와 연계 운영"
+  },
+  "영도 보행전용 데크 연결": {
+    location: "영도 해안 일원",
+    budget: "총사업비 500억원",
+    timeline: "2026~2029 단계 조성",
+    status: "기본설계 진행",
+    target: "영도 주민·방문객",
+    effect: "영도 보행친화 데크 네트워크",
+    org: "부산시 + 영도구",
+    note: "K-pop 아레나·감지관광단지와 연계"
+  },
+  "손주 사랑 만원 패스": {
+    location: "부산 전역",
+    budget: "연 100억원",
+    timeline: "2026 하반기 시행",
+    status: "조례 준비",
+    target: "조부모와 동행하는 손주",
+    effect: "조부모 동행 손주 교통요금 월 1만원 정액",
+    org: "부산시 교통국",
+    note: "어린이 교통요금 무료화(민선 8기) 확대"
+  },
+
+  // ========== 맵씨부산 (4건) ==========
+  "디자인 주도 해상레저 플랫폼 조성": {
+    location: "수영만·북항 등 해상레저 거점",
+    budget: "총사업비 1,000억원",
+    timeline: "2026~2030 단계 조성",
+    status: "수영만 요트경기장 재개발 연계 진행",
+    target: "해상레저 이용객·기업",
+    effect: "디자인 중심 해상레저 복합 플랫폼",
+    org: "부산시 해양수산물류국",
+    note: "수영만 요트경기장(민선 8기 성과)의 고도화"
+  },
+  "영화의전당 야외도서관": {
+    location: "해운대구 영화의전당",
+    budget: "총사업비 100억원",
+    timeline: "2026~2027 조성",
+    status: "기본설계 진행",
+    target: "전 시민",
+    effect: "문화·영상·독서 융합 공간",
+    org: "부산시 문화체육국",
+    note: "2028 세계디자인수도 연계"
+  },
+  "노후산단 디자인": {
+    location: "사상·강서·기장 노후 산업단지",
+    budget: "산단별 100억원",
+    timeline: "2026~2030 단계 리뉴얼",
+    status: "기본계획 수립",
+    target: "입주 기업·근로자",
+    effect: "노후 산단 경관·근무환경 혁신",
+    org: "부산시 산업입지과",
+    note: "M.AX 혁신단지와 패키지"
+  },
+  "재래시장 붐업 (국제·부전·수영팔도)": {
+    location: "국제시장·부전시장·수영팔도시장",
+    budget: "시장당 200억원",
+    timeline: "2026~2030 단계 리뉴얼",
+    status: "대표시장 선정 완료",
+    target: "전통시장 상인·방문객",
+    effect: "원도심 대표시장 활성화",
+    org: "부산시 민생경제과 + 각 구청",
+    note: "자갈치시장 현대화와 연계"
+  },
+
+  // ========== 문화품격 (11건) ==========
+  "생활권별 문화경험 확대": {
+    location: "부산 16개 구·군 생활권",
+    budget: "연 150억원",
+    timeline: "2026 연중 상시",
+    status: "원먼스 페스티벌 모델 확산 중",
+    target: "전 시민",
+    effect: "동네 단위 문화행사 상시 운영",
+    org: "부산시 문화체육국 + 문화재단",
+    note: "민선 8기 원먼스 페스티벌 확대"
+  },
+  "세계 디자인수도 사업": {
+    location: "부산 전역",
+    budget: "2년간 총 1,000억원 이상",
+    timeline: "2028 개최",
+    status: "2028 세계디자인수도 선정 완료, 준비 진행",
+    target: "전 시민 + 세계 디자인계",
+    effect: "부산을 세계 디자인 중심지로",
+    org: "부산시 문화체육국 + 산업디자인학회",
+    note: "민선 8기 최대 문화 성과"
+  },
+  "예술유통도시 부산": {
+    location: "북항·원도심·해운대",
+    budget: "총사업비 500억원",
+    timeline: "2026~2030",
+    status: "기본구상 진행",
+    target: "미술 유통 기업·작가",
+    effect: "부산을 미술·공예 유통 허브로",
+    org: "부산시 문화예술과",
+    note: "원도심 B-컬쳐 클러스터와 연계"
+  },
+  "청년작가 구독사업": {
+    location: "부산 전역",
+    budget: "연 30억원",
+    timeline: "2026 시범 → 2027~ 확대",
+    status: "플랫폼 설계",
+    target: "부산 청년 미술작가",
+    effect: "청년 작가 안정 수입·작품 순환",
+    org: "부산시 문화예술과 + 부산시립미술관",
+    note: "빈집활용 아트하우스와 연계"
+  },
+  "또따또가 시즌2": {
+    location: "중구 또따또가 일원",
+    budget: "시설 확충 100억원",
+    timeline: "2026~2028",
+    status: "시즌2 기본계획 수립",
+    target: "부산 예술인 300명",
+    effect: "예술인 창작공간 대폭 확장",
+    org: "부산시 문화예술과 + 중구",
+    note: "또따또가(민선 8기 이전) 성공 확대"
+  },
+  "서부산권 문화예술": {
+    location: "사상·강서·사하 일원",
+    budget: "총사업비 500억원",
+    timeline: "2026~2030",
+    status: "기본구상 진행",
+    target: "서부산 주민",
+    effect: "서부산 문화 인프라 격차 해소",
+    org: "부산시 문화예술과 + 서부산 3구",
+    note: "낙동오원과 패키지"
+  },
+  "글로컬예술 클러스터": {
+    location: "부산 다문화·국제 거점",
+    budget: "총사업비 300억원",
+    timeline: "2026~2030",
+    status: "구상 단계",
+    target: "글로벌 예술인·유학생",
+    effect: "로컬×글로벌 예술 교류 허브",
+    org: "부산시 문화예술과 + 국제교류센터",
+    note: "부산글로벌 브릿지와 연계"
+  },
+  "로컬크리에이티브커넥트": {
+    location: "부산 전역 (크리에이터 거점)",
+    budget: "연 50억원",
+    timeline: "2026 시범 → 2028 전면",
+    status: "플랫폼 설계",
+    target: "지역 크리에이터 1,000명",
+    effect: "크리에이터 연결망·콘텐츠 생산 생태계",
+    org: "부산시 문화콘텐츠과",
+    note: "영상·웹툰·게임 분야 통합"
+  },
+  "부산소공연장 문화회식·부컬패스": {
+    location: "부산 소공연장 50개소",
+    budget: "연 20억원",
+    timeline: "2026 시행",
+    status: "패스 설계 진행",
+    target: "전 시민",
+    effect: "소공연장 활성화·시민 문화 접근성",
+    org: "부산시 문화예술과",
+    note: "페스티벌시티 부산과 연계"
+  },
+  "문화예술 로컬소상공 창업 지원": {
+    location: "원도심 유휴 상가·빈집",
+    budget: "연 30억원",
+    timeline: "2026 상시",
+    status: "진행 중",
+    target: "문화·예술 기반 소상공 창업자",
+    effect: "문화+소상공 융합 창업 지원",
+    org: "부산시 문화예술과 + 민생경제과",
+    note: "빈집 아트하우스와 연계"
+  },
+  "빈집활용 소음걱정 없는 아트하우스": {
+    location: "원도심 빈집 100호 규모",
+    budget: "총사업비 300억원",
+    timeline: "2026~2030",
+    status: "유학생·외국인 기숙사 모델 확장",
+    target: "예술인·창작자",
+    effect: "빈집 문제 해결 + 창작공간 공급",
+    org: "부산시 주택정책과 + 문화예술과",
+    note: "빈집 활용 유학생 기숙사(민선 8기) 확대"
+  },
+
+  // ========== 관광매력 (22건) — 간략 정리 ==========
+  "부산항선-영도관광 트램 연결": {
+    location: "북항 ↔ 영도",
+    budget: "총사업비 2,000억원",
+    timeline: "2026 설계 → 2030 개통",
+    status: "기본계획 수립",
+    target: "관광객·주민",
+    effect: "북항과 영도 연결 관광트램",
+    org: "부산시 교통국 + 영도구",
+    note: "영도 관광 패키지 핵심"
+  },
+  "영도 모노레일 (해안·봉래산)": {
+    location: "영도 해안 ↔ 봉래산",
+    budget: "총사업비 1,500억원",
+    timeline: "2026~2030",
+    status: "기본구상 진행",
+    target: "관광객·주민",
+    effect: "영도 랜드마크 교통",
+    org: "부산시 + 영도구 + 민간투자",
+    note: "K-pop 아레나·감지관광단지와 패키지"
+  },
+  "수정축-북항 녹지연결": {
+    location: "수정축 ~ 북항 녹지",
+    budget: "총사업비 500억원",
+    timeline: "2026~2029",
+    status: "기본설계",
+    target: "보행자·관광객",
+    effect: "도심 녹지 연속성 확보",
+    org: "부산시 녹지정책과",
+    note: "북항 메가프로젝트와 연계"
+  },
+  "공공하수처리시설 현대화사업": {
+    location: "노후 하수처리시설 전체",
+    budget: "총사업비 5,000억원",
+    timeline: "2026~2035",
+    status: "시설별 순차 진행",
+    target: "전 시민",
+    effect: "수질·악취 개선",
+    org: "부산시 하수도과",
+    note: "CF 도시 부산 인프라"
+  },
+  "다시한번 백만평": {
+    location: "부산 전역",
+    budget: "녹지 조성 총사업비 3,000억원",
+    timeline: "2026~2035",
+    status: "녹지 대상지 발굴 중",
+    target: "전 시민",
+    effect: "공원·녹지 100만평 추가",
+    org: "부산시 녹지정책과",
+    note: "만개정원·국가도시공원과 연계"
+  },
+  "시니어 특화 생활상권 조성": {
+    location: "고령 인구 밀집 지역",
+    budget: "상권당 50억원",
+    timeline: "2026 시범 → 2030 확산",
+    status: "시범 지역 선정 중",
+    target: "어르신 밀집 생활권",
+    effect: "어르신 친화 상권·보행환경",
+    org: "부산시 복지국 + 민생경제과",
+    note: "15분 도시와 연계"
+  },
+  "산-강-바다 연결 라이프 벨트": {
+    location: "부산 산·강·바다 연결축",
+    budget: "총사업비 2,000억원",
+    timeline: "2026~2035",
+    status: "기본구상",
+    target: "전 시민 + 관광객",
+    effect: "도시 라이프 벨트 브랜드",
+    org: "부산시 도시균형발전실",
+    note: "낙동오원과 패키지"
+  },
+  "에코허브(동·식물원) 프로젝트": {
+    location: "어린이대공원·성지곡 일원",
+    budget: "총사업비 1,500억원",
+    timeline: "2026~2030",
+    status: "어린이대공원 동물원 재개장 진행",
+    target: "가족·관광객",
+    effect: "동식물 결합 에코허브",
+    org: "부산시 + 부산진구",
+    note: "민선 8기 '어린이대공원 동물원 조속 재개장' 확대"
+  },
+  "해양레저 치유센터": {
+    location: "기장·해운대 해안",
+    budget: "총사업비 500억원",
+    timeline: "2026~2029",
+    status: "구상 진행",
+    target: "웰니스 관광객",
+    effect: "해양 기반 치유·웰니스",
+    org: "부산시 관광진흥과",
+    note: "수소선박·친환경선박과 연계"
+  },
+  "만개정원이 있는 도시 부산": {
+    location: "부산 전역",
+    budget: "연 100억원 정원 조성",
+    timeline: "2026~2035 상시",
+    status: "정원 대상지 선정",
+    target: "전 시민·관광객",
+    effect: "도시 전체 정원화",
+    org: "부산시 녹지정책과",
+    note: "CF 도시·국가정원 지정과 연계"
+  },
+  "친환경선박 전환 700 프로젝트": {
+    location: "연근해 운항 선박",
+    budget: "선박당 5~10억원 지원",
+    timeline: "2026~2030 700척 전환",
+    status: "시범 선박 지정",
+    target: "연근해 어선·유람선",
+    effect: "연근해 친환경 전환",
+    org: "부산시 해양수산물류국 + 해수부",
+    note: "H-포트와 연계"
+  },
+  "스포츠이벤트 도시 부산": {
+    location: "부산 전역 경기장",
+    budget: "연 100억원 유치",
+    timeline: "2026~ 연중",
+    status: "유치 상시 진행",
+    target: "국제 스포츠 팬",
+    effect: "국제 스포츠 이벤트 상시 유치",
+    org: "부산시 체육진흥과",
+    note: "사직종합운동장 재건축과 연계"
+  },
+  "호국중심 역사공원 복원": {
+    location: "부산 호국 관련 유적지",
+    budget: "총사업비 500억원",
+    timeline: "2026~2030",
+    status: "기본계획 수립",
+    target: "시민·방문객",
+    effect: "호국 역사 계승 공원",
+    org: "부산시 + 국가보훈처",
+    note: "구도심 공원 정비와 연계"
+  },
+  "구도심공원 정비": {
+    location: "원도심 공원 30여 개소",
+    budget: "공원당 10~30억원",
+    timeline: "2026~2030",
+    status: "공원별 우선순위 결정",
+    target: "원도심 주민",
+    effect: "원도심 공원 전면 리뉴얼",
+    org: "부산시 녹지정책과 + 4개 구",
+    note: "15분 도시 기반"
+  },
+  "e스포츠 오션페스타": {
+    location: "해운대 해변",
+    budget: "1회 50억원",
+    timeline: "2026 첫 개최 → 연례",
+    status: "개최 구상",
+    target: "e스포츠 팬·관광객",
+    effect: "해양 결합 e스포츠 페스티벌",
+    org: "부산시 + 한국e스포츠협회",
+    note: "G-STAR와 시너지"
+  },
+  "MICE탤런트 부산": {
+    location: "벡스코 + 부산 주요 대학",
+    budget: "연 30억원",
+    timeline: "2026~2030",
+    status: "교육과정 설계",
+    target: "MICE 분야 청년 인재",
+    effect: "MICE 전문인력 양성 프로그램",
+    org: "부산시 관광MICE산업과",
+    note: "MICE 4.0과 패키지"
+  },
+  "관광 수익 시민에게 직접 환원": {
+    location: "부산 전역",
+    budget: "관광기금 연 100억원 환원",
+    timeline: "2026 조례 제정 → 2027 시행",
+    status: "조례안 준비",
+    target: "관광 영향 지역 주민",
+    effect: "관광수익 시민 환원 체계",
+    org: "부산시 관광진흥과",
+    note: "오버투어리즘 지역 우선 환원"
+  },
+  "시민행복 기반 스마트관광 행정 혁신": {
+    location: "부산 전역",
+    budget: "시스템 구축 100억원",
+    timeline: "2026~2028",
+    status: "진행 중",
+    target: "시민·관광객·관광업계",
+    effect: "시민 만족 기반 관광행정 디지털 혁신",
+    org: "부산시 관광진흥과 + 디지털경제혁신실",
+    note: "관광 컨트롤타워와 패키지"
+  },
+  "관광컨트롤타워 구축": {
+    location: "부산 관광 통합 지휘부",
+    budget: "총사업비 200억원",
+    timeline: "2026~2027 구축",
+    status: "기본설계 진행",
+    target: "관광 관련 전 기관",
+    effect: "관광 총괄 거버넌스 신설",
+    org: "부산시 관광진흥과",
+    note: "민선 8기 외국인 300만 돌파 성과 기반"
+  },
+  "스카이라인 루프(마천루) 프로젝트": {
+    location: "해운대·서면 등 마천루 밀집",
+    budget: "총사업비 300억원 (조명·경관)",
+    timeline: "2026~2030",
+    status: "기본구상",
+    target: "관광객·시민",
+    effect: "부산 스카이라인 야경 브랜드",
+    org: "부산시 관광진흥과 + 도시경관과",
+    note: "세븐브릿지 랜드마크와 연계"
+  },
+  "부산비짓 유스 패스 G-STAR 에디션": {
+    location: "부산 전역",
+    budget: "연 30억원",
+    timeline: "2026 첫 발매",
+    status: "설계 진행",
+    target: "청년 관광객",
+    effect: "G-STAR 방문객 청년 관광 패스",
+    org: "부산시 관광진흥과",
+    note: "페스티벌시티 부산 패키지"
+  },
+  "MICE·축제·문화공연 콘텐츠 연계": {
+    location: "벡스코 + 주요 공연장",
+    budget: "통합 운영 연 100억원",
+    timeline: "2026 상시",
+    status: "진행 중",
+    target: "MICE 방문객·시민",
+    effect: "MICE·축제·공연 통합 운영",
+    org: "부산시 관광MICE산업과 + 문화체육국",
+    note: "페스티벌시티와 MICE 4.0 연결"
+  },
+
+  // ========== 지속환경 (2건) ==========
+  "친환경선박 전환": { _ref: "대표공약", _target: "친환경선박 전환 700 프로젝트" },
+  "도심하천 생태하천 전환_env": {
+    location: "부산 도심하천",
+    budget: "하천당 200~500억원",
+    timeline: "2026~2035",
+    status: "우선 하천 선정",
+    target: "하천 유역 주민",
+    effect: "도심 생태복원",
+    org: "부산시 환경정책과",
+    note: "동천·낙동오원과 패키지"
+  },
+
+  // ========== 생활복지 (12건) ==========
+  "셋이라 더좋은 도시": {
+    location: "부산 전역",
+    budget: "연 200억원",
+    timeline: "2026 조례 개정 → 2027 시행",
+    status: "조례안 준비",
+    target: "3자녀 이상 가정 (약 2만 가구)",
+    effect: "다자녀 특별 지원 패키지",
+    org: "부산시 여성가족국",
+    note: "민선 8기 '다자녀 기준 확대(3→2명)' 확대"
+  },
+  "3040 생활체육 바우처": {
+    location: "부산 전역 체육시설",
+    budget: "연 100억원",
+    timeline: "2026 하반기 시행",
+    status: "조례 준비",
+    target: "30~40대 시민 (약 50만명)",
+    effect: "3040세대 생활체육 참여 확대",
+    org: "부산시 체육진흥과",
+    note: "생활체육 참여율 1위 유지"
+  },
+  "학생 마음 건강 지원": {
+    location: "부산 초·중·고 전체",
+    budget: "연 50억원",
+    timeline: "2026 확대 시행",
+    status: "교육청 협력 진행",
+    target: "부산 학생 약 30만명",
+    effect: "학생 정신건강 전수 조사 및 지원",
+    org: "부산시 교육청 + 보건의료과",
+    note: "위(Wee) 클래스 확대"
+  },
+  "어르신 미용·목욕 바우처 확대": {
+    location: "부산 전역",
+    budget: "연 150억원",
+    timeline: "2026 확대 시행",
+    status: "기존 사업 확대",
+    target: "65세 이상 어르신 (약 80만명)",
+    effect: "어르신 생활편의 바우처 확대",
+    org: "부산시 복지국",
+    note: "기존 어르신 교통비 무료화와 시너지"
+  },
+  "스마트 어르신 사랑방": {
+    location: "부산 16개 구·군",
+    budget: "1개소당 5억원 × 50개소",
+    timeline: "2026~2030 조성",
+    status: "시범 장소 선정",
+    target: "어르신 (시설당 500명 이용)",
+    effect: "AI 기반 어르신 소통 공간",
+    org: "부산시 복지국",
+    note: "AI 기반 스마트 돌봄과 연계"
+  },
+  "플랫폼노동자 모바일 건강 스테이션": {
+    location: "부산 전역 이동식",
+    budget: "연 30억원",
+    timeline: "2026 시범 → 2027 상시",
+    status: "장비 구축",
+    target: "배달·대리 등 플랫폼 노동자",
+    effect: "플랫폼 노동자 건강검진 이동 서비스",
+    org: "부산시 노동정책담당관 + 보건의료과",
+    note: "플랫폼노동자 전국 최초 지자체 지원"
+  },
+  "간호사 전용 리프레시호텔": {
+    location: "부산 관광지 일원",
+    budget: "총사업비 200억원",
+    timeline: "2026~2028",
+    status: "부지 선정",
+    target: "간호사 (연 10,000명 이용)",
+    effect: "간호사 휴식·치유 전용시설",
+    org: "부산시 보건의료과 + 관광진흥과",
+    note: "의료인력 처우 개선 일환"
+  },
+  "부산자치경찰 처우 개선": {
+    location: "부산 자치경찰",
+    budget: "연 100억원 (수당·시설)",
+    timeline: "2026 단계 시행",
+    status: "조례 개정",
+    target: "부산자치경찰 약 3,000명",
+    effect: "자치경찰 처우 향상 및 민생치안 강화",
+    org: "부산시 자치행정과 + 자치경찰위원회",
+    note: "전국 최초 자치경찰 수당 조례"
+  },
+  "공공관리형 독서실": {
+    location: "부산 16개 구·군",
+    budget: "1개소당 10억원 × 30개소",
+    timeline: "2026~2030",
+    status: "시범 3개소 준비",
+    target: "초·중·고·대학생",
+    effect: "공공 학습 공간 대폭 확대",
+    org: "부산시 교육청 + 여성가족국",
+    note: "들락날락(민선 8기)과 연계"
+  },
+  "15분 생활권 체육·문화시설 확충": {
+    location: "부산 전역 15분 생활권",
+    budget: "연 200억원",
+    timeline: "2026~2030 확대",
+    status: "보약숲 산스장 16개 구·군 확대(27~30) 진행",
+    target: "전 시민",
+    effect: "15분 이내 체육·문화 접근성 확보",
+    org: "부산시 체육진흥과 + 문화체육국",
+    note: "민선 8기 15분도시 확산과 패키지"
+  },
+  "어르신 건강보험 프로그램": {
+    location: "부산 전역",
+    budget: "연 100억원",
+    timeline: "2026~",
+    status: "기획 단계",
+    target: "65세 이상 어르신",
+    effect: "어르신 전용 건강관리 패키지",
+    org: "부산시 복지국 + 건강보험공단",
+    note: "노인간병휴직제·동남권 첨단 암치료 허브와 연계"
+  },
+  "안전생활 집 리모델링": {
+    location: "부산 전역 취약계층 주거",
+    budget: "연 150억원",
+    timeline: "2026~ 연중",
+    status: "대상자 발굴",
+    target: "어르신·장애인·저소득 주거 (연 2,000호)",
+    effect: "주거 안전 리모델링",
+    org: "부산시 주택정책과 + 복지국",
+    note: "부산 케어 안심주택과 연계"
+  },
+
+  // ========== 체육건강 (7건) ==========
+  "아웃도어 생활체육 활성화": {
+    location: "부산 전역 (공원·해변·산)",
+    budget: "연 80억원",
+    timeline: "2026~ 상시",
+    status: "진행 중",
+    target: "전 시민",
+    effect: "야외 생활체육 시설·프로그램 확대",
+    org: "부산시 체육진흥과",
+    note: "생활체육 참여율 80.2% (전국 1위) 유지"
+  },
+  "언더그라운드 익스트림부산": {
+    location: "부산 지하·지상 스포츠 부지",
+    budget: "총사업비 500억원",
+    timeline: "2026~2030",
+    status: "기본구상",
+    target: "청년·익스트림 스포츠 팬",
+    effect: "익스트림 스포츠 단지",
+    org: "부산시 체육진흥과 + 관광진흥과",
+    note: "e스포츠 오션페스타와 시너지"
+  },
+  "경계선지능 청년 자립응원": {
+    location: "부산 전역",
+    budget: "연 30억원",
+    timeline: "2026 시범 → 2027 시행",
+    status: "대상자 발굴",
+    target: "경계선지능 청년 (약 2,000명)",
+    effect: "맞춤 자립 지원 (직업·주거·돌봄)",
+    org: "부산시 복지국",
+    note: "자립사각지대 청년지원과 연계"
+  },
+  "우리아이 발달지원단 확대": {
+    location: "부산 전역",
+    budget: "연 50억원",
+    timeline: "2026 확대 시행",
+    status: "기존 사업 확대",
+    target: "영유아 발달지연·장애 아동",
+    effect: "조기 발달 지원 확대",
+    org: "부산시 여성가족국 + 보건의료과",
+    note: "부산어린이병원과 연계"
+  },
+  "부산형 골든타임 응급의료체계 구축": {
+    location: "부산 전역 + 동남권",
+    budget: "총사업비 1,000억원",
+    timeline: "2026~2030",
+    status: "기본계획 수립",
+    target: "중증 응급 환자 (연 5만명)",
+    effect: "권역 응급의료 골든타임 보장",
+    org: "부산시 보건의료과 + 동남권 병원",
+    note: "필수의료 기능 중심 운영체계"
+  },
+  "동남권 첨단 암치료 허브": {
+    location: "부산 대학병원 연계",
+    budget: "총사업비 3,000억원",
+    timeline: "2026~2032",
+    status: "기본구상",
+    target: "동남권 암 환자 (연 5만명)",
+    effect: "수도권 대비 동남권 암 생존율 상승",
+    org: "부산시 + 보건복지부 + 대학병원",
+    note: "동남권 방사선의과학 산업단지와 패키지"
+  },
+  "동남권 방사선의과학 산업단지": {
+    location: "기장 일원",
+    budget: "총사업비 2,000억원",
+    timeline: "2026~2030",
+    status: "기본계획 수립",
+    target: "방사선 의과학 기업·연구기관",
+    effect: "방사선 의과학 산업 집적지",
+    org: "부산시 + 원자력연구원 + 기장군",
+    note: "원전 해체 인재 허브와 연계"
+  },
+
+  // ========== 양성평등 (8건) ==========
+  "여성경력이음 재취업 연계 지원": {
+    location: "부산 전역",
+    budget: "연 100억원",
+    timeline: "2026 확대 시행",
+    status: "기존 사업 확대",
+    target: "경력단절 여성 (연 5,000명)",
+    effect: "경력단절 여성 재취업 연계",
+    org: "부산시 여성가족국",
+    note: "여성미래역량 취·창업과 통합 운영"
+  },
+  "부산마케팅주식회사": {
+    location: "부산 공공 마케팅 전담",
+    budget: "초기 자본금 500억원",
+    timeline: "2026 설립 → 2027 사업 개시",
+    status: "설립 준비",
+    target: "부산 브랜드 총괄",
+    effect: "부산 브랜드 마케팅 공공회사",
+    org: "부산시 + 민간 출자",
+    note: "관광공사와 차별화, 산업·창업 브랜딩 포함"
+  },
+  "3040 비혼여성 자립·안정": {
+    location: "부산 전역",
+    budget: "연 50억원",
+    timeline: "2026 시범 → 2027 시행",
+    status: "대상자 조사",
+    target: "3040 비혼 여성 (약 8만명)",
+    effect: "3040 비혼 여성 주거·경제 자립 지원",
+    org: "부산시 여성가족국",
+    note: "지자체 최초 3040 비혼여성 특화 사업"
+  },
+  "동남권 여성과기인 지표개발": {
+    location: "부산 (지표 개발 연구기관)",
+    budget: "총사업비 20억원",
+    timeline: "2026~2027",
+    status: "연구용역 진행",
+    target: "여성 과학기술인 정책 기반",
+    effect: "여성 과기인 정책 근거 마련",
+    org: "부산시 여성가족국 + 여성과학기술인지원센터",
+    note: "동남권 최초 여성 과기인 지표"
+  },
+  "부산 청년 주식회사": {
+    location: "부산 청년 공공법인",
+    budget: "초기 자본금 300억원",
+    timeline: "2026 설립",
+    status: "설립 준비",
+    target: "부산 청년 주도 사업",
+    effect: "청년 주도 공공법인 출범",
+    org: "부산시 청년정책담당관",
+    note: "부산마케팅주식회사와 별개 운영"
+  },
+  "유모차 다니기 편한 도시": {
+    location: "부산 전역 보행로",
+    budget: "연 100억원",
+    timeline: "2026~ 상시",
+    status: "진행 중",
+    target: "영유아 부모·휠체어 이용자",
+    effect: "유아차·휠체어 보행친화 도시",
+    org: "부산시 건설본부 + 각 구청",
+    note: "15분 도시·무장애 도시"
+  },
+  "태아문화예술 교육 확대": {
+    location: "부산 전역",
+    budget: "연 20억원",
+    timeline: "2026 확대",
+    status: "프로그램 개발",
+    target: "태아 및 영유아 (연 2만명)",
+    effect: "태아·영유아 문화예술 교육",
+    org: "부산시 여성가족국 + 문화재단",
+    note: "전국 최초 태아 단계 예술교육"
+  },
+  "24시간 돌봄체계 가동": {
+    location: "부산 전역",
+    budget: "연 300억원",
+    timeline: "2026~ 전면 시행",
+    status: "24시간 돌봄 시범 확대",
+    target: "맞벌이·야간근로 가정",
+    effect: "24시간 돌봄 체계 구축",
+    org: "부산시 여성가족국",
+    note: "민선 8기 '어린이집 3~5세 전면 무상' 확대"
+  },
+
+  // ========== 국제교류 (2건) ==========
+  "부산글로벌 브릿지 프로젝트": {
+    location: "부산 국제교류 거점",
+    budget: "총사업비 500억원",
+    timeline: "2026~2030",
+    status: "기본구상",
+    target: "국제 방문객·유학생·기업",
+    effect: "부산 글로벌 교류 허브",
+    org: "부산시 국제교류과",
+    note: "글로컬예술 클러스터와 연계"
+  },
+  "해양 AI 인재 육성": {
+    location: "부산 주요 대학·해양과학기술원",
+    budget: "총사업비 500억원",
+    timeline: "2026~2030",
+    status: "교육과정 설계",
+    target: "해양·AI 융합 인재 (연 500명)",
+    effect: "해양×AI 융합 인재 양성",
+    org: "부산시 디지털경제혁신실 + KIOST",
+    note: "해양위성·해양반도체와 연계"
+  },
+
+  // ========== 시민참여 (3건) ==========
+  "지역사회 리빙랩 및 우수지역 선정": {
+    location: "부산 16개 구·군",
+    budget: "연 30억원",
+    timeline: "2026~ 상시",
+    status: "진행 중",
+    target: "주민 주도 지역사회 문제해결",
+    effect: "지역 리빙랩 운영 및 우수사례 선정",
+    org: "부산시 시민참여담당관",
+    note: "시민주도 참여예산과 연계"
+  },
+  "시민주도 주민참여 예산제": {
+    location: "부산 전역",
+    budget: "연 500억원 이상 시민 결정",
+    timeline: "2026 확대 → 2030 전면",
+    status: "기존 사업 대폭 확대",
+    target: "전 시민",
+    effect: "시민 직접 예산 결정 참여",
+    org: "부산시 시민참여담당관",
+    note: "주민참여 예산 비중 점진 확대"
+  },
+  "시민편의 중심 공공기관 기능조정": {
+    location: "부산 산하 공공기관 전체",
+    budget: "구조조정 효율화 재원",
+    timeline: "2026~2027 2차 조정",
+    status: "민선 8기 1차 조정 완료, 2차 진행",
+    target: "시 산하 공공기관",
+    effect: "기능 합리화·효율화",
+    org: "부산시 자치행정과",
+    note: "민선 8기 '2개 분야 효율화' 성과 확대"
+  }
+
+};
+
+// 기존 PLEDGE_DETAILS와 병합
+if (typeof PLEDGE_DETAILS !== 'undefined') {
+  Object.assign(PLEDGE_DETAILS, PLEDGE_DETAILS_EXT);
+}
+
+
+function renderPledgeDetailHTML(pledgeName, detail) {
+  if (!detail) return '';
+  const fields = [
+    { icon: '📍', label: '위치', key: 'location' },
+    { icon: '💰', label: '사업비', key: 'budget' },
+    { icon: '📅', label: '추진일정', key: 'timeline' },
+    { icon: '⚡', label: '현재상태', key: 'status' },
+    { icon: '👥', label: '대상', key: 'target' },
+    { icon: '📋', label: '세부기준', key: 'criteria' },
+    { icon: '🛠️', label: '시행방식', key: 'method' },
+    { icon: '✨', label: '주요내용', key: 'feature' },
+    { icon: '🎯', label: '기대효과', key: 'effect' },
+    { icon: '🏛️', label: '주관기관', key: 'org' },
+    { icon: '💡', label: '참고', key: 'note' }
+  ];
+
+  let html = `<div class="pledge-detail-card">
+    <div class="pdc-header">
+      <span class="pdc-badge">📋 상세 정보</span>
+      <h4 class="pdc-title">${escapeHtml(pledgeName)}</h4>
+    </div>
+    <div class="pdc-body">`;
+
+  // 이미지 (있으면 최상단에)
+  if (detail.image) {
+    html += `<div class="pdc-image">
+      <img src="${escapeHtml(detail.image)}" alt="${escapeHtml(pledgeName)} 이미지" loading="lazy"
+        onerror="this.parentElement.style.display='none'"/>
+      ${detail.imageCaption ? `<div class="pdc-image-caption">${escapeHtml(detail.imageCaption)}</div>` : ''}
+    </div>`;
+  }
+
+  // 구조(structure)가 있으면 bullet으로
+  if (detail.structure && Array.isArray(detail.structure)) {
+    html += `<div class="pdc-field pdc-structure">
+      <div class="pdc-field-label">🔧 구성 요소</div>
+      <ul>${detail.structure.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+    </div>`;
+  }
+
+  fields.forEach(f => {
+    if (detail[f.key]) {
+      html += `<div class="pdc-field">
+        <div class="pdc-field-label">${f.icon} ${f.label}</div>
+        <div class="pdc-field-value">${escapeHtml(detail[f.key])}</div>
+      </div>`;
+    }
+  });
+
+  // 지도 링크 (mapQuery가 있으면 자동 생성)
+  if (detail.mapQuery || detail.location) {
+    const q = encodeURIComponent(detail.mapQuery || detail.location);
+    html += `<div class="pdc-field pdc-maps">
+      <div class="pdc-field-label">🗺️ 지도에서 보기</div>
+      <div class="pdc-map-links">
+        <a href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener" class="pdc-map-btn kakao">
+          카카오맵
+        </a>
+        <a href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener" class="pdc-map-btn naver">
+          네이버지도
+        </a>
+        <a href="https://www.google.com/maps/search/${q}" target="_blank" rel="noopener" class="pdc-map-btn google">
+          Google
+        </a>
+      </div>
+    </div>`;
+  }
+
+  // 추가 관련 링크 (있으면)
+  if (detail.links && Array.isArray(detail.links)) {
+    html += `<div class="pdc-field">
+      <div class="pdc-field-label">🔗 관련 자료</div>
+      <div class="pdc-links">
+        ${detail.links.map(l => `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener" class="pdc-link-item">${escapeHtml(l.label)} →</a>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  html += `</div></div>`;
+  return html;
+}
+
 
 
 /* =========================================================
@@ -2448,6 +4540,32 @@ let citizenInputs = [
 /* =========================================================
    시민 화면: 메시지 전송
    ========================================================= */
+/* 마지막으로 언급된 공약명 추적 (긍정 답변 시 상세 표시용) */
+let lastMentionedPledges = [];
+
+function trackMentionedPledges(hits) {
+  if (!hits || hits.length === 0) return;
+  // 상세가 있는 공약만 추적
+  lastMentionedPledges = hits
+    .map(h => h.title || h.name)
+    .filter(name => name && typeof getPledgeDetail === 'function' && getPledgeDetail(name));
+}
+
+/* 긍정 답변 감지 */
+function isAffirmativeReply(text) {
+  const t = text.trim().toLowerCase().replace(/[.!?~,\s]/g, '');
+  const affirmatives = [
+    '네', '예', '응', '어', '오케이', 'ok', 'yes', 'y',
+    '좋아', '좋아요', '좋습니다', '알려줘', '알려주세요', '보여줘', '보여주세요',
+    '자세히', '자세히알려줘', '자세히알려주세요', '더자세히', '더알려줘',
+    '궁금해', '궁금해요', '궁금합니다',
+    '그래', '그래요', '네좋아요', '네알려주세요', '네네', '응응',
+    '부탁해', '부탁해요', '부탁드려요', '부탁드립니다',
+    '디테일', '상세', '상세정보', '상세히'
+  ];
+  return affirmatives.includes(t) || affirmatives.some(a => t === a);
+}
+
 function sendMessage() {
   const textarea = document.getElementById('input-text');
   const text = textarea.value.trim();
@@ -2458,12 +4576,37 @@ function sendMessage() {
   // 유저 메시지 렌더링
   appendUserMessage(text, district);
 
+  // === 긍정 답변 감지 → 마지막 공약 상세 표시 ===
+  if (isAffirmativeReply(text) && lastMentionedPledges.length > 0) {
+    textarea.value = '';
+    textarea.style.height = 'auto';
+    setTimeout(() => {
+      appendAiMessage({
+        type: '답변',
+        policy: null,
+        confidence: '높음',
+        answer: `네, 말씀하신 공약의 <strong>상세 정보</strong>를 안내드립니다.`,
+        districtData: null,
+        pledgeHits: null,
+        scores: null,
+        text: text,
+        forceDetails: lastMentionedPledges.slice(0, 3) // 최대 3개
+      });
+    }, 400);
+    return;
+  }
+
   // AI 처리
   const type = classifyType(text);
   const { policy, hits } = matchPolicy(text);
   const confidence = confidenceLevel(hits);
   const scores = (type === "제안" || type === "질문+제안") ? scoreProposal(text) : null;
   const answerResult = generateAnswer(text, policy, type, district);
+
+  // 공약 언급 추적
+  if (answerResult.pledgeHits) {
+    trackMentionedPledges(answerResult.pledgeHits);
+  }
 
   // DB 매칭 여부 체크 (구·군 or 공약 하이라이트 or 공약 아이템)
   const hasDbMatch = !!(answerResult.districtData || answerResult.pledgeHits);
@@ -2652,7 +4795,7 @@ function appendUserMessage(text, district) {
   scrollToBottom();
 }
 
-function appendAiMessage({ type, policy, confidence, answer, districtData, pledgeHits, scores, text }) {
+function appendAiMessage({ type, policy, confidence, answer, districtData, pledgeHits, scores, text, forceDetails }) {
   const messages = document.getElementById('messages');
   const div = document.createElement('div');
   div.className = 'msg ai';
@@ -2669,6 +4812,16 @@ function appendAiMessage({ type, policy, confidence, answer, districtData, pledg
   const districtBlocks = districtData ? renderDistrictHTML(districtData) : '';
   const pledgeBlocks = pledgeHits ? renderPledgeHTML(pledgeHits) : '';
 
+  // 긍정 답변 후 강제 상세 카드 출력
+  let forceDetailBlocks = '';
+  if (forceDetails && Array.isArray(forceDetails) && typeof getPledgeDetail === 'function') {
+    forceDetailBlocks = forceDetails.map(name => {
+      const detail = getPledgeDetail(name);
+      if (!detail) return '';
+      return `<div class="pledge-detail-card-wrap" style="margin-top:12px;">${renderPledgeDetailHTML(name, detail)}</div>`;
+    }).join('');
+  }
+
   div.innerHTML = `
     <div class="avatar">政</div>
     <div class="bubble">
@@ -2681,6 +4834,7 @@ function appendAiMessage({ type, policy, confidence, answer, districtData, pledg
       </div>
       <div class="ai-body">${answer}</div>
       ${pledgeBlocks}
+      ${forceDetailBlocks}
       ${districtBlocks}
       ${scoreBlock}
       <div class="source-row">
@@ -2708,12 +4862,19 @@ function renderPledgeHTML(hits) {
   const highlights = hits.filter(h => h.type === 'highlight');
   const items = hits.filter(h => h.type === 'item');
 
+  const hasDetail = (name) => typeof PLEDGE_DETAILS !== 'undefined' && !!getPledgeDetail(name);
+
   const hlHTML = highlights.map(h => `
-    <div class="pledge-highlight">
+    <div class="pledge-highlight" data-pledge-name="${escapeHtml(h.title)}">
       <div class="ph-tag">대표 공약</div>
       <div class="ph-title">${escapeHtml(h.title)}</div>
       <div class="ph-summary">${escapeHtml(h.summary)}</div>
       <div class="ph-detail">${escapeHtml(h.detail)}</div>
+      ${hasDetail(h.title) ? `
+        <button class="pledge-detail-cta" onclick="showPledgeDetail('${escapeHtml(h.title).replace(/'/g, "\\'")}', this)">
+          💬 조금 더 자세한 내용을 알고 싶어요?
+        </button>
+      ` : ''}
     </div>
   `).join('');
 
@@ -2721,19 +4882,56 @@ function renderPledgeHTML(hits) {
     <div class="pledge-items">
       <div class="pledge-items-head">📋 관련 세부 공약 ${items.length}건</div>
       ${items.map(it => `
-        <div class="pledge-item">
+        <div class="pledge-item" data-pledge-name="${escapeHtml(it.name)}">
           <div class="pi-title">
             ${escapeHtml(it.name)}
             <span class="pi-tag ${it.tag}">${escapeHtml(it.tag)}</span>
           </div>
           <div class="pi-desc">${escapeHtml(it.desc)}</div>
           <div class="pi-cat">${it.icon || ''} ${escapeHtml(it.category)} 분야</div>
+          ${hasDetail(it.name) ? `
+            <button class="pledge-detail-cta pdc-mini" onclick="showPledgeDetail('${escapeHtml(it.name).replace(/'/g, "\\'")}', this)">
+              💬 조금 더 자세히 알고 싶어요?
+            </button>
+          ` : ''}
         </div>
       `).join('')}
     </div>
   ` : '';
 
   return hlHTML + itemHTML;
+}
+
+/* =========================================================
+   공약 상세 정보 카드 동적 삽입
+   ========================================================= */
+function showPledgeDetail(pledgeName, btnEl) {
+  const detail = typeof getPledgeDetail === 'function' ? getPledgeDetail(pledgeName) : null;
+  if (!detail) {
+    alert('해당 공약의 상세 정보가 아직 준비되지 않았습니다. 캠프 담당자에게 문의해 주세요.');
+    return;
+  }
+  // 이미 펼쳐져 있으면 토글
+  if (btnEl.dataset.expanded === 'true') {
+    const card = btnEl.nextElementSibling;
+    if (card && card.classList.contains('pledge-detail-card-wrap')) {
+      card.remove();
+    }
+    btnEl.dataset.expanded = 'false';
+    btnEl.textContent = '💬 조금 더 자세한 내용을 알고 싶어요?';
+    return;
+  }
+  // 상세 카드 삽입
+  const wrap = document.createElement('div');
+  wrap.className = 'pledge-detail-card-wrap';
+  wrap.innerHTML = renderPledgeDetailHTML(pledgeName, detail);
+  btnEl.insertAdjacentElement('afterend', wrap);
+  btnEl.dataset.expanded = 'true';
+  btnEl.textContent = '▲ 접기';
+  // 스무스 스크롤
+  setTimeout(() => {
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
 }
 
 /* =========================================================
