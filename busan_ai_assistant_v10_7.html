@@ -15372,16 +15372,12 @@ function renderDistrictSvg() {
 }
 
 /* =========================================================
-   🆕 v10.8 — 6.3 지방선거 국민의힘 공천 확정자 16명 실명 입력
-   출처 (교차검증 4개 이상 독립 출처):
-   - 뉴시스 2026.04.19 「국힘, 부산 기초단체장 후보 16명 공천 완료」
-   - 헤럴드경제 2026.04.19 「국민의힘, 부산 기초단체장 16명 공천 완료」
-   - 부산일보 2026.04.27 「현직 구청장 컷오프에 갈린 보수층 표심」
-   - KNN 2026.04.20 「국힘 부산 단체장 경선 발표, 여야 대진표 완성」
-   - 교육연합신문 2026.04.24 (남구 김광명 후보 단독 검증)
-   - getnews/한겨레 (보조 검증)
-   v10.7 → v10.8: 후보자 20건 "미공개" → 16개 구·군 실명 + 경력 + 공천방식
-   진화 경로: v10.6 (구조) → v10.7 (공약 데이터) → v10.8 (후보자 실명)
+   🆕 v10.7 — 당협별 공약 데이터 입력 완료 (시당 PDF 3종)
+   출처: 부산시당 취합 당협공약 (2026 지방선거 공천자 기준)
+   - 시당_취합__당협공약.pdf (1~8쪽): SIDANG_PLEDGES 8개
+   - 시당_취합__당협공약.pdf (9~13쪽): DH_PLEDGES 16개 구·군
+   - 사상구_당협_공약.pdf: 사상구 4건 (단독 자료, fallback 없음)
+   v10.6 → v10.7: pledges 빈 배열 → 실제 데이터 1차 입력
    ========================================================= */
 // 부산 18개 국회의원 선거구 → 16개 구·군 매핑
 // 갑/을 분리: 부산진(갑/을), 해운대(갑/을), 사하(갑/을), 북·강서(갑/을), 남·수영(통합)
@@ -15393,7 +15389,7 @@ const DH_PLEDGES = {
     union: '중구·영도구 당협 (중구영도구 단일 선거구)',
     note: '시당 취합본의 "중구영도구" 항목 적용. 영도구와 공통 공약.',
     candidates: [
-      { role: '구청장', name: '최진봉', party: '국민의힘', district: '중구', note: '현 구청장·3선 도전', method: '단수공천' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '중구' }
     ],
     pledges: [
       { title: '해양수산부 및 산하기관·기업 적극 유치', desc: '해수부 부산 이전 본격화에 맞춘 산하기관 및 해양 관련 기업 동반 유치', tag: '해양수도' },
@@ -15412,7 +15408,7 @@ const DH_PLEDGES = {
     union: '서구·동구 당협 (서구동구 단일 선거구)',
     note: '시당 취합본의 "서구동구" 항목 적용. 동구와 공통 공약.',
     candidates: [
-      { role: '구청장', name: '공한수', party: '국민의힘', district: '서구', note: '현 구청장', method: '경선 승리' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '서구' }
     ],
     pledges: [
       { title: '도시철도 송도선(노면전차) 조기착공', desc: '1호선 자갈치역 기점 → 공동어시장·송도해수욕장·고신대·감천사거리·장림고개 → 다대선 연결. 원도심-서부산권 교통축 구축', tag: '트램' },
@@ -15429,7 +15425,7 @@ const DH_PLEDGES = {
     union: '서구·동구 당협 (서구동구 단일 선거구)',
     note: '시당 취합본의 "서구동구" 항목 공유. 서구와 동일 공약.',
     candidates: [
-      { role: '구청장', name: '강철호', party: '국민의힘', district: '동구', note: '현 부산시의원', method: '단수공천' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '동구' }
     ],
     pledges: [
       { title: '도시철도 송도선(노면전차) 조기착공', desc: '1호선 자갈치역 기점 → 공동어시장·송도해수욕장·고신대·감천사거리·장림고개 → 다대선 연결', tag: '트램' },
@@ -15446,7 +15442,7 @@ const DH_PLEDGES = {
     union: '중구·영도구 당협 (중구영도구 단일 선거구)',
     note: '시당 취합본의 "중구영도구" 항목 공유. 중구와 동일 공약.',
     candidates: [
-      { role: '구청장', name: '안성민', party: '국민의힘', district: '영도구', note: '부산시의회 의장(시의원)', method: '단수공천' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '영도구' }
     ],
     pledges: [
       { title: '해양수산부 및 산하기관·기업 적극 유치', desc: '해수부 부산 이전 본격화에 맞춘 산하기관 및 해양 관련 기업 동반 유치', tag: '해양수도' },
@@ -15466,7 +15462,7 @@ const DH_PLEDGES = {
     note: '국회의원 선거구 갑/을 분리. 갑·을 별도 공약 모두 표시.',
     splits: ['갑', '을'],
     candidates: [
-      { role: '구청장', name: '김영욱', party: '국민의힘', district: '부산진구', note: '현 구청장', method: '경선 승리' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '부산진구' }
     ],
     candidates_by_split: {
       '갑': [{ role: '시의원 (갑 권역)', name: '미공개', party: '국민의힘' }],
@@ -15494,7 +15490,7 @@ const DH_PLEDGES = {
     district_name: '동래구',
     union: '동래구 당협 (단일 선거구)',
     candidates: [
-      { role: '구청장', name: '장준용', party: '국민의힘', district: '동래구', note: '현 구청장', method: '경선 승리' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '동래구' }
     ],
     pledges: [
       { title: '사직종합운동장 일대 시민 친화 랜드마크', desc: '사직야구장 재건축 차질 없는 추진 + 운동장 일대 복합문화공간·체육·상업시설 유치', tag: '랜드마크' },
@@ -15508,7 +15504,7 @@ const DH_PLEDGES = {
     district_name: '남구',
     union: '남구 당협 (단일·22대 총선부터 수영구와 분리)',
     candidates: [
-      { role: '구청장', name: '김광명', party: '국민의힘', district: '남구', note: '전 부산시의원(8·9대 재선)', method: '단수공천(오은택 컷오프)' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '남구' }
     ],
     pledges: [
       { title: '부산항선 트램 착공 신속 추진', desc: '태종대~북항~문현~우암·감만~용호~경성대·부경대 연결. 원도심 해안축 순환 교통망', tag: '트램' },
@@ -15524,7 +15520,7 @@ const DH_PLEDGES = {
     note: '국회의원 선거구는 북·강서 갑/을. 지방선거는 북구 단독. 갑·을 권역별 공약 분리 표시.',
     splits: ['갑', '을'],
     candidates: [
-      { role: '구청장', name: '오태원', party: '국민의힘', district: '북구', note: '현 구청장', method: '단수공천' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '북구' }
     ],
     pledges: [],
     pledges_by_split: {
@@ -15546,7 +15542,7 @@ const DH_PLEDGES = {
     note: '국회의원 선거구 갑/을 분리. 지방선거는 해운대구 단독.',
     splits: ['갑', '을'],
     candidates: [
-      { role: '구청장', name: '김성수', party: '국민의힘', district: '해운대구', note: '현 구청장', method: '경선 승리' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '해운대구' }
     ],
     candidates_by_split: {
       '갑': [{ role: '시의원 (갑 권역)', name: '미공개', party: '국민의힘' }],
@@ -15576,7 +15572,7 @@ const DH_PLEDGES = {
     note: '국회의원 선거구 갑/을 분리. 지방선거는 사하구 단독.',
     splits: ['갑', '을'],
     candidates: [
-      { role: '구청장', name: '김척수', party: '국민의힘', district: '사하구', note: '전 사하구갑 당협위원장', method: '5파전 경선 승리' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '사하구' }
     ],
     pledges: [],
     pledges_by_split: {
@@ -15599,7 +15595,7 @@ const DH_PLEDGES = {
     district_name: '금정구',
     union: '금정구 당협 (단일 선거구)',
     candidates: [
-      { role: '구청장', name: '윤일현', party: '국민의힘', district: '금정구', note: '현 구청장', method: '단수공천' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '금정구' }
     ],
     pledges: [
       { title: '보험자병원 설립으로 공공의료서비스 제공', desc: '(구)침례병원을 국민건강보험공단 직영 "제2 보험자병원"으로 운영', tag: '공공의료' },
@@ -15614,7 +15610,7 @@ const DH_PLEDGES = {
     union: '북구·강서구 갑/을 (북구와 묶여 분리)',
     note: '북구와 같은 국회의원 선거구이지만 지방선거는 강서구 단독. 시당 취합본의 "강서구" 단독 항목 적용.',
     candidates: [
-      { role: '구청장', name: '김형찬', party: '국민의힘', district: '강서구', note: '현 구청장', method: '단수공천' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '강서구' }
     ],
     pledges: [
       { title: '사통팔달 교통망 확충', desc: '도시철도 하단~녹산선 + 강서선 조속 추진 + 에코IC(남해제2고속도로) + 가락대로(둔치도)~EDC~공항로(맥도) 연결도로 + 부전~마산 복선전철 연내 개통', tag: '교통망' },
@@ -15629,7 +15625,7 @@ const DH_PLEDGES = {
     district_name: '연제구',
     union: '연제구 당협 (단일 선거구)',
     candidates: [
-      { role: '구청장', name: '주석수', party: '국민의힘', district: '연제구', note: '현 구청장', method: '경선 승리' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '연제구' }
     ],
     pledges: [
       { title: 'NEW 대학로 프로젝트', desc: '부산대·부산교육대 통합(2027년 예정) 기반 부산교대 인근 교육·문화 허브 구축', tag: '대학통합' },
@@ -15643,7 +15639,7 @@ const DH_PLEDGES = {
     district_name: '수영구',
     union: '수영구 당협 (단일·22대 총선부터 남구와 분리)',
     candidates: [
-      { role: '구청장', name: '강성태', party: '국민의힘', district: '수영구', note: '현 구청장·3선 도전', method: '단수공천' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '수영구' }
     ],
     pledges: [
       { title: '금련산 방공터널 미디어아트 관광터널 명소화', desc: '폐방공터널을 미디어아트 관광터널로 개발, 광안리와 연계 관광활성화', tag: '관광' },
@@ -15659,7 +15655,7 @@ const DH_PLEDGES = {
     union: '사상구 당협 (단일 선거구)',
     note: '시당 취합본에는 사상구 항목이 "없음"으로 표기. 별도 자료(사상구_당협_공약.pdf) 4건이 정식 공약.',
     candidates: [
-      { role: '구청장', name: '이대훈', party: '국민의힘', district: '사상구', note: '전 대통령비서실 행정관', method: '단수공천' }
+      { role: '구청장', name: '미공개', party: '국민의힘', district: '사상구' }
     ],
     pledges: [
       { title: '자율형 공립고 및 기숙형 중학교 설립', desc: '엄궁동 산97-6 외 82,551㎡ (학교용지 79,908㎡ + 도로 2,643㎡) 학교법인 동아학숙 부지 활용. 자율형 공립고+기숙형 공립중 각 1개소. 서부산권(사상·북·강서·사하) 연결 거점.', tag: '교육거점' },
@@ -15674,7 +15670,7 @@ const DH_PLEDGES = {
     district_name: '기장군',
     union: '기장군 당협 (단일 선거구)',
     candidates: [
-      { role: '군수', name: '정명시', party: '국민의힘', district: '기장군', note: '전 기장경찰서장', method: '경선 승리' }
+      { role: '군수', name: '미공개', party: '국민의힘', district: '기장군' }
     ],
     pledges: [
       { title: '정관선 조기 착공', desc: '예비타당성조사 통과한 정관선 개통의 설계+일부 행정절차를 패스트트랙 병행 추진', tag: '도시철도' },
@@ -15770,7 +15766,7 @@ function selectDistrict(code) {
   
   info.classList.remove('dm-info-empty');
   
-  // === v10.8: 당협별 공약 + 국민의힘 후보 실명 (16개 구·군 공천 확정 2026.04.19) ===
+  // === v10.7: 당협별 공약 + 국민의힘 후보 정보 (PDF 3종 데이터 적용) ===
   const dh = (typeof DH_PLEDGES !== 'undefined') ? DH_PLEDGES[dist.name] : null;
   let dhBlock = '';
   if (dh) {
@@ -15782,14 +15778,10 @@ function selectDistrict(code) {
           🎯 국민의힘 ${dist.name} 출마자
         </div>
         ${dh.candidates.map(c => `
-          <div style="background:#fff; border:1px solid #e8edf3; border-radius:8px; margin-bottom:5px; padding:7px 10px;">
-            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-              <span style="display:inline-flex; padding:3px 9px; background:#E60012; color:#fff; border-radius:100px; font-size:10px; font-weight:800;">${escapeHtml(c.role)}</span>
-              <strong style="font-size:13px; color:var(--navy); letter-spacing:-0.3px;">${escapeHtml(c.name)}</strong>
-              <span style="font-size:10.5px; color:#6b7280;">· ${escapeHtml(c.party)}</span>
-              ${c.method ? `<span style="display:inline-block; padding:2px 7px; background:rgba(184,134,11,0.18); color:#8a6d2a; border-radius:100px; font-size:9.5px; font-weight:700; margin-left:auto;">${escapeHtml(c.method)}</span>` : ''}
-            </div>
-            ${c.note ? `<div style="font-size:10.5px; color:#4a5568; margin-top:4px; padding-left:2px; line-height:1.4;">📌 ${escapeHtml(c.note)}</div>` : ''}
+          <div style="display:flex; align-items:center; gap:8px; padding:6px 10px; background:#fff; border:1px solid #e8edf3; border-radius:8px; margin-bottom:5px;">
+            <span style="display:inline-flex; padding:3px 9px; background:#E60012; color:#fff; border-radius:100px; font-size:10px; font-weight:800;">${escapeHtml(c.role)}</span>
+            <strong style="font-size:12.5px; color:var(--navy);">${escapeHtml(c.name)}</strong>
+            <span style="font-size:10.5px; color:#6b7280;">· ${escapeHtml(c.party)}</span>
           </div>
         `).join('')}
       </div>`;
