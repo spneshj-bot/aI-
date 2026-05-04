@@ -1,0 +1,7 @@
+{
+  "name": "park-bs-campaign",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "박형준 캠프 AI 정책비서 — Vercel 프록시 함수 (OpenAI + Claude)"
+}
