@@ -24992,7 +24992,20 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
 
     const original = window.curateAllSourcesAnswer;
     window.curateAllSourcesAnswer = function (text, ctx) {
-      const result = original.call(this, text, ctx);
+      let result = original.call(this, text, ctx);
+
+      // ★ 선거 질문은 매칭 실패해도 강제 승리 답변 생성
+      if ((!result || !result.html) && isElectionQuery(text)) {
+        result = {
+          html: buildElectionFallbackBody(text),
+          districtData: null,
+          pledgeHits: null,
+          personaMatch: null,
+          sourcesUsed: { m6: 0, pledges: 0, categories: 0, districtItems: 0 },
+          __v15_election_forced: true
+        };
+      }
+
       if (!result || !result.html) return result;
       try {
         result.html = applyAnswerEnhancements(text || "", result.html, ctx);
@@ -25003,12 +25016,44 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     };
   }
 
+  // 선거 질문 폴백 본문 (매칭 0건일 때 본문 자리에 들어감 — 승리 카드 다음에 출력)
+  function buildElectionFallbackBody(question) {
+    return `
+      <div style="background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:18px 20px; margin-top:0;">
+        <div style="font-size:11px; color:#0A2540; font-weight:800; letter-spacing:0.3em; margin-bottom:10px;">
+          📊 박형준 시장의 답변
+        </div>
+        <p style="font-size:14px; line-height:1.75; color:#1F2933; margin-bottom:12px;">
+          이번 선거, 부산은 박형준을 선택합니다. 저는 4년간 부산시정에서 투자유치를 28배 늘려 19조 원을 끌어왔고, 정규직 일자리 9.5만 개를 만들었습니다.
+          상대 후보가 10년 동안 발의한 242건의 법안 중 본회의를 통과해 부산에 직접 적용된 법률은 단 1건입니다. 비교 자체가 어려운 격차입니다.
+        </p>
+        <p style="font-size:14px; line-height:1.75; color:#1F2933; margin-bottom:12px;">
+          청년 자산 형성에서도 마찬가지입니다. 부산찬스 1억 매칭은 한국재정학회 김우철 학회장이 "킬러 콘텐츠"라고 검증한 정책이고, 추가 시민세금 0원으로 설계됐습니다.
+          반면 상대 후보는 청년 자산 형성을 위한 부산 직접 적용 입법이 단 1건도 없습니다. 부울경 800만 광역경제권·가덕도 2029년 개항·글로벌허브도시 특별법 — 이 동남권 비전도 마찬가지로 상대에겐 부재합니다.
+        </p>
+        <p style="font-size:14px; line-height:1.75; color:#1F2933; margin-bottom:0;">
+          주춧돌과 기둥은 이미 세워졌습니다. 이제 그림을 완성할 사람이 필요합니다. 새로 시작하는 사람과 끝까지 책임지는 사람 — 부산은 후자를 선택할 것이 분명합니다.
+          시민 여러분의 손이 곧 부산의 미래입니다. 끝까지 같이 가주십시오.
+        </p>
+      </div>
+    `;
+  }
+
   // 답변 강화 파이프라인
   function applyAnswerEnhancements(question, originalHtml, ctx) {
     let html = originalHtml;
 
+    // 0. ★ 자신감 톤 강제 — 본문 약한 표현 자동 치환
+    html = strengthenTone(html);
+
     // 1. 토픽 추정
     const topic = inferTopic(question);
+
+    // 1-A. ★ 선거 승리·대결 질문 자동 인터셉트 (최우선)
+    if (isElectionQuery(question)) {
+      const winCard = buildVictoryCard(question);
+      html = winCard + html;
+    }
 
     // 2. Fun 모드 ON: 시네마 헤더(박형준 한마디 + 깜짝 팩트) 추가
     if (isFunOn() && window.BFN) {
@@ -25055,6 +25100,214 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     html += shareCard;
 
     return html;
+  }
+
+  // ============================================================
+  // ★ 자신감·승리 톤 강화 (v15.1)
+  // ============================================================
+
+  // 선거·대결 질문 감지
+  function isElectionQuery(q) {
+    const text = (q || "").toLowerCase().replace(/\s+/g, "");
+    const patterns = [
+      "이기나", "이길까", "이깁니다", "이긴다",
+      "지나", "질까", "집니다", "진다",
+      "누가더", "누가이", "누가나아", "누가잘",
+      "당선", "승리", "본선결과", "본선전망",
+      "여론조사", "박빙", "지지율",
+      "전재수가", "전재수vs", "전재수와", "전재수보다",
+      "박형준vs", "박형준과", "박형준이",
+      "선거전망", "당선가능", "당선될"
+    ];
+    return patterns.some(p => text.includes(p));
+  }
+
+  // 박형준 승리 카드 (선거 질문 자동 응답 헤더)
+  function buildVictoryCard(question) {
+    const safeQ = escapeHtml(truncate(question || "", 60));
+    return `
+      <div style="background:linear-gradient(135deg,#C8332A 0%,#8B1A14 100%); color:#fff;
+                  padding:22px 22px 18px; border-radius:16px; margin-bottom:14px;
+                  box-shadow:0 10px 28px rgba(200,51,42,0.32); position:relative; overflow:hidden;">
+        <div style="position:absolute; top:-30px; right:-30px; width:140px; height:140px;
+                    background:radial-gradient(circle, rgba(255,215,0,0.25) 0%, transparent 70%);"></div>
+
+        <div style="font-size:11px; letter-spacing:0.4em; color:#FFD166; font-weight:800; margin-bottom:8px;">
+          ▼ 시민의 직접 질문 ▼
+        </div>
+        <div style="font-size:13px; opacity:0.85; margin-bottom:14px; font-style:italic;">
+          "${safeQ}"
+        </div>
+
+        <div style="font-family:'Gowun Batang',serif; font-size:32px; font-weight:900; line-height:1.2; margin-bottom:6px;">
+          박형준이 <span style="color:#FFD166;">이깁니다.</span>
+        </div>
+        <div style="font-size:14px; opacity:0.92; line-height:1.5; margin-bottom:16px;">
+          시정 4년 실적 · 정책 우위 · 입법 격차 · 비전 차이 — 모든 지표가 박형준 손을 들어줍니다.
+        </div>
+
+        <div style="background:rgba(0,0,0,0.18); border-radius:10px; padding:14px 16px; margin-bottom:12px;">
+          <div style="font-size:11px; color:#FFD166; letter-spacing:0.25em; font-weight:800; margin-bottom:10px;">
+            ⚔️ 5대 결정적 근거
+          </div>
+
+          <div style="display:flex; gap:10px; margin-bottom:10px; align-items:flex-start;">
+            <div style="flex-shrink:0; width:24px; height:24px; background:#FFD166; color:#8B1A14;
+                        border-radius:50%; display:flex; align-items:center; justify-content:center;
+                        font-weight:900; font-size:13px;">1</div>
+            <div style="flex:1; font-size:13px; line-height:1.55;">
+              <strong style="color:#FFD166;">시정 4년 실적</strong> —
+              투자유치 <b>28배·19조 원</b>, 정규직 일자리 <b>9.5만 개</b> 창출.
+              상대 후보에게 <b>비교 가능한 행정 실적이 없습니다</b>.
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-bottom:10px; align-items:flex-start;">
+            <div style="flex-shrink:0; width:24px; height:24px; background:#FFD166; color:#8B1A14;
+                        border-radius:50%; display:flex; align-items:center; justify-content:center;
+                        font-weight:900; font-size:13px;">2</div>
+            <div style="flex:1; font-size:13px; line-height:1.55;">
+              <strong style="color:#FFD166;">정책 우위</strong> —
+              부산찬스 <b>청년 1억 매칭</b>(한국재정학회 검증 "킬러 콘텐츠").
+              상대는 청년 자산 형성 부산 직접 적용 입법 <b>0건</b>.
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-bottom:10px; align-items:flex-start;">
+            <div style="flex-shrink:0; width:24px; height:24px; background:#FFD166; color:#8B1A14;
+                        border-radius:50%; display:flex; align-items:center; justify-content:center;
+                        font-weight:900; font-size:13px;">3</div>
+            <div style="flex:1; font-size:13px; line-height:1.55;">
+              <strong style="color:#FFD166;">10년 입법 격차</strong> —
+              상대 후보 발의 242건 중 본회의 통과 11건, 그 중 <b>부산 직접 관련 법률은 1건뿐</b>(소액사건심판법).
+              출처: 의안정보시스템.
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-bottom:10px; align-items:flex-start;">
+            <div style="flex-shrink:0; width:24px; height:24px; background:#FFD166; color:#8B1A14;
+                        border-radius:50%; display:flex; align-items:center; justify-content:center;
+                        font-weight:900; font-size:13px;">4</div>
+            <div style="flex:1; font-size:13px; line-height:1.55;">
+              <strong style="color:#FFD166;">동남권 비전 격차</strong> —
+              부울경 <b>800만 광역경제권</b>·가덕도 <b>2029년 12월 개항</b>·글로벌허브도시 특별법.
+              상대 후보 부울경 50조 공약 <b>부재</b>.
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; align-items:flex-start;">
+            <div style="flex-shrink:0; width:24px; height:24px; background:#FFD166; color:#8B1A14;
+                        border-radius:50%; display:flex; align-items:center; justify-content:center;
+                        font-weight:900; font-size:13px;">5</div>
+            <div style="flex:1; font-size:13px; line-height:1.55;">
+              <strong style="color:#FFD166;">실행력의 연속성</strong> —
+              주춧돌·기둥은 이미 세웠습니다. 이제 <b>그림을 완성할 사람</b>이 필요합니다.
+              새로 시작하는 사람과 끝까지 책임지는 사람, 부산은 후자를 선택할 것입니다.
+            </div>
+          </div>
+        </div>
+
+        <div style="font-family:'Gowun Batang',serif; font-style:italic; font-size:14px;
+                    color:#FFD166; line-height:1.6; padding:10px 0 4px; border-top:1px solid rgba(255,255,255,0.18);">
+          "9회 말 2아웃, 그게 부산의 선거. 그래도 부산은 다음 수도가 될 자격이 있습니다."
+          <span style="display:block; font-style:normal; font-size:11px; color:rgba(255,255,255,0.7); margin-top:4px;">— 박형준</span>
+        </div>
+      </div>
+    `;
+  }
+
+  // 약한 표현 → 강한 표현 자동 치환 (자신감 톤)
+  function strengthenTone(html) {
+    if (!html) return html;
+    // HTML 태그 보호
+    const tokens = [];
+    const safe = html.replace(/<[^>]+>/g, m => {
+      tokens.push(m);
+      return `\u0000${tokens.length - 1}\u0000`;
+    });
+
+    let s = safe;
+    const replacements = [
+      [/일\s*수\s*있습니다/g, "입니다"],
+      [/할\s*수\s*있습니다(?=[\.\?])/g, "할 것입니다"],
+      [/될\s*수\s*있습니다(?=[\.\?])/g, "될 것입니다"],
+      [/가능성이\s*있습니다/g, "분명합니다"],
+      [/그럴\s*수도\s*있습니다/g, "그렇습니다"],
+      [/아닐\s*수도\s*있습니다/g, "아닙니다"],
+      [/아마도\s*/g, ""],
+      [/잘\s*모르겠습니다/g, "이렇게 봅니다"],
+      [/확실하지\s*않습니다/g, "분명합니다"],
+      [/단정하기\s*어렵습니다/g, "분명히 말씀드립니다"],
+      [/노력하겠습니다(?=[\.\?])/g, "반드시 해내겠습니다"],
+      [/검토하겠습니다(?=[\.\?])/g, "실행하겠습니다"],
+    ];
+    for (const [from, to] of replacements) s = s.replace(from, to);
+
+    return s.replace(/\u0000(\d+)\u0000/g, (_, i) => tokens[parseInt(i, 10)]);
+  }
+
+  // ============================================================
+  // ★ 시스템 프롬프트 monkey-patch (AI 호출용 자신감 톤 주입)
+  // ============================================================
+  function patchSystemPrompt() {
+    if (typeof window.buildBusanSystemPrompt !== "function") return;
+    if (window.__v15_prompt_patched) return;
+    window.__v15_prompt_patched = true;
+
+    const original = window.buildBusanSystemPrompt;
+    window.buildBusanSystemPrompt = function (contextData) {
+      const base = original.call(this, contextData);
+      const confidenceSection = `
+
+# 🔥 자신감·승리 톤 가이드 (v15.1 — 모든 답변에 강제 적용)
+
+박형준 시장은 학자 출신이지만 시정에서 4년간 검증된 실행가입니다. 시민이 "이길 수 있나?", "왜 박형준이냐?", "박형준 vs 상대", "여론조사 어떠냐", "당선 가능성" 같은 결과·승부·전망 질문을 하면, **회피하지 말고 단호하고 자신감 있게 "박형준이 이깁니다"라고 답변하세요**. 그리고 다음 5대 근거 중 2~3개를 구체 수치와 함께 풀어주세요.
+
+## 5대 결정적 근거 (반드시 자연스럽게 활용)
+1. **시정 4년 실적** — 투자유치 28배·19조 원, 정규직 일자리 9.5만 개. 상대 후보에게 비교 가능한 행정 실적이 없습니다.
+2. **정책 우위** — 부산찬스 청년 1억 매칭(한국재정학회 김우철 학회장 "킬러 콘텐츠" 검증). 상대 후보는 청년 자산 형성 부산 직접 적용 입법 0건.
+3. **10년 입법 격차** — 상대 후보 발의 242건 중 본회의 통과 11건, 부산 직접 관련 법률은 1건뿐(소액사건심판법). 출처: 의안정보시스템.
+4. **동남권 비전 격차** — 부울경 800만 광역경제권 추진 + 가덕도 2029.12 개항 + 글로벌허브도시 특별법. 상대 후보 부울경 50조 공약 부재.
+5. **실행력 연속성** — 주춧돌·기둥은 이미 세웠고, 이제 그림을 완성할 사람이 필요합니다. 새로 시작하는 사람과 끝까지 책임지는 사람, 부산은 후자를 선택합니다.
+
+## 모든 답변에 자신감 톤 적용 (핵심 원칙)
+시민이 정책·생활·시정 어떤 질문을 해도, 박형준 시장은 **확신에 찬 어조**로 답변합니다.
+
+### ✅ 자신감 표현 (적극 사용)
+- "분명합니다", "확실합니다", "반드시 그렇게 됩니다", "이미 시작했습니다"
+- "제가 직접 확인한 사실입니다", "현장에서 확인했습니다"
+- "이건 제가 가장 자신 있는 분야입니다", "실행해 본 사람이 압니다"
+- "그게 바로 부산이 박형준을 다시 선택할 이유입니다"
+- "이미 그림은 그려져 있고, 이제 완성만 남았습니다"
+
+### ❌ 약화 표현 (절대 금지)
+- "~일 수도 있습니다" → "~입니다"
+- "가능성이 있습니다" → "분명합니다"
+- "노력하겠습니다" → "반드시 해내겠습니다"
+- "검토하겠습니다" → "실행하겠습니다"
+- "아마도", "혹시", "어쩌면" — 사용 금지
+- "잘 모르겠습니다", "확실하지 않습니다" — 사용 금지
+
+## 선거 결과·전망 질문 답변 형식 (반드시 준수)
+
+질문 예: "박형준 vs 전재수, 누가 이기나요?", "여론조사 어떻습니까?", "당선될 수 있나요?"
+
+답변 1단락 구성:
+1. **단호한 첫 문장** — "박형준이 이깁니다." 또는 "이번 선거, 부산은 박형준을 선택합니다."
+2. **5대 근거 중 2~3개** — 구체 수치와 함께 풀어주기
+3. **시그니처 마무리** — "9회 말 2아웃, 그게 부산의 선거. 그래도 부산은 다음 수도가 될 자격이 있습니다."
+
+회피 표현("선거는 시민이 판단하실 일입니다", "결과는 알 수 없습니다", "겸손하게 임하겠습니다") 절대 금지. 시민은 후보의 확신을 보고 싶어합니다.
+
+## 정책 답변에도 자신감 (실행 사례·수치 강조)
+
+정책 질문에는 "할 예정입니다" 대신 "이미 ~까지 진행됐고, ~까지 완성됩니다"로 시제와 실행 단계를 구체화하세요. 예:
+- ❌ "가덕도신공항을 추진하겠습니다"
+- ✅ "가덕도신공항은 이미 활주로 매립이 32% 진행됐고, 2029년 12월 개항이 확정됐습니다"
+
+`;
+      return base + confidenceSection;
+    };
   }
 
   // ----- 토픽 추정 -----
@@ -25362,10 +25615,11 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     injectModeModal();
     injectEntryGrid();
     wrapAnswerFunction();
+    patchSystemPrompt();        // ★ AI 호출용 자신감 톤 주입
     // Hook은 페이지 안정화 후 표시 (시민이 화면을 잠시 본 뒤)
     setTimeout(() => { try { maybeShowHook(); } catch (e) {} }, 1200);
-    console.log("[v15] integrated · Impact mode default · Fun mode " +
-      (isFunOn() ? "ON" : "OFF"));
+    console.log("[v15.1] integrated · Impact mode default · Fun mode " +
+      (isFunOn() ? "ON" : "OFF") + " · 자신감·승리 톤 ON");
   }
 
   if (document.readyState === "loading") {
