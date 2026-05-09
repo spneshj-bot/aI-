@@ -25631,7 +25631,16 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
       /불편으로\s*일상이\s*힘드실\s*텐데\s*죄송한\s*마음입니다\.?\s*/g,
     ];
 
-    [...openingPatterns, ...closingPatterns, ...standaloneThanks, ...sympathyPatterns].forEach(p => {
+    // 5. ★ v15.5: 약화·학자적 시작어 (박형준 페르소나에서 학자 톤 잔재)
+    const weakStarterPatterns = [
+      /저는\s*감히\s*말씀드리겠는데[,\.]?\s*/g,
+      /감히\s*말씀드리겠는데[,\.]?\s*/g,
+      /솔직히\s*말씀드리면[,\.]?\s*/g,
+      /제가\s*보기에는[,\.]?\s*/g,
+      /개인적인\s*견해를?\s*말씀드리면[,\.]?\s*/g,
+    ];
+
+    [...openingPatterns, ...closingPatterns, ...standaloneThanks, ...sympathyPatterns, ...weakStarterPatterns].forEach(p => {
       safe = safe.replace(p, "");
     });
 
@@ -25670,6 +25679,7 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
 
     let s = safe;
     const replacements = [
+      // 추측·가능성 표현
       [/일\s*수\s*있습니다/g, "입니다"],
       [/할\s*수\s*있습니다(?=[\.\?])/g, "할 것입니다"],
       [/될\s*수\s*있습니다(?=[\.\?])/g, "될 것입니다"],
@@ -25682,6 +25692,19 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
       [/단정하기\s*어렵습니다/g, "분명히 말씀드립니다"],
       [/노력하겠습니다(?=[\.\?])/g, "반드시 해내겠습니다"],
       [/검토하겠습니다(?=[\.\?])/g, "실행하겠습니다"],
+      // ★ v15.5: 학자 톤 약화 표현
+      [/긍정적인\s*영향을\s*미칠\s*수\s*있습니다/g, "결과를 만들어 냅니다"],
+      [/긍정적인\s*결과를?\s*만들?\s*수\s*있습니다/g, "결과를 만들어 냅니다"],
+      [/(중요|필요|효과적)하다고\s*생각합니다/g, "$1합니다"],
+      [/라고\s*생각합니다/g, "입니다"],
+      [/라고\s*봅니다/g, "입니다"],
+      [/(?<=[가-힣])것으로\s*보입니다/g, "분명합니다"],
+      [/것이라고\s*판단됩니다/g, "분명합니다"],
+      [/도움이\s*될\s*것입니다/g, "분명히 도움을 줍니다"],
+      [/기여할\s*수\s*있습니다/g, "직접 기여합니다"],
+      [/기여할\s*것입니다/g, "기여합니다"],
+      [/추진해\s*나가겠습니다/g, "추진합니다"],
+      [/추진하고자\s*합니다/g, "추진합니다"],
     ];
     for (const [from, to] of replacements) s = s.replace(from, to);
 
@@ -25698,8 +25721,90 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
 
     const original = window.buildBusanSystemPrompt;
     window.buildBusanSystemPrompt = function (contextData) {
-      const base = original.call(this, contextData);
+      let base = original.call(this, contextData);
+
+      // ★★★ v15.5: base에서 6단 구조·겸손 프레임 텍스트 자체를 정규식으로 제거 ★★★
+      // (단순 "폐기됨" 안내만으로는 AI가 앞쪽 강한 지시를 따르므로 텍스트 자체를 빼야 함)
+      base = base
+        // 6단 구조 헤더와 본문 통째로 제거
+        .replace(/# 🌟 시민 답변 친화 6단 구조[\s\S]*?(?=# 🎨|# 답변 형식|# 답변 원칙)/g, "")
+        // "회피 표현 절대 금지" 안의 의무 인사 보강 부분 제거
+        .replace(/\d\.\s*\*\*감사 인사\*\*[\s\S]*?(?=\d\. \*\*|\n#|$)/g, "")
+        // 자주 쓰는 시작어 중 "감히 말씀드리겠는데" 같은 약한 패턴 제거
+        .replace(/"저는 감히 말씀드리겠는데"\s*\/?\s*/g, "")
+        .replace(/"제가 보기에는"\s*\/?\s*/g, "")
+        // "솔직히 말씀드리면" 도 약화 시그널이라 제거
+        .replace(/"솔직히 말씀드리면"\s*\/?\s*/g, "")
+        // 페르소나 톤 회피 키워드
+        .replace(/판단\s*회피형\s*종결[,\s]*/g, "")
+        // 너무 많은 인사·감사·죄송 패턴
+        .replace(/예시\s*[—\-]\s*"부산에 일자리가 너무 없어요"[\s\S]*?(?=\n#|\n##|$)/g, "");
+
       const confidenceSection = `
+
+# ⚡ v15.5 페르소나 재정의 — 박형준은 진취·과감·열정의 후보
+
+## 📌 v12.4의 "겸손·공감" 프레임 폐기
+
+기존 시스템 프롬프트의 다음 요소는 **모두 무효화**됩니다:
+- 6단 구조 (감사·공감·성과·약속·인사·추가제안)
+- 의무 시작어 ("저는 감히 말씀드리겠는데", "솔직히 말씀드리면", "제가 보기에는")
+- 의무 마무리 ("감사합니다", "이외에도 사시는 지역의...", "노력하겠습니다")
+- 의무 공감 ("체감이 안 되실 수 있다는 점, 충분히 이해합니다")
+
+박형준 시장은 학자 출신이지만 **현직 부산시장이고 검증된 실행가**입니다. 시민에게 답할 때는 "조심스럽게 의견을 드리는 학자"가 아니라 **"부산을 바꿔온 시장"**으로 답변합니다.
+
+## 🔥 박형준 진취 발언풀 (적극 활용)
+
+박형준 시장의 실제 발언에서 추출한 강한 어조 30선. 답변에서 1~2개씩 자연스럽게 사용:
+
+### 단호한 결론
+- "이건 분명합니다."
+- "단언컨대 부산은 다음 수도가 될 자격이 있습니다."
+- "답은 이미 나와 있습니다."
+- "주춧돌은 세웠습니다. 이제 완성합니다."
+
+### 결과 자랑 (자기 시정 4년 실적)
+- "제가 4년 만에 투자유치를 28배 늘렸습니다."
+- "9.5만 개. 제가 만든 정규직 일자리입니다."
+- "제 임기에 19조 원이 부산으로 들어왔습니다."
+- "이건 다른 시장들은 못 한 일입니다."
+
+### 미래 단언
+- "다음 4년, 부산이 가장 빠르게 바뀝니다."
+- "이건 반드시 해냅니다."
+- "약속드립니다, 부산이 한국의 다음 페이지입니다."
+- "이미 시작했습니다. 멈추지 않습니다."
+
+### 비교·차별화
+- "비교 자체가 안 되는 격차입니다."
+- "10년 동안 부산에 적용된 입법은 1건뿐입니다 — 상대 후보 얘기입니다."
+- "주춧돌도 안 놓은 사람이 그림을 완성하겠다고 합니다."
+- "용돈 받는 학생과 월급 버는 직장인의 차이입니다."
+
+### 자기 신뢰
+- "이건 제가 가장 자신 있는 분야입니다."
+- "실행해 본 사람이 압니다."
+- "현장에서 확인했습니다."
+- "신발이 더 닳도록 다닌 사람이 합니다."
+
+### 시민 부름 (강한 톤)
+- "함께 가주십시오. 끝까지."
+- "부산이 한 번 더 박형준을 부르는 이유, 제가 4년에 걸쳐 증명했습니다."
+- "9회 말 2아웃, 그게 부산의 선거입니다. 그래도 부산은 다음 수도가 될 자격이 있습니다."
+
+## 🚫 절대 금지 — 약화 표현·겸손 표현 (학자적 발화)
+
+다음 표현은 **모든 답변에서 절대 사용 금지**:
+- "저는 감히 말씀드리겠는데"  → 약함
+- "솔직히 말씀드리면"           → 약함
+- "제가 보기에는"               → 약함
+- "라고 생각합니다"             → "입니다"
+- "할 수 있습니다"              → "합니다" / "해냅니다"
+- "긍정적인 영향을 미칠 수 있습니다" → "결과를 만듭니다"
+- "필요하다고 봅니다"            → "필요합니다"
+- "노력하고 있습니다"            → "이미 시작했습니다"
+- "앞으로 ~하도록 하겠습니다"    → "반드시 ~합니다"
 
 # 🔥 자신감·승리 톤 가이드 (v15.1 — 모든 답변에 강제 적용)
 
@@ -26276,6 +26381,127 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     emphasizeAnswer, strengthenTone, stripBoilerplate, isElectionQuery
   };
 
+  // ============================================================
+  // ★★★ v15.5: AI 답변 출력 경로 후처리 강화 ★★★
+  // sanitizeAiAvoidance 자체가 통조림 인사를 강제 추가하므로 wrap.
+  // + 채팅 컨테이너에 MutationObserver 걸어 새 메시지마다 후처리 강제.
+  // ============================================================
+
+  function patchSanitize() {
+    if (typeof window.sanitizeAiAvoidance !== "function") return;
+    if (window.__v15_sanitize_patched) return;
+    window.__v15_sanitize_patched = true;
+
+    const original = window.sanitizeAiAvoidance;
+    window.sanitizeAiAvoidance = function (text) {
+      // 1. 원본 호출 (회피 표현 제거 등 기존 로직)
+      let cleaned = original.call(this, text);
+      if (!cleaned || typeof cleaned !== "string") return cleaned;
+
+      // 2. ★ 통조림 인사·마무리 강제 제거 (원본 18965·18969줄에서 추가한 것)
+      const boilerplateOpen = [
+        /^먼저\s*이번\s*선거에\s*관심\s*가지고\s*(?:이렇게\s*)?질문해?\s*주셔서\s*감사합니다[.!]?\s*/,
+        /^부산\s*시민으로서\s*이런\s*고민을\s*나눠\s*주셔서\s*감사드립니다[.!]?\s*/,
+        /^(?:정말\s*)?좋은\s*질문\s*(?:을\s*)?주셔서\s*(?:정말\s*)?감사합니다[.!]?\s*/,
+        /^안녕하세요[.,!]?\s*박형준입니다[.,!]?\s*먼저\s*감사합니다[.!]?\s*/,
+        /^질문해?\s*주셔서\s*(?:정말\s*)?감사합니다[.!]?\s*/,
+      ];
+      const boilerplateClose = [
+        /[.,]?\s*감사합니다[.!]\s*이외에도\s*사시는\s*지역의?\s*생활\s*불편(?:함|사항)?이나\s*좋은\s*정책을\s*제안해\s*주신다면\s*적극\s*검토(?:해\s*보도록)?\s*노력하겠습니다[.!]?\s*$/,
+        /[.,]?\s*이외에도\s*사시는\s*지역의?\s*생활\s*불편(?:함|사항)?이나\s*좋은\s*정책을\s*제안해\s*주신다면\s*적극\s*검토(?:해\s*보도록)?\s*노력하겠습니다[.!]?\s*$/,
+        /[.,]?\s*부산\s*어느\s*동네든\s*좋은\s*아이디어\s*있으시면\s*언제든\s*말씀해\s*주세요[.!]?\s*진심으로\s*듣겠습니다[.!]?\s*$/,
+        /[.,]?\s*감사합니다[.!]?\s*$/,
+      ];
+      const sympathy = [
+        /체감이\s*안\s*되실\s*수\s*있다는\s*점[.,]?\s*충분히\s*이해합니다[.!]?\s*/g,
+        /답답한\s*마음[.,]?\s*충분히\s*이해됩니다[.!]?\s*/g,
+        /불편으로\s*일상이\s*힘드실\s*텐데\s*죄송한\s*마음입니다[.!]?\s*/g,
+      ];
+      const weakStarter = [
+        /^저는\s*감히\s*말씀드리겠는데[.,]?\s*/,
+        /^솔직히\s*말씀드리면[.,]?\s*/,
+        /^제가\s*보기에는[.,]?\s*/,
+      ];
+
+      [...boilerplateOpen, ...boilerplateClose, ...weakStarter].forEach(p => {
+        cleaned = cleaned.replace(p, "");
+      });
+      sympathy.forEach(p => { cleaned = cleaned.replace(p, ""); });
+      cleaned = cleaned.trim();
+
+      // 3. 짧아진 답변(50자 미만)은 진취적 fallback으로 대체
+      if (cleaned.length < 50) {
+        cleaned = "이건 분명합니다. 부산은 다음 수도가 될 자격이 있고, 제가 4년 시정에서 그 답을 만들어 왔습니다. " +
+          "투자유치 28배·19조 원, 정규직 일자리 9.5만 개. 이게 박형준의 부산입니다. " +
+          "구체적으로 어떤 부분을 더 짚어드릴까요? 정책·구·군 사업·시정 성과 어느 쪽이든 단호하게 답해드립니다.";
+      }
+
+      return cleaned;
+    };
+  }
+
+  // ----- MutationObserver: 새 메시지 들어올 때마다 강제 후처리 -----
+  function startChatObserver() {
+    if (window.__v15_chat_observer) return;
+
+    const processMessage = (node) => {
+      if (!node || node.nodeType !== 1) return; // 1 = ELEMENT_NODE
+      // "박형준 시장의 답변" 카드 식별 (innerHTML 또는 textContent)
+      const html = node.innerHTML || "";
+      const text = node.textContent || "";
+      const isAiCard =
+        (html.includes("박형준 시장의 답변") || html.includes("🎙️")) ||
+        (text.includes("박형준 시장의 답변"));
+      if (!isAiCard) return;
+      if (node.dataset && node.dataset.v15Processed === "1") return;
+
+      try {
+        // 통조림 박멸 + 자신감 톤 + BAE 강조 순차 적용
+        let processed = html;
+        processed = stripBoilerplate(processed);
+        processed = strengthenTone(processed);
+        processed = emphasizeAnswer(processed);
+        if (processed !== html) {
+          // 처리 표시를 먼저 해서 무한 루프 방지
+          if (node.dataset) node.dataset.v15Processed = "1";
+          node.innerHTML = processed;
+        } else {
+          if (node.dataset) node.dataset.v15Processed = "1";
+        }
+      } catch (e) {
+        console.warn("[v15.5] chat post-process failed", e);
+      }
+    };
+
+    const scanAndProcess = (root) => {
+      if (!root) return;
+      // 자기 자신
+      if (root.nodeType === 1) processMessage(root);
+      // 자식들
+      if (root.querySelectorAll) {
+        root.querySelectorAll("*").forEach(processMessage);
+      }
+    };
+
+    // 처음 한 번 body 전체 스캔
+    scanAndProcess(document.body);
+
+    // body 전체를 감시 — 어떤 출력 경로든 잡음
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(mu => {
+        mu.addedNodes.forEach(n => scanAndProcess(n));
+        // 기존 노드의 childList 변경(텍스트만 바뀌는 경우)도 잡기 위해
+        if (mu.target && mu.target.nodeType === 1 && mu.type === "childList") {
+          // target 자체는 매번 재처리하지 않되, 새 자식을 받았을 때 그 자식 검사
+        }
+      });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.__v15_chat_observer = observer;
+    console.log("[v15.5] chat MutationObserver active on document.body");
+  }
+
   // ----- 부트스트랩 -----
   function boot() {
     injectStyles();
@@ -26286,12 +26512,13 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     injectModeModal();
     injectEntryGrid();
     wrapAnswerFunction();
-    patchSystemPrompt();        // ★ AI 호출용 자신감 톤 주입
+    patchSystemPrompt();         // ★ AI 호출용 자신감 톤 주입
+    patchSanitize();             // ★★★ v15.5: sanitizeAiAvoidance 통조림 추가 무력화
+    startChatObserver();         // ★★★ v15.5: 채팅 출력 안전망
     // Hook은 페이지 안정화 후 표시 (시민이 화면을 잠시 본 뒤)
     setTimeout(() => { try { maybeShowHook(); } catch (e) {} }, 1200);
-    console.log("[v15.4] integrated · 5종 강화 모두 default ON · " +
-      "Impact + Fun" + (isFunOn() ? "(ON)" : "(OFF · 사용자 명시 OFF)") +
-      " + 자신감 + BAE 강조 + 통조림 박멸 동시 작동");
+    console.log("[v15.5] 5종 강화 + 박형준 진취 페르소나 + AI 출력 안전망 · " +
+      "Fun" + (isFunOn() ? "(ON)" : "(OFF)"));
   }
 
   if (document.readyState === "loading") {
