@@ -24810,7 +24810,12 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
   const HOOK_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24h
 
   // ----- 모드 상태 -----
-  function isFunOn() { return localStorage.getItem(KEY_FUN) === "1"; }
+  // v15.4: Fun 모드 default ON. localStorage가 명시적으로 "0"이 저장된 경우에만 OFF.
+  // (값 없음 / "1" / 어떤 값이든 → ON)
+  function isFunOn() {
+    const v = localStorage.getItem(KEY_FUN);
+    return v !== "0";
+  }
   function setFunOn(v) {
     localStorage.setItem(KEY_FUN, v ? "1" : "0");
     document.body.classList.toggle("v15-fun-on", v);
@@ -24827,8 +24832,8 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
       .v15-mode-btn { background:none; border:none; cursor:pointer; padding:6px 8px; font-size:18px;
         position:relative; }
       .v15-mode-btn::after { content:""; position:absolute; bottom:6px; right:6px; width:8px; height:8px;
-        border-radius:50%; background:#9AA5B1; transition:background .2s; }
-      body.v15-fun-on .v15-mode-btn::after { background:#1F7A4D; }
+        border-radius:50%; background:#1F7A4D; transition:background .2s; }
+      body:not(.v15-fun-on) .v15-mode-btn::after { background:#9AA5B1; }
 
       .v15-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999;
         display:none; align-items:center; justify-content:center; padding:20px; }
@@ -24897,26 +24902,37 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     wrap.id = "v15-mode-modal";
     wrap.className = "v15-modal-overlay";
     wrap.innerHTML = `
-      <div class="v15-modal-card" onclick="event.stopPropagation()">
-        <div class="v15-modal-title">🎬 답변 표시 모드</div>
-        <p class="v15-modal-sub">시민이 정책을 만나는 방식을 두 가지 모드로 분리했습니다. <b>임팩트 모드는 항상 켜져 있고</b>, 펀 모드는 선택입니다.</p>
+      <div class="v15-modal-card" onclick="event.stopPropagation()" style="max-width:480px;">
+        <div class="v15-modal-title">🎬 답변 표시 모드 <span style="font-size:13px; color:#B8860B; font-weight:600;">v15.4</span></div>
+        <p class="v15-modal-sub"><b>5가지 강화가 모두 기본 작동 중</b>입니다. 시민이 받는 모든 답변에 임팩트·자신감·강조·통조림 박멸·시그니처 톤이 동시 적용됩니다.</p>
 
         <div class="v15-mode-row locked">
           <div class="v15-mode-icon">⚡</div>
           <div class="v15-mode-info">
-            <div class="v15-mode-name">임팩트 모드 <span style="font-size:11px; color:#1F7A4D; font-weight:600;">기본 · 항상 켜짐</span></div>
-            <div class="v15-mode-desc">첫 화면 Hook · 답변 임팩트 헤더 · 카톡 OG 카드 · 박형준 vs 전재수 팩트 비교</div>
+            <div class="v15-mode-name">임팩트 모드 <span style="font-size:11px; color:#1F7A4D; font-weight:700;">기본 · 항상 켜짐</span></div>
+            <div class="v15-mode-desc">첫 화면 Hook · 답변 임팩트 헤더 · 카톡 OG 카드 · 박형준 vs 전재수 팩트 비교 · 5년 타임랩스 · 부산찬스 계산기</div>
           </div>
           <div class="v15-toggle on locked"></div>
         </div>
 
-        <div class="v15-mode-row">
+        <div class="v15-mode-row" id="v15-row-fun">
           <div class="v15-mode-icon">🎭</div>
           <div class="v15-mode-info">
-            <div class="v15-mode-name">펀 모드 <span style="font-size:11px; color:#5B6B7A; font-weight:500;">선택 · 현재 <span id="v15-mode-status-fun">꺼짐</span></span></div>
-            <div class="v15-mode-desc">박형준 시그니처 한마디 · 깜짝 팩트박스 · 시네마 답변 톤. 답변이 더 따뜻하게 풀립니다.</div>
+            <div class="v15-mode-name">펀 모드 <span style="font-size:11px; color:#1F7A4D; font-weight:700;">기본 · 현재 <span id="v15-mode-status-fun">켜짐</span></span></div>
+            <div class="v15-mode-desc">박형준 시그니처 한마디 · 깜짝 팩트박스 · 시네마 답변 톤. 답변이 더 따뜻하게 풀립니다. <span style="color:#5B6B7A;">(원하시면 끄실 수 있습니다)</span></div>
           </div>
-          <div id="v15-fun-toggle" class="v15-toggle" onclick="window.V15.toggleFun()"></div>
+          <div id="v15-fun-toggle" class="v15-toggle on" onclick="window.V15.toggleFun()"></div>
+        </div>
+
+        <div style="margin-top:10px; padding:14px 16px; background:#FFFCF5; border:1px solid rgba(184,134,11,0.25); border-radius:10px;">
+          <div style="font-size:11px; color:#B8860B; font-weight:800; letter-spacing:0.2em; margin-bottom:8px;">
+            ✨ 답변 자동 강화 (3가지 · 끌 수 없음)
+          </div>
+          <div style="font-size:12.5px; line-height:1.7; color:#1F2933;">
+            <b>① 자신감 톤</b> — "~일 수 있습니다" → "~입니다", 회피 표현 자동 강화<br>
+            <b>② BAE 시각 강조</b> — 숫자·정책명·시그니처 동사 자동 골드/네이비 강조<br>
+            <b>③ 통조림 박멸</b> — "먼저 이번 선거에 관심…" 의무 인사 자동 제거
+          </div>
         </div>
 
         <div class="v15-modal-footer">
@@ -26273,8 +26289,9 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     patchSystemPrompt();        // ★ AI 호출용 자신감 톤 주입
     // Hook은 페이지 안정화 후 표시 (시민이 화면을 잠시 본 뒤)
     setTimeout(() => { try { maybeShowHook(); } catch (e) {} }, 1200);
-    console.log("[v15.3] integrated · 통조림 답변 박멸 · Impact 기본 · Fun " +
-      (isFunOn() ? "ON" : "OFF") + " · 자신감·BAE 강조 ON · 보일러플레이트 자동 제거 ON");
+    console.log("[v15.4] integrated · 5종 강화 모두 default ON · " +
+      "Impact + Fun" + (isFunOn() ? "(ON)" : "(OFF · 사용자 명시 OFF)") +
+      " + 자신감 + BAE 강조 + 통조림 박멸 동시 작동");
   }
 
   if (document.readyState === "loading") {
