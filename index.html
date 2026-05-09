@@ -25043,8 +25043,11 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
   function applyAnswerEnhancements(question, originalHtml, ctx) {
     let html = originalHtml;
 
-    // 0. ★ 자신감 톤 강제 — 본문 약한 표현 자동 치환
+    // 0-A. ★ 자신감 톤 강제 — 본문 약한 표현 자동 치환
     html = strengthenTone(html);
+
+    // 0-B. ★★ BAE — 답변 시각 강조 (숫자·정책명·시그니처 동사·부사·비유 자동 강조)
+    html = emphasizeAnswer(html);
 
     // 1. 토픽 추정
     const topic = inferTopic(question);
@@ -25099,8 +25102,353 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     const shareCard = buildShareFooter(topic, question);
     html += shareCard;
 
+    // 6. ★★ BAE: CTA 그룹 (답변 끝 행동 유도)
+    html = appendCTAGroup(html, topic, question);
+
     return html;
   }
+
+  // ============================================================
+  // ★★ BAE — Busan Answer Emphasis (v15.2) ★★
+  // 답변 본문에 시각적 강조를 자동 적용해 시민의 각인을 극대화
+  //
+  // 7가지 인지심리학 기반 강조:
+  //   1. 숫자 앵커링 (Numerical Anchoring)   — 숫자+단위 골드 변환
+  //   2. 강조 부사 (Emphasis Adverbs)         — 반드시·분명히 빨강
+  //   3. 시그니처 동사 (Signature Verbs)      — 했습니다·만들었습니다 네이비 굵게
+  //   4. 정책명 (Policy Brand Words)          — 부산찬스·가덕도 강조
+  //   5. 직접 인용 (Pull Quote)               — "..." → 큰 serif 박스
+  //   6. 머니 쿼트 (Money Quote)              — 답변 첫 핵심 문장 → 결론 박스
+  //   7. CTA (Call To Action)                 — 답변 끝 행동 유도 그룹
+  // ============================================================
+
+  function injectEmphasisStyles() {
+    if (document.getElementById("v15-bae-style")) return;
+    const css = `
+      /* === BAE: 숫자 앵커링 === */
+      .bae-num {
+        font-weight: 800;
+        color: #B8860B;
+        font-size: 1.05em;
+        background: linear-gradient(180deg, transparent 60%, rgba(184,134,11,0.15) 60%);
+        padding: 0 2px;
+        border-radius: 2px;
+        white-space: nowrap;
+        animation: bae-pop 0.6s ease-out;
+      }
+      .bae-num-big {
+        font-weight: 900;
+        color: #B8860B;
+        font-size: 1.15em;
+        font-family: 'Gowun Batang', serif;
+        white-space: nowrap;
+      }
+      /* === BAE: 강조 부사 === */
+      .bae-adverb {
+        font-weight: 800;
+        color: #C8332A;
+      }
+      /* === BAE: 시그니처 동사 (실행·완성·약속) === */
+      .bae-verb {
+        font-weight: 700;
+        color: #0A2540;
+        background: linear-gradient(180deg, transparent 70%, rgba(212,165,58,0.30) 70%);
+      }
+      /* === BAE: 정책명 (부산찬스·가덕도 등) === */
+      .bae-policy {
+        font-weight: 700;
+        color: #0A2540;
+        border-bottom: 2px solid #B8860B;
+        padding-bottom: 1px;
+        white-space: nowrap;
+      }
+      /* === BAE: 직접 인용 pull quote === */
+      .bae-pullquote {
+        display: block;
+        margin: 18px auto;
+        padding: 14px 24px;
+        font-family: 'Gowun Batang', serif;
+        font-size: 1.15em;
+        font-weight: 600;
+        line-height: 1.7;
+        color: #0A2540;
+        text-align: center;
+        border-top: 2px solid #B8860B;
+        border-bottom: 2px solid #B8860B;
+        max-width: 90%;
+        position: relative;
+      }
+      .bae-pullquote::before {
+        content: "“";
+        font-size: 2.4em;
+        color: #B8860B;
+        line-height: 0.5;
+        position: absolute;
+        top: 12px;
+        left: 6px;
+        font-family: 'Gowun Batang', serif;
+      }
+      /* === BAE: 머니 쿼트 (답변 첫 결론 박스) === */
+      .bae-money-quote {
+        background: linear-gradient(135deg, #FFFCF5 0%, #FAF7F0 100%);
+        border-left: 5px solid #B8860B;
+        padding: 14px 18px;
+        border-radius: 0 12px 12px 0;
+        margin: 0 0 14px;
+        font-size: 15.5px;
+        line-height: 1.7;
+        color: #0A2540;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(184,134,11,0.10);
+      }
+      .bae-money-quote::before {
+        content: "▸ 핵심";
+        display: block;
+        font-size: 10px;
+        color: #B8860B;
+        letter-spacing: 0.3em;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      /* === BAE: 시그니처 비유 (별도 박스) === */
+      .bae-metaphor {
+        display: inline-block;
+        margin: 4px 0;
+        padding: 6px 12px;
+        background: rgba(10,37,64,0.06);
+        border-radius: 8px;
+        font-style: italic;
+        color: #0A2540;
+        font-weight: 500;
+        border-left: 3px solid #1E5BB5;
+      }
+      /* === BAE: 비교 박스 (반면·vs) === */
+      .bae-comparison {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 0;
+        margin: 14px 0;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #E5E7EB;
+      }
+      .bae-comparison-left,
+      .bae-comparison-right {
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .bae-comparison-left {
+        background: #FFFCF5;
+        border-right: 1px solid #E5E7EB;
+      }
+      .bae-comparison-right {
+        background: #FAFAF7;
+      }
+      .bae-comparison-vs {
+        background: #0A2540;
+        color: #FFD166;
+        padding: 0 10px;
+        display: flex;
+        align-items: center;
+        font-weight: 800;
+        font-size: 12px;
+        letter-spacing: 0.2em;
+      }
+      /* === BAE: CTA 그룹 (답변 끝) === */
+      .bae-cta-group {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px dashed #D6DCE5;
+      }
+      .bae-cta-btn {
+        flex: 1;
+        padding: 10px 12px;
+        background: #fff;
+        color: #0A2540;
+        border: 1.5px solid #0A2540;
+        border-radius: 10px;
+        font-family: inherit;
+        font-weight: 700;
+        font-size: 12.5px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .bae-cta-btn:hover {
+        background: #0A2540;
+        color: #fff;
+      }
+      .bae-cta-btn.primary {
+        background: #0A2540;
+        color: #fff;
+      }
+      .bae-cta-btn.primary:hover {
+        background: #1E5BB5;
+      }
+      .bae-cta-btn.gold {
+        background: #B8860B;
+        color: #fff;
+        border-color: #B8860B;
+      }
+      .bae-cta-btn.gold:hover {
+        background: #D4A53A;
+        border-color: #D4A53A;
+      }
+      /* === BAE: 등장 애니메이션 === */
+      @keyframes bae-pop {
+        0% { transform: scale(0.92); opacity: 0.6; }
+        60% { transform: scale(1.03); }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      /* 다크모드 대응 */
+      [data-theme="dark"] .bae-num { color: #D4A53A; }
+      [data-theme="dark"] .bae-verb { color: #F0F2F7; }
+      [data-theme="dark"] .bae-money-quote {
+        background: linear-gradient(135deg, #1F2635 0%, #161B26 100%);
+        color: #F0F2F7;
+      }
+      [data-theme="dark"] .bae-pullquote { color: #F0F2F7; }
+      [data-theme="dark"] .bae-comparison { border-color: #2A3344; }
+      [data-theme="dark"] .bae-comparison-left { background: #1F2635; border-right-color: #2A3344; }
+      [data-theme="dark"] .bae-comparison-right { background: #161B26; }
+    `;
+    const style = document.createElement("style");
+    style.id = "v15-bae-style";
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+
+  // 시그니처 비유 사전 (박형준 고유 비유 자동 인용 박스화)
+  const SIGNATURE_METAPHORS = [
+    "9회 말 2아웃", "머리 흰 식탁", "주춧돌과 기둥", "주춧돌·기둥",
+    "헐렁한 옷", "안개 낀 바다", "큰 배의 엔진", "뱃머리를 세계",
+    "5단 사다리", "용돈 받는 학생", "부모찬스의 반대말", "AI를 누가 잘 입느냐",
+    "신발이 더 닳도록", "9회말 2아웃"
+  ];
+
+  // 정책 브랜드 어휘
+  const POLICY_BRANDS = [
+    "부산찬스", "가덕도신공항", "가덕도", "강서특별법", "글로벌허브도시",
+    "월드클래스 부산", "월드클래스", "BLH", "BLA", "BuTX",
+    "다둥이찬스", "다둥이", "부울경", "부울경 광역경제권",
+    "부산 특별시민", "최고시민 패스", "AI플러스 부산", "AI 플러스",
+    "동서남북 성장", "내게 힘이 되는", "부산오페라하우스",
+    "글로벌 본사", "에어포트시티"
+  ];
+
+  // 강조 부사 (단호한 톤)
+  const EMPHASIS_ADVERBS = [
+    "반드시", "분명히", "절대", "확실히", "무조건", "끝까지",
+    "이미", "가장", "오직", "직접", "단연", "당연히",
+    "분명합니다", "확실합니다"
+  ];
+
+  // 시그니처 동사 패턴 (실행·완성·약속)
+  const SIGNATURE_VERBS = [
+    "해냈습니다", "만들었습니다", "이뤘습니다", "완성했습니다",
+    "시작했습니다", "약속드립니다", "확인했습니다", "끌어왔습니다",
+    "실행했습니다", "검증된", "검증했습니다",
+    "반드시 해내겠습니다", "실행하겠습니다", "완성하겠습니다", "책임지겠습니다"
+  ];
+
+  // 핵심: 답변 강조 메인 함수
+  // 토큰 보호 패턴으로 안전 처리 (HTML 태그 손상 0%)
+  function emphasizeAnswer(html) {
+    if (!html) return html;
+
+    // 0. 토큰 보호 (HTML 태그 + 이미 처리된 부분)
+    const tokens = [];
+    const protect = (m) => {
+      tokens.push(m);
+      return `\u0000${tokens.length - 1}\u0000`;
+    };
+
+    // 모든 HTML 태그 보호
+    let safe = html.replace(/<[^>]+>/g, protect);
+
+    // 1. 시그니처 비유 → 인라인 비유 박스
+    SIGNATURE_METAPHORS.forEach(m => {
+      const re = new RegExp(escapeRegex(m), "g");
+      safe = safe.replace(re, (match) => protect(`<span class="bae-metaphor">${match}</span>`));
+    });
+
+    // 2. 큰 단위 숫자 (1억, 19조, 9.5만, 28배, 7,000만 원, 13.7조)
+    // 핵심 임팩트 단위는 별도 큰 폰트
+    const bigUnits = "(?:억|조|만(?:\\s*명)?|배|%|개)";
+    safe = safe.replace(
+      new RegExp(`(\\d{1,3}(?:,\\d{3})*(?:\\.\\d+)?)\\s*${bigUnits}(?:\\s*원)?`, "g"),
+      (match) => {
+        // 큰 임팩트는 1억, 19조, 28배, 5만 같은 키워드
+        const isBigImpact = /^(\d+|\d+\.\d+)\s*(억|조|배|만)/.test(match);
+        return protect(`<span class="${isBigImpact ? 'bae-num-big' : 'bae-num'}">${match}</span>`);
+      }
+    );
+
+    // 3. 정책명 강조 (긴 것부터 처리해야 부분 매칭 방지)
+    const sortedPolicies = [...POLICY_BRANDS].sort((a, b) => b.length - a.length);
+    sortedPolicies.forEach(p => {
+      const re = new RegExp(escapeRegex(p), "g");
+      safe = safe.replace(re, (match) => protect(`<span class="bae-policy">${match}</span>`));
+    });
+
+    // 4. 강조 부사 (앞뒤가 한글·영문이 아닌 경계)
+    EMPHASIS_ADVERBS.forEach(adv => {
+      const re = new RegExp(`(?<![가-힣\\w])${escapeRegex(adv)}(?![가-힣\\w])`, "g");
+      safe = safe.replace(re, (match) => protect(`<span class="bae-adverb">${match}</span>`));
+    });
+
+    // 5. 시그니처 동사 (긴 것부터)
+    const sortedVerbs = [...SIGNATURE_VERBS].sort((a, b) => b.length - a.length);
+    sortedVerbs.forEach(v => {
+      const re = new RegExp(escapeRegex(v), "g");
+      safe = safe.replace(re, (match) => protect(`<span class="bae-verb">${match}</span>`));
+    });
+
+    // 6. 토큰 복원
+    return safe.replace(/\u0000(\d+)\u0000/g, (_, i) => tokens[parseInt(i, 10)]);
+  }
+
+  // 머니 쿼트 박스 (답변 본문 첫 의미 있는 문장 강조)
+  function prependMoneyQuote(html, question) {
+    if (!html) return html;
+    // 본문에서 첫 번째 의미 있는 문장 추출 시도
+    // 이미 임팩트 헤더가 있으니, 그 안에 들어 있는 헤드라인을 추출
+    // 또는 본문 첫 <p> 또는 첫 텍스트 노드의 첫 문장
+    const txt = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    const firstSentence = (txt.split(/[\.!?。]/)[0] || "").trim();
+    if (firstSentence.length < 10 || firstSentence.length > 120) return html;
+    // YOUR ANSWER 헤더가 이미 있으면 머니 쿼트 생략 (중복 방지)
+    if (html.includes("YOUR ANSWER")) return html;
+    if (html.includes("박형준이 이깁니다")) return html;
+    const moneyHtml = `<div class="bae-money-quote">${escapeHtml(firstSentence)}.</div>`;
+    return moneyHtml + html;
+  }
+
+  // CTA 그룹 (답변 끝 자동 행동 유도)
+  function appendCTAGroup(html, topic, question) {
+    if (!html) return html;
+    // 카톡 공유 카드가 이미 있으면 CTA 추가 생략 (중복 방지)
+    // 단, BAE 자체 CTA는 더 작은 버튼들이라 공존 가능
+    const ctaHtml = `
+      <div class="bae-cta-group">
+        <button class="bae-cta-btn" onclick="window.V15.askMore('${escapeAttr(topic)}')">
+          🔍 더 깊이 알아보기
+        </button>
+        <button class="bae-cta-btn primary" onclick="window.V15.openCalculator()">
+          📊 내 혜택 계산
+        </button>
+        <button class="bae-cta-btn gold" onclick="window.V15.shareThisAnswer('${escapeAttr(question)}')">
+          💌 친구에게
+        </button>
+      </div>
+    `;
+    return html + ctaHtml;
+  }
+
+  function escapeRegex(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+  function escapeAttr(s) { return String(s || "").replace(/'/g, "\\'").replace(/"/g, "&quot;"); }
 
   // ============================================================
   // ★ 자신감·승리 톤 강화 (v15.1)
@@ -25304,6 +25652,62 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
 정책 질문에는 "할 예정입니다" 대신 "이미 ~까지 진행됐고, ~까지 완성됩니다"로 시제와 실행 단계를 구체화하세요. 예:
 - ❌ "가덕도신공항을 추진하겠습니다"
 - ✅ "가덕도신공항은 이미 활주로 매립이 32% 진행됐고, 2029년 12월 개항이 확정됐습니다"
+
+# 🎯 답변 시각 강조 가이드 (v15.2 — 시민 각인 극대화)
+
+답변은 시민이 빠르게 읽고 핵심을 기억할 수 있도록 다음 강조 원칙을 따르세요. 답변 후처리 시스템이 자동으로 시각 강조를 입히므로, AI는 텍스트만 다음 패턴으로 자연스럽게 작성하면 됩니다.
+
+## 1. 숫자는 반드시 구체 단위로 (인지심리학 — Numerical Anchoring)
+- ❌ "많은 일자리를 만들었습니다" → ✅ "정규직 일자리 9.5만 개를 만들었습니다"
+- ❌ "투자유치가 크게 늘었습니다" → ✅ "투자유치 28배·19조 원으로 늘렸습니다"
+- ❌ "부산찬스로 청년 자산을 형성합니다" → ✅ "부산찬스로 10년 뒤 청년 통장에 1억이 찍힙니다"
+- 큰 숫자는 시민 일상 단위로 환산 — "1억 = 매월 25만 원"·"19조 = 시민 1인당 600만 원"
+
+## 2. 정책 브랜드명은 반드시 그대로 (인지심리학 — Brand Repetition)
+정책 핵심 어휘는 답변마다 정확히 같은 표기로 사용 — 시각 강조 시스템이 자동으로 강조 처리:
+- ✅ "부산찬스" (×) "부산 찬스" / "청년 매칭"
+- ✅ "가덕도신공항" 또는 "가덕도" (×) "가덕도 공항" / "신공항"
+- ✅ "강서특별법" / "글로벌허브도시" / "월드클래스 부산" / "부울경 광역경제권"
+- ✅ "BLH(부산형 공공학습관)" / "BuTX" / "에어포트시티"
+
+## 3. 강조 부사 적극 사용 (인지심리학 — Emphasis Adverbs)
+다음 부사는 자동으로 빨강 굵게 처리됩니다. 답변마다 1~2개 자연스럽게:
+- "반드시" "분명히" "절대" "확실히" "무조건" "끝까지" "이미" "직접" "가장" "오직"
+- 예: "이건 **반드시** 해냅니다", "**이미** 매립 32% 진행됐습니다", "**가장** 자신 있는 분야입니다"
+
+## 4. 시그니처 동사로 끝맺기 (인지심리학 — Action Verb Memory)
+답변의 핵심 결론은 다음 동사 패턴으로 끝내세요. 자동으로 네이비 굵게 + 골드 밑줄 처리:
+- "해냈습니다" / "만들었습니다" / "이뤘습니다" / "완성했습니다" / "시작했습니다"
+- "약속드립니다" / "확인했습니다" / "끌어왔습니다" / "실행했습니다"
+- 미래형: "반드시 해내겠습니다" / "실행하겠습니다" / "완성하겠습니다" / "책임지겠습니다"
+
+## 5. 시그니처 비유 1개 (인지심리학 — Memorable Metaphor)
+답변마다 다음 박형준 시그니처 비유 중 1개를 자연스럽게 녹이세요. 자동으로 인용 박스로 강조:
+- "9회 말 2아웃, 그게 부산의 선거" — 본선 의지
+- "주춧돌과 기둥은 세웠다, 이제 그림을 완성" — 재선 명분
+- "헐렁한 옷이 이제 몸에 맞기 시작했습니다" — 시정 성과
+- "청년이 떠난 도시는 머리 흰 식탁" — 인구 감소
+- "5단 사다리(1000대 기업·중견·혁신·창업·소상공인)" — 경제 구조
+- "용돈 받는 학생과 월급 버는 직장인" — 행정통합 비유
+- "부모찬스의 반대말이 부산찬스" — 청년 자산형성
+- "신발이 더 닳도록 다닙니다" — 자기풍자
+- "안개 낀 바다에서 등대만 바라볼 시간 없습니다" — 미래 리더십
+- "AI를 누가 잘 쓰느냐가 아니라 누가 잘 입느냐" — AI 전환
+
+## 6. 답변 구조 — 첫 문장과 마지막 문장이 결정적 (인지심리학 — Primacy & Recency)
+시민은 답변의 첫 문장과 마지막 문장만 기억합니다. 그래서:
+- **첫 문장**: 결론을 박는다 — "박형준이 이깁니다", "1억은 분명히 시민 통장에 찍힙니다", "이미 매립 32% 진행됐습니다"
+- **마지막 문장**: 시그니처 비유 또는 약속 — "9회 말 2아웃, 그게 부산의 선거입니다", "이건 반드시 해냅니다"
+
+## 7. 답변 길이 안에서 시각 리듬 (인지심리학 — Visual Rhythm)
+350~520자 정책 답변 안에 다음 비율을 권장:
+- 숫자+단위 강조: 3~5회 (1억, 28배, 9.5만 같은 핵심 수치)
+- 정책 브랜드명: 1~2회 (부산찬스, 가덕도 등)
+- 강조 부사: 1~2회 (반드시, 분명히, 이미)
+- 시그니처 동사: 1~2회 (해냈습니다, 약속드립니다)
+- 시그니처 비유: 1회 (가장 적절한 위치 1곳)
+
+이 비율이 시민의 답변 끝까지 읽기·기억·공유 비율을 극대화합니다.
 
 `;
       return base + confidenceSection;
@@ -25597,18 +26001,44 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     return s.length > n ? s.substring(0, n - 1) + "…" : s;
   }
 
+  // ----- BAE CTA 핸들러 -----
+  function askMore(topic) {
+    // 6대 공약 섹션으로 스크롤 또는 관련 모달 열기
+    const main6 = document.getElementById("main6Section");
+    if (main6) {
+      main6.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      flashToast(`"${topic}" 관련 공약을 더 보여드립니다`);
+    }
+  }
+
+  function shareThisAnswer(question) {
+    const safeQ = String(question || "").replace(/['"\\]/g, "");
+    const txt = `[박형준의 부산]\n\nQ. ${safeQ}\n→ 박형준 부산이 답합니다.\n\n부산 AI 정책비서 · busan-ai.kr`;
+    try {
+      navigator.clipboard.writeText(txt).then(
+        () => flashToast("복사 완료! 카톡에 붙여넣으세요."),
+        () => flashToast("복사 실패")
+      );
+    } catch (e) { flashToast("복사 실패"); }
+  }
+
   // ----- 글로벌 노출 -----
   window.V15 = {
     isFunOn, setFunOn, toggleFun,
     openModeModal, closeModeModal, previewHook,
     openCalculator, openTimelapse, openTodayPledge, openCompare,
     shareCopy, shareKakao,
-    maybeShowHook
+    askMore, shareThisAnswer,
+    maybeShowHook,
+    // 디버그·시연용
+    emphasizeAnswer, strengthenTone, isElectionQuery
   };
 
   // ----- 부트스트랩 -----
   function boot() {
     injectStyles();
+    injectEmphasisStyles();      // ★★ BAE 강조 스타일 주입
     // 모드 상태 반영
     document.body.classList.toggle("v15-fun-on", isFunOn());
     injectModeButton();
@@ -25618,8 +26048,8 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     patchSystemPrompt();        // ★ AI 호출용 자신감 톤 주입
     // Hook은 페이지 안정화 후 표시 (시민이 화면을 잠시 본 뒤)
     setTimeout(() => { try { maybeShowHook(); } catch (e) {} }, 1200);
-    console.log("[v15.1] integrated · Impact mode default · Fun mode " +
-      (isFunOn() ? "ON" : "OFF") + " · 자신감·승리 톤 ON");
+    console.log("[v15.2] integrated · Impact mode default · Fun mode " +
+      (isFunOn() ? "ON" : "OFF") + " · 자신감 톤 ON · BAE 강조 ON");
   }
 
   if (document.readyState === "loading") {
