@@ -25675,12 +25675,18 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
   // ============================================================
 
   // ----- 1. "부산 특별시민" → "부산 최고 시민" 표기 통일 -----
+  //         + 2호 공약 subtitle "부산에서 살면, 외롭지 않다" → "세계도시 부산은 시민일상 행복에서 시작됩니다"
   function fixCitizenPolicyName() {
     // (1) 데이터 객체 안의 표기 모두 "부산 최고 시민"으로 통일
     if (window.MAIN_PLEDGES_6 && Array.isArray(window.MAIN_PLEDGES_6)) {
       window.MAIN_PLEDGES_6.forEach(p => {
         if (p && typeof p.title === "string" && p.title.includes("부산 특별시민")) {
           p.title = p.title.replace(/부산\s*특별시민/g, "부산 최고 시민");
+        }
+        // ★ 2호 공약 subtitle 교체
+        if (p && typeof p.subtitle === "string" &&
+            p.subtitle.includes("부산에서 살면, 외롭지 않다")) {
+          p.subtitle = "세계도시 부산은 시민일상 행복에서 시작됩니다";
         }
         // note 등 다른 필드도 정리
         if (p && typeof p.note === "string") {
@@ -25717,9 +25723,20 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     const replaceTextInNode = (node) => {
       if (!node) return;
       if (node.nodeType === 3) {
-        if (node.nodeValue && node.nodeValue.includes("부산 특별시민")) {
-          node.nodeValue = node.nodeValue.replace(/부산\s*특별시민/g, "부산 최고 시민");
+        let v = node.nodeValue;
+        if (!v) return;
+        let changed = false;
+        if (v.includes("부산 특별시민")) {
+          v = v.replace(/부산\s*특별시민/g, "부산 최고 시민");
+          changed = true;
         }
+        // ★ 2호 공약 subtitle 교체
+        if (v.includes("부산에서 살면, 외롭지 않다")) {
+          v = v.replace(/부산에서\s*살면,\s*외롭지\s*않다/g,
+            "세계도시 부산은 시민일상 행복에서 시작됩니다");
+          changed = true;
+        }
+        if (changed) node.nodeValue = v;
         return;
       }
       if (node.nodeType !== 1) return;
