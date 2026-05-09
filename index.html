@@ -23344,7 +23344,7 @@ function showCategoryPledges(catName) {
 
 
 <!-- ============================================================
-     v15 통합 — Impact 모드(기본) + Fun 모드(선택)
+     v15 통합 — Impact 모드(기본) + Fun 모드(선택) + 구별 공약 지도
      2026.05.09 · 정책공보TF
      ============================================================ -->
 <!-- v13 BFN 모듈 (Fun 모드용) -->
@@ -25666,6 +25666,413 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
   }
 
   // ============================================================
+  // ★★★ v15.6 정정 모듈 (5가지 이슈 통합 패치) ★★★
+  //   1. "부산 특별시민" → "부산 최고 시민" 표기 통일
+  //   2. "💬 클릭해서 질문 시작 →" 버튼 클릭 핸들러 연결
+  //   3. 5년 타임랩스 해운대 카드 광안리 → 해운대 데이터 교체
+  //   4. 오늘의 공약 카드에 닫힘 버튼(×) 추가
+  //   5. 전재수 후보 공약 팩트비교 업데이트 (web_search 기반)
+  // ============================================================
+
+  // ----- 1. "부산 특별시민" → "부산 최고 시민" 표기 통일 -----
+  function fixCitizenPolicyName() {
+    // (1) 데이터 객체 안의 표기 모두 "부산 최고 시민"으로 통일
+    if (window.MAIN_PLEDGES_6 && Array.isArray(window.MAIN_PLEDGES_6)) {
+      window.MAIN_PLEDGES_6.forEach(p => {
+        if (p && typeof p.title === "string" && p.title.includes("부산 특별시민")) {
+          p.title = p.title.replace(/부산\s*특별시민/g, "부산 최고 시민");
+        }
+        // note 등 다른 필드도 정리
+        if (p && typeof p.note === "string") {
+          p.note = p.note.replace(/「부산\s*특별시민」/g, "「부산 최고 시민」")
+                          .replace(/부산\s*특별시민/g, "부산 최고 시민");
+        }
+      });
+    }
+    // PLEDGE_DETAILS 같은 다른 객체에도 적용
+    ["PLEDGE_DETAILS", "PLEDGE_CATEGORIES", "DISTRICT_ITEM_DETAILS"].forEach(key => {
+      const obj = window[key];
+      if (!obj || typeof obj !== "object") return;
+      try {
+        const json = JSON.stringify(obj);
+        if (!json.includes("부산 특별시민")) return;
+        const fixed = json.replace(/부산\s*특별시민/g, "부산 최고 시민");
+        // 객체 키별로 직접 치환 (전체 재할당은 참조 깨짐 방지)
+        Object.keys(obj).forEach(k => {
+          const item = obj[k];
+          if (typeof item === "string") {
+            obj[k] = item.replace(/부산\s*특별시민/g, "부산 최고 시민");
+          } else if (item && typeof item === "object") {
+            Object.keys(item).forEach(k2 => {
+              if (typeof item[k2] === "string") {
+                item[k2] = item[k2].replace(/부산\s*특별시민/g, "부산 최고 시민");
+              }
+            });
+          }
+        });
+      } catch (e) { /* skip */ }
+    });
+
+    // (2) DOM 텍스트 노드 치환
+    const replaceTextInNode = (node) => {
+      if (!node) return;
+      if (node.nodeType === 3) {
+        if (node.nodeValue && node.nodeValue.includes("부산 특별시민")) {
+          node.nodeValue = node.nodeValue.replace(/부산\s*특별시민/g, "부산 최고 시민");
+        }
+        return;
+      }
+      if (node.nodeType !== 1) return;
+      Array.from(node.childNodes).forEach(replaceTextInNode);
+    };
+    replaceTextInNode(document.body);
+
+    // (3) input/placeholder 등 속성도
+    document.querySelectorAll("[placeholder]").forEach(el => {
+      const v = el.getAttribute("placeholder") || "";
+      if (v.includes("부산 특별시민")) {
+        el.setAttribute("placeholder", v.replace(/부산\s*특별시민/g, "부산 최고 시민"));
+      }
+    });
+  }
+
+  // ----- 2. "💬 클릭해서 질문 시작" 버튼 클릭 시 입력창 포커스 -----
+  function fixQuickAskButton() {
+    const focusInput = () => {
+      // 입력창 후보들
+      const selectors = [
+        "#userInput", "#chat-input", "#chatInput", "#question-input",
+        "textarea[placeholder*=질문]", "input[placeholder*=질문]",
+        "textarea[placeholder*=입력]", "input[placeholder*=입력]",
+        ".chat-input textarea", "form textarea", "form input[type=text]"
+      ];
+      let target = null;
+      for (const sel of selectors) {
+        const el = document.querySelector(sel);
+        if (el && el.offsetParent !== null) { target = el; break; }
+      }
+      if (target) {
+        target.focus();
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        return true;
+      }
+      return false;
+    };
+
+    // 이미 있는 버튼 + 동적으로 추가되는 버튼 모두 처리
+    const wireButton = (btn) => {
+      if (!btn || btn.dataset.v156Wired === "1") return;
+      btn.dataset.v156Wired = "1";
+      btn.style.cursor = "pointer";
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        focusInput();
+      });
+    };
+
+    const findAndWire = () => {
+      // 텍스트 매칭으로 모든 후보 버튼 찾기
+      const candidates = document.querySelectorAll(
+        "button, a, [role=button], div[onclick], span[onclick]"
+      );
+      candidates.forEach(el => {
+        const txt = (el.textContent || "").trim();
+        if (txt.includes("클릭해서 질문 시작") ||
+            txt.includes("질문 시작") && txt.includes("💬") ||
+            (txt.includes("💬") && txt.includes("→") && txt.length < 30)) {
+          wireButton(el);
+        }
+      });
+    };
+
+    findAndWire();
+    // 동적 추가 대비: MutationObserver
+    const mo = new MutationObserver(findAndWire);
+    mo.observe(document.body, { childList: true, subtree: true });
+    window.__v156_quickask_observer = mo;
+  }
+
+  // ----- 3. 5년 타임랩스 해운대 카드 광안리 → 해운대 정확 표기로 교체 -----
+  function fixHaeundaeTimelapse() {
+    // BIM 모듈 안 TIMELAPSE_DATA에 직접 접근 불가하므로
+    // BIM이 노출한 함수가 아닌 모듈 수준에서 다시 정의된 데이터를 덮어씀
+    // BIM 내부 클로저는 못 바꾸므로, openTimelapse를 wrap해서
+    // 호출 결과 모달의 해운대 카드 텍스트를 후처리로 정정
+    if (!window.BIM || typeof window.BIM.openTimelapse !== "function") return;
+    if (window.__v156_timelapse_patched) return;
+    window.__v156_timelapse_patched = true;
+
+    const original = window.BIM.openTimelapse;
+    window.BIM.openTimelapse = function (place) {
+      const ret = original.call(this, place);
+      // 모달이 열린 후 해운대 탭 누를 때마다 텍스트 정정
+      setTimeout(() => correctHaeundaeText(), 200);
+      // 탭 클릭 등 인터랙션 후에도 다시 정정
+      const interval = setInterval(() => {
+        const modal = document.querySelector(".bim-timelapse-modal, .bim-modal");
+        if (!modal) { clearInterval(interval); return; }
+        correctHaeundaeText();
+      }, 600);
+      // 모달 닫히면 인터벌 해제
+      setTimeout(() => clearInterval(interval), 60000);
+      return ret;
+    };
+
+    // 별도로 V15에 직접 호출 가능한 정정 함수 등록
+    window.V15 && (window.V15.fixHaeundaeText = correctHaeundaeText);
+  }
+
+  // 해운대 텍스트 정정 (광안리 → 해운대 컨텍스트)
+  function correctHaeundaeText() {
+    // 해운대 카드/모달 텍스트가 광안리로 적혀 있는 부분 찾아서 교체
+    const candidates = document.querySelectorAll(
+      ".bim-timelapse-card, .bim-timelapse-detail, [class*=timelapse], [class*=haeundae], [data-place=haeundae]"
+    );
+    const haeundaeFixMap = [
+      ["광안리 K-POP 페스타", "해운대 K-POP 페스타"],
+      ["광안리 바다는 그대로지만", "해운대 바다는 그대로지만"],
+      ["광안리 신혼집이 절반 잡힌다", "해운대 신혼집이 절반 잡힌다"],
+      ["광안리 24평 신혼집이 손에 잡힌다", "해운대 24평 신혼집이 손에 잡힌다"],
+      ["광안리 K-POP", "해운대 K-POP"],
+      ["광안리 신혼집", "해운대 신혼집"],
+    ];
+    candidates.forEach(el => {
+      // 자식 텍스트 노드만 정정 (구조는 유지)
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+      const textNodes = [];
+      let n;
+      while ((n = walker.nextNode())) textNodes.push(n);
+      textNodes.forEach(t => {
+        let v = t.nodeValue || "";
+        // 해운대 카드 안에서만 광안리를 해운대로 (해운대 카드 자체가 광안리 컨텍스트로 잘못 적혀있는 경우)
+        haeundaeFixMap.forEach(([from, to]) => {
+          if (v.includes(from)) v = v.split(from).join(to);
+        });
+        if (v !== t.nodeValue) t.nodeValue = v;
+      });
+    });
+  }
+
+  // ----- 4. 오늘의 공약 카드에 닫힘(×) 버튼 추가 -----
+  function fixDailyCardClose() {
+    if (!window.BIM || typeof window.BIM.renderDailyCard !== "function") return;
+    if (window.__v156_daily_close_patched) return;
+    window.__v156_daily_close_patched = true;
+
+    const original = window.BIM.renderDailyCard;
+    window.BIM.renderDailyCard = function (target) {
+      const ret = original.call(this, target);
+      // 렌더 후 닫힘 버튼 자동 추가
+      setTimeout(() => addCloseButtonToDaily(), 100);
+      return ret;
+    };
+
+    // 모달이 어디서 호출되든 닫힘 버튼 강제 추가
+    const observer = new MutationObserver(() => addCloseButtonToDaily());
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.__v156_daily_observer = observer;
+  }
+
+  function addCloseButtonToDaily() {
+    // 오늘의 공약 카드/모달 후보들
+    const candidates = document.querySelectorAll(
+      "#v15-today-modal, .bim-daily-card, [class*=daily-pledge], [class*=today-pledge]"
+    );
+    candidates.forEach(card => {
+      if (card.dataset.v156CloseAdded === "1") return;
+
+      // 오늘의 공약 식별 (불필요한 모든 카드에 ✕가 붙는 것 방지)
+      const txt = card.textContent || "";
+      const isDailyCard = txt.includes("오늘의 공약");
+      if (!isDailyCard) {
+        card.dataset.v156CloseAdded = "1"; // skip 표시
+        return;
+      }
+
+      // V15가 만든 모달은 footer에 닫기 버튼이 이미 있음 → skip
+      if (card.id === "v15-today-modal" && card.querySelector(".v15-modal-close")) {
+        card.dataset.v156CloseAdded = "1";
+        return;
+      }
+
+      // 자식 카드/내부 컨테이너에는 추가 안 함 (중복 방지)
+      // 가장 바깥 컨테이너에만 ✕ 추가
+      const parentCard = card.closest("#v15-today-modal, .bim-daily-card, [class*=overlay], [class*=modal]");
+      if (parentCard && parentCard !== card) {
+        // 부모가 별도 카드면 skip
+        card.dataset.v156CloseAdded = "1";
+        return;
+      }
+
+      // 닫기 버튼 추가
+      const closeBtn = document.createElement("button");
+      closeBtn.innerHTML = "✕";
+      closeBtn.setAttribute("aria-label", "닫기");
+      closeBtn.style.cssText = `
+        position: absolute; top: 10px; right: 10px;
+        width: 32px; height: 32px; border-radius: 50%;
+        background: rgba(255,255,255,0.92); border: 1px solid #D6DCE5;
+        color: #0A2540; font-size: 16px; font-weight: 700;
+        cursor: pointer; z-index: 10001;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      `;
+      closeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const overlay = card.closest("[class*=overlay], [class*=modal], .v15-modal-overlay");
+        if (overlay) {
+          overlay.classList.remove("show");
+          overlay.style.display = "none";
+        } else {
+          card.style.display = "none";
+        }
+      });
+
+      const computed = window.getComputedStyle(card);
+      if (computed.position === "static") card.style.position = "relative";
+      card.appendChild(closeBtn);
+      card.dataset.v156CloseAdded = "1";
+    });
+  }
+
+  // ----- 5. 전재수 공약 팩트비교 업데이트 (web_search 기반 최신 본선 공약) -----
+  // 2026.05 기준 전재수 후보 본선 공약 = 해양수도 4종 세트 + 북항 돔구장 + 민생 100일 비상조치 + 퐁피두/오페라하우스 재검토
+  const JEON_BUSAN_PLEDGES_2026 = [
+    {
+      topic: "해양수도 4종 세트",
+      park: { line: "글로벌허브도시 특별법 + 동남권 800만 광역경제권. 시정 4년 누적 투자유치 19조·일자리 9.5만개로 검증.", source: "부산시정 백서 2026" },
+      jeon: { line: "해수부 이전 + HMM 등 해운기업 본사 이전 + 해사전문법원(2028) + 50조 동남투자공사. 4종 모두 중앙정부 의존 구조.", source: "전재수 캠프 자료 2026.04" }
+    },
+    {
+      topic: "북항 개폐형 돔구장",
+      park: { line: "북항 재개발 + 글로벌 본사 30개·외투 50조 + 에어포트시티 통합. 산업·관광 동시 흡수.", source: "부산시정 비전 2026" },
+      jeon: { line: "북항에 개폐형 돔구장 단일 시설. 항만재개발법·항만공사법 개정 본인 발의.", source: "한국경제 2026.04.22" }
+    },
+    {
+      topic: "청년 자산 형성",
+      park: { line: "부산찬스 1억 매칭. 한국재정학회 검증 \"킬러 콘텐츠\". 추가 시민세금 0원.", source: "부산찬스 v16.1" },
+      jeon: { line: "청년 자산 형성 단독 공약 부재. \"일자리 구조 만들기\" 일반 입장.", source: "오마이뉴스 2026.04.22" }
+    },
+    {
+      topic: "민생·생활 정책",
+      park: { line: "다둥이찬스(셋째 500만)·부산 최고 시민(컬처패스)·통합돌봄·BLH 평생학습. 4년 시정 누적 실행.", source: "부산시 정책백서" },
+      jeon: { line: "취임 즉시 100일 비상조치 — 동백전 캐시백 한시 확대·취약계층 돌봄·공공일자리.", source: "KNN 2026.05.05" }
+    },
+    {
+      topic: "문화 정책",
+      park: { line: "오페라하우스 2027 개관(시민 공모 100%) + 청년 예술가 1,000명 + 퐁피두 미술관 분관 추진.", source: "부산시정 2026" },
+      jeon: { line: "퐁피두 미술관 분관 1,100억 재검토 + 오페라하우스 개관 3일 공연 105억 재검토.", source: "KNN 2026.05.05" }
+    },
+    {
+      topic: "10년 입법 실적",
+      park: { line: "부산시장 5년 시정. 가덕도 매립 32%·BuTX·복합소득 등 정책 산출물 다수.", source: "부산시 정책백서" },
+      jeon: { line: "10년 의원, 발의 242건 / 본회의 통과 11건 / 부산 직접 적용 1건 (소액사건심판법).", source: "의안정보시스템" }
+    },
+    {
+      topic: "부울경 행정통합",
+      park: { line: "부울경 800만 광역경제권 추진. 글로벌허브도시 특별법으로 제도 기반 마련.", source: "부산시정 비전 2026" },
+      jeon: { line: "부울경 통합 단독 공약 없음. \"수도권 일극체제 극복\" 정책 슬로건만 제시.", source: "오마이뉴스 2026.04.22" }
+    }
+  ];
+
+  // BIM의 renderCompareInsert를 wrap해서 최신 데이터로 교체
+  function patchCompareData() {
+    if (!window.BIM || typeof window.BIM.renderCompareInsert !== "function") return;
+    if (window.__v156_compare_patched) return;
+    window.__v156_compare_patched = true;
+
+    window.BIM.renderCompareInsert = function (topicHint) {
+      // topicHint와 가장 잘 맞는 항목 선택, 없으면 전체 표시
+      const hint = String(topicHint || "").toLowerCase();
+      let pairs = JEON_BUSAN_PLEDGES_2026;
+      if (hint) {
+        const matched = JEON_BUSAN_PLEDGES_2026.filter(p =>
+          p.topic.toLowerCase().includes(hint) ||
+          hint.includes(p.topic.toLowerCase().substring(0, 3))
+        );
+        if (matched.length > 0) pairs = matched.slice(0, 3);
+      }
+      return renderCompareCards(pairs);
+    };
+  }
+
+  function renderCompareCards(pairs) {
+    if (!pairs || pairs.length === 0) return "";
+    const note = `
+      <div style="margin: 14px 0 10px; padding: 10px 12px; background: #FFFCF5;
+                  border-left: 3px solid #B8860B; border-radius: 6px; font-size: 11.5px;
+                  color: #5B6B7A; line-height: 1.6;">
+        ⚖️ <b>박형준 vs 전재수 팩트 비교</b> — 공식 발언·법안 발의·언론 보도(2026.04~05) 기반.
+        <span style="color: #1F7A4D;">단정형 평가는 시민의 몫입니다.</span>
+      </div>
+    `;
+    const cards = pairs.map(pair => `
+      <div style="margin-bottom: 10px; border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden;">
+        <div style="background: #0A2540; color: #FFD166; padding: 8px 12px;
+                    font-size: 12px; font-weight: 800; letter-spacing: 0.15em;">
+          📌 ${escapeHtml(pair.topic)}
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <div style="padding: 12px 14px; background: #FFFCF5; border-right: 1px solid #E5E7EB;">
+            <div style="font-size: 10px; color: #B8860B; font-weight: 800; letter-spacing: 0.2em; margin-bottom: 5px;">
+              박형준
+            </div>
+            <div style="font-size: 12.5px; line-height: 1.6; color: #1F2933; margin-bottom: 6px;">
+              ${escapeHtml(pair.park.line)}
+            </div>
+            <div style="font-size: 10px; color: #5B6B7A; font-style: italic;">
+              ${escapeHtml(pair.park.source)}
+            </div>
+          </div>
+          <div style="padding: 12px 14px; background: #FAFAF7;">
+            <div style="font-size: 10px; color: #5B6B7A; font-weight: 800; letter-spacing: 0.2em; margin-bottom: 5px;">
+              전재수
+            </div>
+            <div style="font-size: 12.5px; line-height: 1.6; color: #1F2933; margin-bottom: 6px;">
+              ${escapeHtml(pair.jeon.line)}
+            </div>
+            <div style="font-size: 10px; color: #5B6B7A; font-style: italic;">
+              ${escapeHtml(pair.jeon.source)}
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join("");
+    return note + cards;
+  }
+
+  // openCompare도 새 데이터로 갱신
+  function patchOpenCompare() {
+    if (!window.V15 || typeof window.V15.openCompare !== "function") return;
+    if (window.__v156_open_compare_patched) return;
+    window.__v156_open_compare_patched = true;
+
+    window.V15.openCompare = function () {
+      let m = document.getElementById("v15-compare-modal");
+      if (!m) {
+        m = document.createElement("div");
+        m.id = "v15-compare-modal";
+        m.className = "v15-modal-overlay";
+        m.innerHTML = `<div class="v15-modal-card" onclick="event.stopPropagation()" style="max-width:560px; max-height:85vh; overflow-y:auto;">
+          <div class="v15-modal-title">⚖️ 팩트 비교 — 박형준 vs 전재수</div>
+          <p class="v15-modal-sub">공식 발언 · 법안 발의 · 언론 보도(2026.04~05) 기반 검증. 단정형 평가는 시민의 몫입니다.</p>
+          <div id="v15-compare-host"></div>
+          <div class="v15-modal-footer">
+            <button class="v15-modal-close" onclick="document.getElementById('v15-compare-modal').classList.remove('show')">닫기</button>
+          </div>
+        </div>`;
+        m.addEventListener("click", () => m.classList.remove("show"));
+        document.body.appendChild(m);
+      }
+      const host = m.querySelector("#v15-compare-host");
+      // 7개 비교 모두 표시
+      host.innerHTML = renderCompareCards(JEON_BUSAN_PLEDGES_2026);
+      m.classList.add("show");
+    };
+  }
+
+  // ============================================================
   // ★ 자신감 톤 강제 (약한 표현 → 강한 표현)
   // ============================================================
   function strengthenTone(html) {
@@ -26515,16 +26922,1794 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
     patchSystemPrompt();         // ★ AI 호출용 자신감 톤 주입
     patchSanitize();             // ★★★ v15.5: sanitizeAiAvoidance 통조림 추가 무력화
     startChatObserver();         // ★★★ v15.5: 채팅 출력 안전망
+
+    // ★★★ v15.6: 5가지 정정 모듈
+    fixCitizenPolicyName();      // (1) "부산 특별시민" → "부산 최고 시민"
+    fixQuickAskButton();         // (2) "💬 클릭해서 질문 시작" 버튼 클릭 핸들러
+    fixHaeundaeTimelapse();      // (3) 해운대 타임랩스 광안리 → 해운대 정정
+    fixDailyCardClose();         // (4) 오늘의 공약 카드 닫힘 버튼 추가
+    patchCompareData();          // (5a) 팩트비교 데이터 v15.6으로 교체
+    patchOpenCompare();          // (5b) openCompare 모달 v15.6 데이터로 갱신
+
     // Hook은 페이지 안정화 후 표시 (시민이 화면을 잠시 본 뒤)
     setTimeout(() => { try { maybeShowHook(); } catch (e) {} }, 1200);
-    console.log("[v15.5] 5종 강화 + 박형준 진취 페르소나 + AI 출력 안전망 · " +
-      "Fun" + (isFunOn() ? "(ON)" : "(OFF)"));
+    // 페이지 일부가 늦게 로드되는 케이스 대비: 지연 정정 1회
+    setTimeout(() => {
+      try { fixCitizenPolicyName(); fixQuickAskButton(); } catch (e) {}
+    }, 2000);
+    console.log("[v15.6] 5종 정정 적용 · 부산최고시민·질문버튼·해운대·닫힘버튼·팩트비교 · " +
+      "5종 강화 (Impact+Fun+자신감+BAE+통조림박멸) · Fun" + (isFunOn() ? "(ON)" : "(OFF)"));
   }
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
   } else {
     boot();
+  }
+})();
+
+</script>
+
+<!-- v15.7 구별 공약 지도 모듈 -->
+<script id="v15-busan-district-map">
+/* ================================================================
+ * 부산 AI v15.7 — 구별 공약 카드 + 인터랙티브 부산 지도
+ * 첨부 PDF 100% 반영:
+ *   - 부산시당 8대 공약 (모든 구 공통 적용)
+ *   - 16개 당협별 공약 (구별 고유 공약)
+ *   - 분구별 세부 공약 (중영도/서동/부산진갑·을 등)
+ *   - 후보 정보 placeholder (캠프 추후 입력)
+ *
+ * 진입: 메인화면 진입 그리드에 "🗺️ 구별 공약 카드" 추가
+ * 클릭 → 부산 지도 모달 → 구·군 클릭 → 시당+당협 공약 + 후보 리스트
+ * ================================================================ */
+(function () {
+  "use strict";
+
+  // ============================================================
+  // 1. 부산시당 8대 공약 (시당공약.pdf 기반 — 모든 구 공통)
+  // ============================================================
+  const SIDANG_PLEDGES = [
+    {
+      no: 1,
+      title: "가덕신공항 건설 및 공항복합도시 개발",
+      keyPoints: [
+        "26년 상반기 부지조성공사 기본설계, 하반기 우선시공분 착공",
+        "신공항 배후지원·신산업·관광 3구역 공항복합도시 개발",
+        "Tri-port 복합물류산업지구 → 동북아 물류 허브",
+        "북극항로 시대 글로벌 물류 거점"
+      ],
+      effect: "남부권 글로벌 관문공항 + 동북아 물류 중심"
+    },
+    {
+      no: 2,
+      title: "공공기관 2차 지방이전 추진",
+      keyPoints: [
+        "산업은행·기업은행·수출입은행 등 금융 중점 이전",
+        "한국산업기술진흥원·한국환경산업기술원 등 국책연구기관",
+        "앵커기관+소규모 합쳐 33개 기관, 해양 7개 기관 별도",
+        "혁신지구 추가 확대 지정 추진"
+      ],
+      effect: "新 성장동력 확보 + 지역 혁신 균형발전 거점"
+    },
+    {
+      no: 3,
+      title: "부산 글로벌허브도시 조성 특별법 제정",
+      keyPoints: [
+        "3대 전략(비즈니스·자본·사람) + 2대 인프라(생활·제도)",
+        "무세금·무규제·무비자·무언어장벽",
+        "24년 부산 여야 국회의원 전원 공동발의",
+        "행안위 상정·법안심사 조속 추진"
+      ],
+      effect: "수도권 일극체제 극복 + 국가균형발전 견인"
+    },
+    {
+      no: 4,
+      title: "부산-경남 행정통합 추진",
+      keyPoints: [
+        "여론조사 찬성 부산 55.6% / 경남 51.7%",
+        "26년 1월 부산경남 시도지사 공동입장 발표",
+        "자치입법권·재정권·인사조직 자율운영권 보장",
+        "전국 적용 '행정통합 기본법' 제정"
+      ],
+      effect: "수도권과 함께하는 남부권 새 발전축"
+    },
+    {
+      no: 5,
+      title: "부산항 북항 항만재개발사업 신속 추진",
+      keyPoints: [
+        "1단계: 27년까지 전체 사업 준공 (오페라하우스·친수공원·마리나)",
+        "2단계: MICE·숙박시설 + 지하차도·보행교 (영도조선소 일대)",
+        "3단계: 55보급창·미군부두 → 레저문화시설·시민공원",
+        "외국 자본 19조원 이상 유치"
+      ],
+      effect: "친환경 워터프론트 + 아시아 최고 업무중심지구"
+    },
+    {
+      no: 6,
+      title: "초광역 교통혁명 — 동남권 1시간 생활권",
+      keyPoints: [
+        "차세대 부산형 급행철도(BuTX) 54km 수소열차",
+        "광역연계 A·B·C노선 (가덕~울산·창원·태화강)",
+        "부전역 복합환승센터 건립",
+        "정관선 조기 착공 + 경부선 지하화"
+      ],
+      effect: "가덕신공항 접근성 + 광역경제권 통합 + 글로벌허브 기반"
+    },
+    {
+      no: 7,
+      title: "환경재난 대응 안전 도시 구축",
+      keyPoints: [
+        "안전한 먹는 물 — 취수원 다변화",
+        "(구)침례병원 공공병원화",
+        "낙동강 하구 국가도시공원 지정",
+        "온천천 대심도 빗물터널 + 수영공공하수처리시설 현대화"
+      ],
+      effect: "침수·환경재난 대응 + 공공의료 + 생활 인프라"
+    },
+    {
+      no: 8,
+      title: "해양·첨단기술 미래성장 거점 산업 육성",
+      keyPoints: [
+        "동남권 방사선 의과학 산업단지 — 중입자 가속기 치료센터",
+        "해운대 53사단 이전 → 첨단사이언스파크",
+        "차세대 해양반도체 산업 육성",
+        "국립치의학연구원 + 해운거래소 + K-블루푸드 수출입 허브"
+      ],
+      effect: "해양·첨단기술 기반 미래성장 거점 도약"
+    }
+  ];
+
+  // ============================================================
+  // 2. 16개 당협별 공약 + 분구별 세부 공약 (당협별 공약카드.pdf 기반)
+  //    좌표는 부산 지도 SVG 안의 각 구 중심 위치 (viewBox 0 0 600 500)
+  // ============================================================
+  const DISTRICT_DATA = {
+    junggu: {
+      name: "중구",
+      label: "중구",
+      cx: 295, cy: 280,
+      pledges: [
+        "글로벌 창업허브 부산 조성",
+        "중구·영도구 트램 신설",
+        "용두산 공원 일원 관광 특화사업 추진"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    junggu_yeongdo: {
+      name: "중구·영도구 (분구)",
+      label: "중영도",
+      isDivision: true,
+      cx: 295, cy: 305,
+      pledges: [
+        "해양수산부 및 산하기관·기업 적극 유치",
+        "남항재개발을 통한 원도심 활성화",
+        "영도구를 북극항로 핵심 지역으로 육성 (조선·항만·북극해 개발 중심)",
+        "해양치유센터·태종대 기반 체류형 관광단지",
+        "중구·영도구 트램 신설",
+        "봉래산 터널 조기 완공",
+        "영도교통환승센터 신설"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    seogu: {
+      name: "서구",
+      label: "서구",
+      cx: 270, cy: 295,
+      pledges: [
+        "송도선 조기착공",
+        "서구 웰니스 의료관광 활성화",
+        "서구 해양수산관광벨트 조성"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    seogu_donggu: {
+      name: "서구·동구 (분구)",
+      label: "서동",
+      isDivision: true,
+      cx: 285, cy: 270,
+      pledges: [
+        "도시철도 송도선(노면전차) 조기착공 — 자갈치~공동어시장~송도~다대선 연결",
+        "서구 해양수산관광벨트 — 공동어시장 현대화 + 국제 명품수산타운",
+        "해양수산부 신청사 유치 + 해사법원 설치",
+        "55보급창 이전 개발",
+        "산복도로 르네상스(시즌2) 주민 주도 원도심 재생"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    donggu: {
+      name: "동구",
+      label: "동구",
+      cx: 305, cy: 255,
+      pledges: [
+        "부산 디자인 수도 연계 원도심 디자인 재생",
+        "문화복합스포츠시설 건립",
+        "노후주거지 정비 및 도시재생사업 조속 추진 (좌천2지구 등)"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    yeongdo: {
+      name: "영도구",
+      label: "영도구",
+      cx: 320, cy: 340,
+      pledges: [
+        "남항재개발을 통한 원도심 활성화",
+        "해양치유센터와 태종대를 기반으로 체류형 관광단지 조성",
+        "봉래산 터널 조기 완공"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    busanjin: {
+      name: "부산진구",
+      label: "부산진구",
+      cx: 320, cy: 235,
+      pledges: [
+        "어린이대공원 동물원 조속 재개장",
+        "부전역 광역복합환승센터 건립",
+        "범천철도차량기지 복합미래혁신지구 개발",
+        "개금레일스포츠파크 적기 조성"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    busanjin_gap: {
+      name: "부산진구 갑 (분구)",
+      label: "부산진갑",
+      isDivision: true,
+      cx: 305, cy: 230,
+      pledges: [
+        "어린이대공원 동물원 조속 재개장",
+        "부전역 KTX 정차 + 복합환승센터 건립",
+        "도시철도 초읍선 신설",
+        "동서·부암고가도로 철거",
+        "'부전-마산역' 당감역 신설",
+        "경부선 철도 지하화 및 상부 개발"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    busanjin_eul: {
+      name: "부산진구 을 (분구)",
+      label: "부산진을",
+      isDivision: true,
+      cx: 335, cy: 240,
+      pledges: [
+        "범천철도차량기지 이전 → 복합미래혁신지구",
+        "지하 종합환승시설 + 주거·상업·교육·여가 복합개발",
+        "개금레일스포츠파크 적기 조성 (복합 체육센터 + 야외 체육시설)"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    dongnae: {
+      name: "동래구",
+      label: "동래구",
+      cx: 350, cy: 200,
+      pledges: [
+        "사직종합운동장 일대 시민 친화 스포츠랜드마크 (사직야구장 재건축)",
+        "명장정수장·동래통합사업소 부지 재개발 (공원화)",
+        "금정산 국립공원 내 생태체험시설 + 금강공원 재개발"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    namgu: {
+      name: "남구",
+      label: "남구",
+      cx: 360, cy: 290,
+      pledges: [
+        "「부산항선 트램」 신속 착공 (태종대~북항~문현~우암감만~용호~경성대)",
+        "「금융자율형사립고등학교」 조속 설립",
+        "오륙도선 조속 추진 (부산항선 트램 연계)"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    bukgu: {
+      name: "북구",
+      label: "북구",
+      cx: 270, cy: 175,
+      pledges: [
+        "만덕대로 상부 공원화 사업",
+        "교통편익 증진 명품관광·주거단지 조성",
+        "교육 국제화 특구 지정 추진"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    bukgu_gap: {
+      name: "북구 갑 (분구)",
+      label: "북구갑",
+      isDivision: true,
+      cx: 260, cy: 180,
+      pledges: [
+        "만덕대로 상부 공원화 — 만덕~센텀시티 대심도 터널 개통 후 상부 복개·테마공원"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    bukgu_eul: {
+      name: "북구 을 (분구)",
+      label: "북구을",
+      isDivision: true,
+      cx: 280, cy: 165,
+      pledges: [
+        "북구 만성 교통 혼잡 해소 — 철도 환승체계 + 도시철도 역사 신설",
+        "낙동선셋 화명에코파크 + 화명마리나 + 생태공원",
+        "화명·금곡·만덕1동 노후 아파트 재개발 신속 추진",
+        "교육 국제화 특구 + 명문 자립형 공립고",
+        "65세 이상 어르신 돌봄 서비스 확대"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    haeundae: {
+      name: "해운대구",
+      label: "해운대구",
+      cx: 425, cy: 245,
+      pledges: [
+        "달맞이 명품 공원 조성",
+        "도시철도 2호선 오시리아 연장 추진",
+        "재송·반여-수영강 이음다리 건설",
+        "쉼과 문화가 있는 친수·녹지 공간 조성"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    haeundae_gap: {
+      name: "해운대구 갑 (분구)",
+      label: "해운대갑",
+      isDivision: true,
+      cx: 410, cy: 240,
+      pledges: [
+        "신해운대역 53사단 일대 첨단산업단지 조성",
+        "부산형 급행철도(BuTX) 센텀시티역 조속 건설",
+        "도시철도 2호선 오시리아 연장 (장산역~송정삼거리역(신설)~오시리아관광단지역)"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    haeundae_eul: {
+      name: "해운대구 을 (분구)",
+      label: "해운대을",
+      isDivision: true,
+      cx: 440, cy: 250,
+      pledges: [
+        "재반·온천천 이음다리 건설",
+        "센텀2지구 도심융합특구 차질 없는 조성 — 공공기관 이전·앵커기업 유치",
+        "사통발달 해운대 — KTX-이음 정차 확대 + 제2센텀선 + 반여우회도로",
+        "쉼과 문화 — 석대천·수영강 친수공간 + 해운대수목원",
+        "국민안전체험관 조속 추진"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    geumjeong: {
+      name: "금정구",
+      label: "금정구",
+      cx: 360, cy: 145,
+      pledges: [
+        "보험자병원 설립 — (구)침례병원 국민건강보험공단 직영 '제2 보험자병원'",
+        "금정산 국립공원 관리사무소 금정구 유치 (범어사 인근)",
+        "부울경 1시간 생활권 — KTX울산~양산 웅상~부산 노포 광역철도 조기 착공"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    gangseo: {
+      name: "강서구",
+      label: "강서구",
+      cx: 130, cy: 320,
+      pledges: [
+        "도시철도 하단~녹산선 + 강서선 + 에코IC + 가락대로 연결도로",
+        "부전~마산 복선전철 연내 개통 추진",
+        "대저연구개발특구·대저공공주택지구 조속 추진",
+        "서부산권 복합산업단지·트라이포트·제2에코델타시티",
+        "강서 어린이영어도서관 건립",
+        "녹산공공하수처리장 고도화 + 체육공원 조성"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    yeonje: {
+      name: "연제구",
+      label: "연제구",
+      cx: 360, cy: 220,
+      pledges: [
+        "NEW 대학로 — 부산대·부산교대 통합(27년 예정) 기반 교육·문화 허브",
+        "시청역 체육문화복합센터 건립",
+        "배산 자연중심 문화콘텐츠 복합타운 (연산 8·9동)"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    suyeong: {
+      name: "수영구",
+      label: "수영구",
+      cx: 405, cy: 285,
+      pledges: [
+        "금련산 방공터널 '미디어아트 관광터널 명소화' 사업",
+        "수영강 휴먼브리지 주변 디자인 공원 조성 (화장실 등 주민편의시설)",
+        "전통시장 푸드코트 + 시장상인 교육관 건립"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    sasang: {
+      name: "사상구",
+      label: "사상구",
+      cx: 195, cy: 240,
+      pledges: [
+        "자율형 공립고·기숙형 중학교 설립",
+        "서부산 행정청사 조속 건립",
+        "삼락생태공원 국가정원 지정"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    saha: {
+      name: "사하구",
+      label: "사하구",
+      cx: 215, cy: 320,
+      pledges: [
+        "빈집 주거 정비를 통한 공원 등 시민 여가생활 환경 구축",
+        "신평역 철도기지창 이전을 통한 도시공간 재편",
+        "생태도시 사하 조성",
+        "장림 하수종말처리장 현대화사업"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    saha_gap: {
+      name: "사하구 갑 (분구)",
+      label: "사하갑",
+      isDivision: true,
+      cx: 210, cy: 305,
+      pledges: [
+        "빈집 주거 정비 — 빈집 매입·정비·활용 사업",
+        "신평역 철도기지창 이전 — 노포역 이전 통한 도시 공간 재구조화",
+        "을숙도 제1호 국가도시공원 조성",
+        "서부산 광역복합환승센터 — 도시철도 1호선·사상하단·하단녹산·BuTX·시내광역버스 통합"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    saha_eul: {
+      name: "사하구 을 (분구)",
+      label: "사하을",
+      isDivision: true,
+      cx: 220, cy: 335,
+      pledges: [
+        "맑은 공기 청정 구역 — 오염배출허용기준 강화 + 악취·미세먼지 자동시스템",
+        "생태도시 사하 — 을숙도·몰운대 국가생태공원",
+        "투명행정 — 예산·계약·심의위원·회의록·구청장 행정사무 완전공개"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    },
+    gijang: {
+      name: "기장군",
+      label: "기장군",
+      cx: 470, cy: 165,
+      pledges: [
+        "정관선 조기 착공 — 패스트트랙 방식 설계·행정절차 병행",
+        "동부산 관광벨트 완성 — 기장 오션 블루레일 + K-컬쳐타운 + 지역 상권 연계",
+        "동남권 방사선 의과학 산업단지 — 중입자 가속기 치료센터 + 원자력의학원 + 오시리아 웰니스 의료관광"
+      ],
+      candidates: { gucheong: "—", siUiwon: "—", guUiwon: "—" }
+    }
+  };
+
+  // ============================================================
+  // 3. 부산 지도 SVG (간이 정사각형 기반 — 16개 구·군 영역)
+  //    실제 부산 형태를 단순화한 클릭 가능 영역
+  // ============================================================
+  function buildBusanMapSVG() {
+    // 각 구·군 영역의 SVG path (단순화 — 클릭 가능 영역만)
+    const regions = [
+      // 강서구 - 서남부
+      { id: "gangseo", path: "M 50,260 L 180,260 L 180,400 L 50,400 Z" },
+      // 사상구 - 중서부
+      { id: "sasang", path: "M 180,200 L 230,200 L 230,290 L 180,290 Z" },
+      // 사하구 - 남서부 해안
+      { id: "saha", path: "M 180,290 L 250,290 L 250,380 L 180,380 Z" },
+      // 북구 - 북서부
+      { id: "bukgu", path: "M 230,130 L 305,130 L 305,200 L 230,200 Z" },
+      // 금정구 - 북동부
+      { id: "geumjeong", path: "M 305,100 L 400,100 L 400,180 L 305,180 Z" },
+      // 동래구 - 중부
+      { id: "dongnae", path: "M 305,180 L 390,180 L 390,225 L 305,225 Z" },
+      // 부산진구 - 중부
+      { id: "busanjin", path: "M 290,225 L 360,225 L 360,265 L 290,265 Z" },
+      // 연제구 - 중동부
+      { id: "yeonje", path: "M 340,200 L 390,200 L 390,240 L 340,240 Z" },
+      // 중구 - 도심
+      { id: "junggu", path: "M 280,265 L 320,265 L 320,300 L 280,300 Z" },
+      // 동구 - 도심 북부
+      { id: "donggu", path: "M 290,240 L 330,240 L 330,275 L 290,275 Z" },
+      // 서구 - 도심 서부
+      { id: "seogu", path: "M 250,270 L 290,270 L 290,310 L 250,310 Z" },
+      // 영도구 - 섬
+      { id: "yeongdo", path: "M 295,310 L 350,310 L 350,365 L 295,365 Z" },
+      // 남구 - 동부 해안
+      { id: "namgu", path: "M 330,275 L 395,275 L 395,330 L 330,330 Z" },
+      // 수영구 - 동부
+      { id: "suyeong", path: "M 380,265 L 430,265 L 430,310 L 380,310 Z" },
+      // 해운대구 - 동부 해변
+      { id: "haeundae", path: "M 395,225 L 470,225 L 470,275 L 395,275 Z" },
+      // 기장군 - 북동부 끝
+      { id: "gijang", path: "M 430,130 L 540,130 L 540,200 L 430,200 Z" }
+    ];
+
+    const labels = regions.map(r => {
+      const d = DISTRICT_DATA[r.id];
+      if (!d) return "";
+      return `<text x="${d.cx}" y="${d.cy}" class="bd-region-label" data-id="${r.id}">${d.label}</text>`;
+    }).join("");
+
+    const paths = regions.map(r => {
+      return `<path d="${r.path}" class="bd-region" data-id="${r.id}" />`;
+    }).join("");
+
+    return `<svg viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg" class="bd-map">
+      <!-- 부산 외곽 -->
+      <rect x="40" y="90" width="510" height="320" fill="#EAF1F8" stroke="#1E5BB5" stroke-width="2" rx="8"/>
+      <!-- 바다 영역 (남부) -->
+      <rect x="40" y="370" width="510" height="40" fill="#B8D4ED" opacity="0.35"/>
+      <!-- 라벨 -->
+      <text x="50" y="115" font-size="11" fill="#5B6B7A" font-weight="600">부산광역시</text>
+      <text x="500" y="395" font-size="10" fill="#1E5BB5" font-style="italic">남해</text>
+      <!-- 16개 구·군 영역 -->
+      ${paths}
+      ${labels}
+      <!-- 안내 -->
+      <text x="300" y="445" text-anchor="middle" font-size="11" fill="#5B6B7A">
+        구·군을 클릭하시면 시당+당협 공약과 후보 리스트가 나옵니다
+      </text>
+    </svg>`;
+  }
+
+  // ============================================================
+  // 4. 스타일 주입
+  // ============================================================
+  function injectMapStyles() {
+    if (document.getElementById("v15-busan-district-style")) return;
+    const css = `
+      .bd-map { width: 100%; height: auto; max-width: 600px; display: block; margin: 0 auto; }
+      .bd-region {
+        fill: #FFFCF5; stroke: #B8860B; stroke-width: 1.5;
+        cursor: pointer; transition: fill 0.15s, stroke-width 0.15s;
+      }
+      .bd-region:hover { fill: #FFE7A8; stroke-width: 2.5; }
+      .bd-region.active { fill: #FFD166; stroke: #0A2540; stroke-width: 3; }
+      .bd-region-label {
+        font-size: 11px; font-weight: 700; fill: #0A2540;
+        text-anchor: middle; pointer-events: none;
+        font-family: "Pretendard", sans-serif;
+      }
+
+      .bd-detail-card {
+        max-width: 480px; margin: 16px auto 0; padding: 18px 20px;
+        background: #fff; border: 1px solid #E5E7EB; border-radius: 14px;
+        box-shadow: 0 4px 14px rgba(10,37,64,0.08);
+      }
+      .bd-detail-name {
+        font-size: 22px; font-weight: 800; color: #0A2540;
+        font-family: "Gowun Batang", serif; margin-bottom: 4px;
+      }
+      .bd-detail-sub {
+        font-size: 12px; color: #5B6B7A; margin-bottom: 16px;
+      }
+      .bd-section-title {
+        font-size: 12px; font-weight: 800; letter-spacing: 0.18em;
+        color: #B8860B; margin: 16px 0 8px; padding-bottom: 4px;
+        border-bottom: 2px solid #B8860B;
+      }
+      .bd-section-title.sidang { color: #1E5BB5; border-color: #1E5BB5; }
+      .bd-section-title.dangheop { color: #B8860B; border-color: #B8860B; }
+      .bd-section-title.candidates { color: #C8332A; border-color: #C8332A; }
+
+      .bd-pledge-list { list-style: none; padding: 0; margin: 0; }
+      .bd-pledge-item {
+        padding: 8px 12px; margin-bottom: 6px;
+        background: #FAFAF7; border-left: 3px solid #B8860B;
+        border-radius: 4px; font-size: 13px; line-height: 1.6;
+        color: #1F2933;
+      }
+      .bd-pledge-item.sidang { border-left-color: #1E5BB5; background: #F0F6FC; }
+      .bd-pledge-item.division {
+        background: #FFF7E0; border-left-color: #D4A53A;
+      }
+      .bd-sidang-summary {
+        font-size: 11.5px; color: #5B6B7A; line-height: 1.55;
+        margin-bottom: 8px; padding: 8px 10px; background: #F8FAFC;
+        border-radius: 6px;
+      }
+      .bd-sidang-toggle {
+        background: none; border: 1px dashed #1E5BB5; color: #1E5BB5;
+        padding: 6px 12px; border-radius: 18px; cursor: pointer;
+        font-size: 11.5px; font-weight: 700; margin-bottom: 8px;
+        font-family: inherit;
+      }
+      .bd-sidang-toggle:hover { background: #F0F6FC; }
+      .bd-sidang-list { display: none; }
+      .bd-sidang-list.show { display: block; }
+
+      .bd-candidate-grid {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+        margin-top: 6px;
+      }
+      .bd-candidate-cell {
+        padding: 10px 8px; background: #FFF; border: 1px solid #E5E7EB;
+        border-radius: 8px; text-align: center;
+      }
+      .bd-candidate-role {
+        font-size: 10px; color: #C8332A; font-weight: 800;
+        letter-spacing: 0.2em; margin-bottom: 4px;
+      }
+      .bd-candidate-name {
+        font-size: 13px; font-weight: 700; color: #0A2540;
+        font-family: "Gowun Batang", serif;
+      }
+      .bd-candidate-name.empty {
+        color: #9AA5B1; font-style: italic; font-weight: 500;
+      }
+      .bd-edit-note {
+        margin-top: 10px; padding: 8px 10px; background: #FFFCF5;
+        border-left: 3px solid #B8860B; border-radius: 4px;
+        font-size: 11px; color: #5B6B7A; line-height: 1.55;
+      }
+
+      .bd-back-btn {
+        display: inline-block; margin-bottom: 10px; padding: 7px 14px;
+        background: #fff; color: #0A2540; border: 1px solid #0A2540;
+        border-radius: 18px; font-size: 12px; font-weight: 700;
+        cursor: pointer; font-family: inherit;
+      }
+      .bd-back-btn:hover { background: #0A2540; color: #fff; }
+
+      [data-theme="dark"] .bd-region { fill: #1F2635; stroke: #D4A53A; }
+      [data-theme="dark"] .bd-region:hover { fill: #2A3344; }
+      [data-theme="dark"] .bd-region.active { fill: #D4A53A; stroke: #FFFCF5; }
+      [data-theme="dark"] .bd-region-label { fill: #F0F2F7; }
+      [data-theme="dark"] .bd-detail-card { background: #1F2635; border-color: #2A3344; }
+      [data-theme="dark"] .bd-detail-name { color: #F0F2F7; }
+      [data-theme="dark"] .bd-pledge-item { background: #2A3344; color: #F0F2F7; }
+    `;
+    const style = document.createElement("style");
+    style.id = "v15-busan-district-style";
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+
+  // ============================================================
+  // 5. 모달 본체 + 이벤트 와이어링
+  // ============================================================
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, c =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+    );
+  }
+
+  function openDistrictMap() {
+    injectMapStyles();
+    let m = document.getElementById("bd-modal");
+    if (!m) {
+      m = document.createElement("div");
+      m.id = "bd-modal";
+      m.className = "v15-modal-overlay";
+      m.style.zIndex = "10050";
+      m.innerHTML = `
+        <div class="v15-modal-card" onclick="event.stopPropagation()" style="max-width: 640px; max-height: 90vh; overflow-y: auto;">
+          <div class="v15-modal-title">🗺️ 부산 16개 구·군 공약 지도</div>
+          <p class="v15-modal-sub">
+            <b>구·군을 클릭하시면</b> 시당 8대 공약 + 당협별 고유 공약 + 후보 리스트가 한 화면에 나옵니다.
+            <span style="color:#B8860B; font-weight:700;">2026.05 기준</span>
+          </p>
+          <div id="bd-map-host"></div>
+          <div id="bd-detail-host"></div>
+          <div class="v15-modal-footer">
+            <button class="v15-modal-help" onclick="window.V15.openCompare && window.V15.openCompare()">⚖️ 박형준 vs 전재수</button>
+            <button class="v15-modal-close" onclick="document.getElementById('bd-modal').classList.remove('show')">닫기</button>
+          </div>
+        </div>
+      `;
+      m.addEventListener("click", () => m.classList.remove("show"));
+      document.body.appendChild(m);
+    }
+
+    // 지도 렌더링
+    const host = m.querySelector("#bd-map-host");
+    host.innerHTML = buildBusanMapSVG();
+
+    // 이벤트: 구·군 클릭
+    host.querySelectorAll(".bd-region").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = el.getAttribute("data-id");
+        showDistrictDetail(id);
+        // 활성 표시
+        host.querySelectorAll(".bd-region").forEach(r => r.classList.remove("active"));
+        el.classList.add("active");
+      });
+    });
+
+    m.classList.add("show");
+  }
+
+  function showDistrictDetail(districtId) {
+    const d = DISTRICT_DATA[districtId];
+    if (!d) return;
+    const host = document.querySelector("#bd-detail-host");
+    if (!host) return;
+
+    // 분구가 있는 구는 분구 카드도 함께 노출 가능하도록 ID 연계
+    const subDivisions = Object.entries(DISTRICT_DATA)
+      .filter(([k, v]) => k !== districtId && v.isDivision &&
+        (k.startsWith(districtId + "_") || (districtId === "yeongdo" && k === "junggu_yeongdo")))
+      .map(([k, v]) => v);
+
+    const sidangSummary = SIDANG_PLEDGES.map((p, i) =>
+      `<li class="bd-pledge-item sidang">
+        <strong style="color:#1E5BB5;">${p.no}.</strong> ${escapeHtml(p.title)}
+        <div style="font-size:11.5px; color:#5B6B7A; margin-top:3px; line-height:1.5;">${escapeHtml(p.effect)}</div>
+      </li>`
+    ).join("");
+
+    const dangPledges = (d.pledges || []).map(p =>
+      `<li class="bd-pledge-item">${escapeHtml(p)}</li>`
+    ).join("");
+
+    const subDivHtml = subDivisions.length > 0 ? `
+      <div class="bd-section-title dangheop" style="margin-top: 18px;">
+        ▸ 분구별 세부 공약 (${subDivisions.length}개)
+      </div>
+      ${subDivisions.map(sd => `
+        <div style="margin-bottom: 12px;">
+          <div style="font-weight:700; color:#0A2540; font-size:13px; margin-bottom:6px;">
+            📍 ${escapeHtml(sd.name)}
+          </div>
+          <ul class="bd-pledge-list">
+            ${(sd.pledges || []).map(p => `<li class="bd-pledge-item division">${escapeHtml(p)}</li>`).join("")}
+          </ul>
+        </div>
+      `).join("")}
+    ` : "";
+
+    const cands = d.candidates || {};
+
+    // ★ v15.10 fix: 후보 데이터가 객체 배열 형태(v15.8 입력)이면 v15.8 renderer를 사용.
+    // 폴백으로 안전하게 단일 문자열도 처리.
+    let candidateSectionHtml;
+    if (typeof window !== "undefined" && window.V15 &&
+        typeof window.V15.renderCandidateSection === "function" &&
+        cands.gucheong) {
+      // v15.8 후보 데이터가 주입돼 있고 renderer 가용 → 그것 사용
+      candidateSectionHtml = window.V15.renderCandidateSection(districtId);
+    } else {
+      // 폴백: 단일 문자열 또는 미등록 케이스
+      const safeStr = (v) => {
+        if (v == null || v === "") return "—";
+        if (typeof v === "string") return v;
+        // 객체 배열인 경우 임시로 이름만 추출
+        if (Array.isArray(v)) {
+          return v.map(item => {
+            if (typeof item === "string") return item;
+            if (item && typeof item === "object") {
+              if (item.name) return item.district ? `${item.district} ${item.name}` : item.name;
+              if (item.names) return `${item.district || ""} ${item.names.join(", ")}`.trim();
+            }
+            return String(item);
+          }).join(" / ");
+        }
+        return String(v);
+      };
+      const candCell = (role, name) => `
+        <div class="bd-candidate-cell">
+          <div class="bd-candidate-role">${escapeHtml(role)}</div>
+          <div class="bd-candidate-name ${name === "—" ? "empty" : ""}">${escapeHtml(name === "—" ? "추후 등록" : name)}</div>
+        </div>
+      `;
+      const headerLabel = (cands.gucheong || cands.siUiwon || cands.guUiwon)
+        ? "(2026.05.10 시당 의결 기준)"
+        : "(추후 등록)";
+      candidateSectionHtml = `
+        <div class="bd-section-title candidates">▸ 국민의힘 ${escapeHtml(d.name)} 후보 ${headerLabel}</div>
+        <div class="bd-candidate-grid">
+          ${candCell("구청장", safeStr(cands.gucheong))}
+          ${candCell("시의원", safeStr(cands.siUiwon))}
+          ${candCell("구의원", safeStr(cands.guUiwon))}
+        </div>
+        <div class="bd-edit-note">
+          ℹ️ 후보 정보는 캠프 운영자가 직접 등록합니다.
+          공천 확정 후 <code style="background:#fff; padding:1px 4px; border-radius:3px; color:#B8860B;">DISTRICT_DATA["${districtId}"].candidates</code>를 갱신하시면 즉시 노출됩니다.
+        </div>
+      `;
+    }
+
+    host.innerHTML = `
+      <div class="bd-detail-card">
+        <button class="bd-back-btn" onclick="document.querySelector('#bd-detail-host').innerHTML='';
+          document.querySelectorAll('#bd-modal .bd-region').forEach(r => r.classList.remove('active'));">
+          ← 지도로 돌아가기
+        </button>
+        <div class="bd-detail-name">${escapeHtml(d.name)}</div>
+        <div class="bd-detail-sub">시당 8대 공약(공통) + 당협별 고유 공약 + 후보 정보</div>
+
+        <!-- 시당 8대 공약 (요약 + 펼치기) -->
+        <div class="bd-section-title sidang">▸ 부산시당 8대 공약 (모든 구 공통)</div>
+        <button class="bd-sidang-toggle" onclick="
+          const list = this.parentElement.querySelector('.bd-sidang-list');
+          const isShow = list.classList.contains('show');
+          list.classList.toggle('show');
+          this.textContent = isShow ? '▼ 8대 공약 펼치기' : '▲ 접기';
+        ">▼ 8대 공약 펼치기</button>
+        <ul class="bd-pledge-list bd-sidang-list">
+          ${sidangSummary}
+        </ul>
+
+        <!-- 당협별 고유 공약 -->
+        <div class="bd-section-title dangheop">▸ ${escapeHtml(d.name)} 당협 고유 공약 (${(d.pledges || []).length}건)</div>
+        <ul class="bd-pledge-list">
+          ${dangPledges || '<li class="bd-pledge-item" style="color:#9AA5B1; font-style:italic;">당협별 고유 공약 미등록 (시당 8대 공약 적용)</li>'}
+        </ul>
+
+        ${subDivHtml}
+
+        <!-- 후보 정보 (v15.10: v15.8 renderer 직접 호출 → [object Object] 박멸) -->
+        ${candidateSectionHtml}
+      </div>
+    `;
+
+    host.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // ============================================================
+  // 6. 메인화면 진입 그리드에 카드 추가
+  // ============================================================
+  function injectMapEntryCard() {
+    // V15 진입 그리드를 찾아서 카드 추가
+    const grid = document.querySelector(".v15-entry-grid");
+    if (!grid) {
+      // 5초 후 재시도 (그리드가 늦게 만들어지는 경우)
+      setTimeout(injectMapEntryCard, 1000);
+      return;
+    }
+    if (grid.querySelector(".bd-entry-card")) return;
+
+    const card = document.createElement("button");
+    card.className = "v15-entry-card bd-entry-card";
+    card.innerHTML = `
+      <span class="icon">🗺️</span>
+      <div class="label">구별 공약 카드</div>
+      <div class="desc">부산 지도에서 우리 동네를 누르면 시당+당협 공약과 후보가 한눈에.</div>
+    `;
+    card.addEventListener("click", openDistrictMap);
+    grid.appendChild(card);
+  }
+
+  // ============================================================
+  // 7. 전역 노출 + 부트
+  // ============================================================
+  if (!window.V15) window.V15 = {};
+  window.V15.openDistrictMap = openDistrictMap;
+  window.V15.showDistrictDetail = showDistrictDetail;
+  window.V15.SIDANG_PLEDGES = SIDANG_PLEDGES;
+  window.V15.DISTRICT_DATA = DISTRICT_DATA;
+
+  function boot() {
+    injectMapStyles();
+    injectMapEntryCard();
+    console.log("[v15.7] 구별 공약 지도 모듈 로드 — 26개 구/분구 + 시당 8대 공약");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    setTimeout(boot, 500);
+  }
+})();
+
+</script>
+
+<!-- v15.8 국민의힘 부산 후보 데이터 (2026.05.10 시당 의결 기준) -->
+<script id="v15-busan-candidates">
+/* ================================================================
+ * v15.8 — 국민의힘 부산 후보 데이터 (2026.05.10 시당 의결 기준)
+ * 출처: 국민의힘 부산시당 공천관리위원회 의결 + 5월 8일 선관위 반영 예비후보 현황
+ * 검증: 뉴시스 2026.04.19, 헤럴드경제, 뉴스1, KNN, 부산MBC 교차확인
+ *
+ * 구조:
+ *   gucheong:  string  (구청장·군수 1명)
+ *   siUiwon:   [{ district: "1", name: "강주택" }, ...]
+ *   guUiwon:   [{ district: "가", names: ["이길희", "이대봉", "금동욱"] }, ...]
+ *
+ * 중선거구제: 시의원 1명 / 구의원 1선거구당 1~3명 (가/나/다 순번)
+ * ================================================================ */
+(function () {
+  "use strict";
+
+  // ============================================================
+  // 1. 국민의힘 후보 데이터 (구·군별)
+  // ============================================================
+  const PPP_CANDIDATES = {
+    junggu: {
+      gucheong: "최진봉",
+      siUiwon: [{ district: "중구", name: "강주택" }],
+      guUiwon: [
+        { district: "가", names: ["이길희", "이대봉", "금동욱"] },
+        { district: "나", names: ["한지원", "이인구"] }
+      ]
+    },
+    seogu: {
+      gucheong: "공한수",
+      siUiwon: [
+        { district: "제1", name: "송상조" },
+        { district: "제2", name: "이용운" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["주지웅", "강경미"] },
+        { district: "나", names: ["김건우", "이현우"] }
+      ]
+    },
+    donggu: {
+      gucheong: "강철호",
+      siUiwon: [
+        { district: "제1", name: "이상욱" },
+        { district: "제2", name: "김재헌" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["김경도", "김재헌"] },
+        { district: "나", names: ["윤정섭", "허근형"] }
+      ]
+    },
+    yeongdo: {
+      gucheong: "안성민",
+      siUiwon: [
+        { district: "제1", name: "김은명" },
+        { district: "제2", name: "양준모" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["부석규", "서승환"] },
+        { district: "나", names: ["김승찬", "서정희"] }
+      ]
+    },
+    busanjin: {
+      gucheong: "김영욱",
+      siUiwon: [
+        { district: "제1", name: "박희용" },
+        { district: "제2", name: "이대석" },
+        { district: "제3", name: "김재운" },
+        { district: "제4", name: "배영숙" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["이도경", "오우택"] },
+        { district: "나", names: ["성낙욱", "김준기"] },
+        { district: "다", names: ["조수성", "김석훈"] },
+        { district: "라", names: ["이분희", "배금강"] },
+        { district: "마", names: ["류재필"] },
+        { district: "바", names: ["김진복"] },
+        { district: "사", names: ["김민경"] },
+        { district: "아", names: ["안수만"] }
+      ]
+    },
+    dongnae: {
+      gucheong: "장준용",
+      siUiwon: [
+        { district: "제1", name: "김동하" },
+        { district: "제2", name: "송우현" },
+        { district: "제3", name: "서국보" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["오영진"] },
+        { district: "나", names: ["조진우", "최수용"] },
+        { district: "다", names: ["손준영", "이정훈"] },
+        { district: "라", names: ["최순희"] },
+        { district: "마", names: ["정명철", "이환기"] }
+      ]
+    },
+    namgu: {
+      gucheong: "김광명",
+      siUiwon: [
+        { district: "제1", name: "서성부" },
+        { district: "제2", name: "조상진" },
+        { district: "제3", name: "성현달" },
+        { district: "제4", name: "박미순" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["이준희"] },
+        { district: "나", names: ["김철현"] },
+        { district: "다", names: ["이종현"] },
+        { district: "라", names: ["윤성록"] },
+        { district: "마", names: ["노택균", "고선화"] }
+      ]
+    },
+    bukgu: {
+      gucheong: "오태원",
+      gucheongNote: "※ 법원 변수",
+      siUiwon: [
+        { district: "제1", name: "강영두" },
+        { district: "제2", name: "김효정" },
+        { district: "제3", name: "이종진" },
+        { district: "제4", name: "박종율" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["김봉국", "김태식", "김정방", "최병익", "박순자"] },
+        { district: "나", names: ["성효림", "김장수", "박성진"] },
+        { district: "다", names: ["김성택"] },
+        { district: "라", names: ["배정대", "박기훈", "조복남"] }
+      ],
+      guUiwonNote: "북구 의원은 5월 8일 선관위 반영 + 5월 5일 시당 의결 기준"
+    },
+    haeundae: {
+      gucheong: "김성수",
+      siUiwon: [
+        { district: "제1", name: "박준영" },
+        { district: "제2", name: "임말숙" },
+        { district: "제3", name: "김태효" },
+        { district: "제4", name: "강무길" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["심윤정"] },
+        { district: "나", names: ["박대진", "최소영"] },
+        { district: "다", names: ["장용석", "김민정"] },
+        { district: "라", names: ["서창우"] },
+        { district: "마", names: ["박기훈", "김민성"] },
+        { district: "바", names: ["장성철", "이국두"] },
+        { district: "사", names: ["박정요", "나근호"] },
+        { district: "아", names: ["송민우"] }
+      ]
+    },
+    gijang: {
+      gucheong: "정명시",
+      siUiwon: [
+        { district: "제1", name: "박종철" },
+        { district: "제2", name: "맹승자" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["김명원", "박기조"] },
+        { district: "나", names: ["박홍복"] },
+        { district: "다", names: ["박우식", "구본영", "송창섭"] }
+      ]
+    },
+    saha: {
+      gucheong: "김척수",
+      siUiwon: [
+        { district: "제1", name: "윤지영" },
+        { district: "제2", name: "최종원" },
+        { district: "제3", name: "채창섭" },
+        { district: "제4", name: "이상은" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["박상구", "윤보수"] },
+        { district: "나", names: ["강기동", "정삼균"] },
+        { district: "다", names: ["조재영", "정명철"] },
+        { district: "라", names: ["김민경", "박훈희"] },
+        { district: "마", names: ["신현수", "장재희"] }
+      ]
+    },
+    geumjeong: {
+      gucheong: "윤일현",
+      siUiwon: [
+        { district: "제1", name: "하은미" },
+        { district: "제2", name: "이준호" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["김효영"] },
+        { district: "나", names: ["강재호"] },
+        { district: "다", names: ["김종태"] },
+        { district: "라", names: ["김경태", "김태연"] }
+      ],
+      guUiwonNote: "다선거구는 일부 선관위 반영 기사 '김종택'으로 표기됐으나, 14차 공관위 보도 '김종태' 기준"
+    },
+    gangseo: {
+      gucheong: "김형찬",
+      siUiwon: [
+        { district: "제1", name: "이종환" },
+        { district: "제2", name: "송현준" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["구정란", "김주홍"] },
+        { district: "나", names: ["박병률", "이자연"] }
+      ]
+    },
+    yeonje: {
+      gucheong: "주석수",
+      siUiwon: [
+        { district: "제1", name: "최홍찬" },
+        { district: "제2", name: "이열" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["임현남", "차성민"] },
+        { district: "나", names: ["이창민", "황지원"] },
+        { district: "다", names: ["이미소", "권종헌"] },
+        { district: "라", names: ["박재홍", "김현규"] }
+      ]
+    },
+    suyeong: {
+      gucheong: "강성태",
+      siUiwon: [
+        { district: "제1", name: "조병제" },
+        { district: "제2", name: "김보언" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["권창환"] },
+        { district: "나", names: ["황도연"] },
+        { district: "다", names: ["김태성"] },
+        { district: "라", names: ["김동욱"] }
+      ]
+    },
+    sasang: {
+      gucheong: "이대훈",
+      siUiwon: [
+        { district: "제1", name: "윤태한" },
+        { district: "제2", name: "서경태" }
+      ],
+      guUiwon: [
+        { district: "가", names: ["김춘화", "배연옥"] },
+        { district: "나", names: ["김종선"] },
+        { district: "다", names: ["김윤경"] },
+        { district: "라", names: ["김진순"] }
+      ]
+    }
+  };
+
+  // ============================================================
+  // 2. DISTRICT_DATA에 candidates 주입 + 분구도 부모 데이터 공유
+  // ============================================================
+  function attachCandidates() {
+    if (!window.V15 || !window.V15.DISTRICT_DATA) {
+      // 모듈 로드 순서 대비 — 재시도
+      setTimeout(attachCandidates, 300);
+      return;
+    }
+    const D = window.V15.DISTRICT_DATA;
+    Object.keys(PPP_CANDIDATES).forEach(key => {
+      if (D[key]) D[key].candidates = PPP_CANDIDATES[key];
+    });
+    // 분구도 부모 후보 데이터를 공유
+    const parentMap = {
+      junggu_yeongdo: ["junggu", "yeongdo"],
+      seogu_donggu: ["seogu", "donggu"],
+      busanjin_gap: "busanjin",
+      busanjin_eul: "busanjin",
+      bukgu_gap: "bukgu",
+      bukgu_eul: "bukgu",
+      haeundae_gap: "haeundae",
+      haeundae_eul: "haeundae",
+      saha_gap: "saha",
+      saha_eul: "saha"
+    };
+    Object.keys(parentMap).forEach(divKey => {
+      if (!D[divKey]) return;
+      const parents = parentMap[divKey];
+      if (Array.isArray(parents)) {
+        // 합쳐진 분구 (중영도, 서동) — 두 부모 후보 합치기
+        const merged = {
+          gucheong: parents.map(p => `${PPP_CANDIDATES[p].gucheong} (${D[p].name})`).join(" / "),
+          siUiwon: parents.flatMap(p => (PPP_CANDIDATES[p].siUiwon || [])
+            .map(s => ({ district: `${D[p].name} ${s.district}`, name: s.name }))),
+          guUiwon: parents.flatMap(p => (PPP_CANDIDATES[p].guUiwon || [])
+            .map(g => ({ district: `${D[p].name} ${g.district}`, names: g.names })))
+        };
+        D[divKey].candidates = merged;
+      } else {
+        D[divKey].candidates = PPP_CANDIDATES[parents];
+        D[divKey].candidatesParent = D[parents].name;
+      }
+    });
+    console.log("[v15.8] 후보 데이터 26개 구·군+분구 모두 주입 완료");
+  }
+
+  // ============================================================
+  // 3. 후보 카드 렌더 함수 (showDistrictDetail에서 사용)
+  // ============================================================
+  function renderCandidateSection(districtId) {
+    const d = window.V15.DISTRICT_DATA[districtId];
+    if (!d || !d.candidates) {
+      return `<div class="bd-section-title candidates">▸ 국민의힘 후보 (등록 전)</div>
+        <div style="font-size:12px; color:#9AA5B1; padding:8px 0;">아직 등록되지 않았습니다.</div>`;
+    }
+    const c = d.candidates;
+    const parentNote = d.candidatesParent ?
+      `<div style="font-size:11px; color:#5B6B7A; margin-bottom:8px; font-style:italic;">
+        ※ 분구 후보 정보는 모(母) 구·군 <b>${d.candidatesParent}</b> 후보 명단 기준
+      </div>` : "";
+
+    // 구청장
+    const gucheongHtml = `
+      <div style="margin-bottom: 14px;">
+        <div style="font-size: 11px; color: #C8332A; font-weight: 800; letter-spacing: 0.2em; margin-bottom: 5px;">
+          ▸ 구청장·군수
+        </div>
+        <div style="display: inline-block; padding: 8px 18px; background: linear-gradient(135deg, #C8332A 0%, #8B1A14 100%);
+                    color: #FFD166; border-radius: 24px; font-weight: 800; font-size: 15px;
+                    font-family: 'Gowun Batang', serif;">
+          ${escHtml(c.gucheong)}${c.gucheongNote ? ` <span style="font-size:10px; color:#fff; opacity:0.8;">${escHtml(c.gucheongNote)}</span>` : ""}
+        </div>
+      </div>`;
+
+    // 시의원
+    const siHtml = (c.siUiwon && c.siUiwon.length) ? `
+      <div style="margin-bottom: 14px;">
+        <div style="font-size: 11px; color: #1E5BB5; font-weight: 800; letter-spacing: 0.2em; margin-bottom: 6px;">
+          ▸ 시의원 (${c.siUiwon.length}명)
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px;">
+          ${c.siUiwon.map(s => `
+            <div style="padding: 8px 10px; background: #F0F6FC; border: 1px solid #B8D4ED;
+                        border-radius: 8px; text-align: center;">
+              <div style="font-size: 10px; color: #1E5BB5; font-weight: 700; margin-bottom: 2px;">
+                ${escHtml(s.district)}
+              </div>
+              <div style="font-size: 13px; font-weight: 700; color: #0A2540;
+                          font-family: 'Gowun Batang', serif;">
+                ${escHtml(s.name)}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div>` : "";
+
+    // 구의원 (선거구별 1~5명)
+    const guHtml = (c.guUiwon && c.guUiwon.length) ? `
+      <div>
+        <div style="font-size: 11px; color: #B8860B; font-weight: 800; letter-spacing: 0.2em; margin-bottom: 6px;">
+          ▸ 구·군의원 (선거구 ${c.guUiwon.length}개)
+        </div>
+        ${c.guUiwon.map(g => `
+          <div style="margin-bottom: 6px; padding: 8px 12px; background: #FFFCF5;
+                      border-left: 3px solid #B8860B; border-radius: 4px;">
+            <div style="font-size: 10px; color: #B8860B; font-weight: 800; margin-bottom: 4px;">
+              ${escHtml(g.district)}선거구
+            </div>
+            <div style="font-size: 13px; line-height: 1.6; color: #0A2540;">
+              ${(g.names || []).map((n, i) => `
+                <span style="display: inline-block; padding: 3px 10px; margin: 2px;
+                             background: #fff; border: 1px solid #D4A53A; border-radius: 12px;
+                             font-weight: 700; font-family: 'Gowun Batang', serif;">
+                  ${escHtml(`2-${["가","나","다","라","마"][i] || (i+1)}`)} ${escHtml(n)}
+                </span>
+              `).join("")}
+            </div>
+          </div>
+        `).join("")}
+        ${c.guUiwonNote ? `<div style="font-size:11px; color:#5B6B7A; margin-top:6px; font-style:italic;">
+          ※ ${escHtml(c.guUiwonNote)}
+        </div>` : ""}
+      </div>` : "";
+
+    return `
+      <div class="bd-section-title candidates">▸ 국민의힘 ${escHtml(d.name)} 후보 (2026.05.10 시당 의결 기준)</div>
+      ${parentNote}
+      ${gucheongHtml}
+      ${siHtml}
+      ${guHtml}
+      <div class="bd-edit-note">
+        ℹ️ 본후보 등록 전 단계입니다. 중앙당 최고위원회 의결 절차가 남아 있어 일부 변동 가능.
+        출처: 국민의힘 부산시당 공천관리위원회 의결(4~5월) + 5월 8일 선관위 예비후보 현황.
+      </div>
+    `;
+  }
+
+  function escHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, c =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+    );
+  }
+
+  // ============================================================
+  // 4. v15.10: showDistrictDetail 직접 통합으로 patch 불필요
+  //   (busan_district_map_v1.js의 원본이 V15.renderCandidateSection을 직접 호출)
+  //   이 함수는 호환성을 위해 남겨두지만 실제 wrap은 하지 않음.
+  // ============================================================
+  function patchShowDetail() {
+    // no-op (v15.10에서 원본이 직접 통합)
+    window.__v158_show_patched = true;
+  }
+
+  // ============================================================
+  // 5. 부트
+  // ============================================================
+  function boot() {
+    attachCandidates();
+    patchShowDetail();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(boot, 800));
+  } else {
+    setTimeout(boot, 800);
+  }
+
+  // 디버그 노출
+  if (!window.V15) window.V15 = {};
+  window.V15.PPP_CANDIDATES = PPP_CANDIDATES;
+  window.V15.renderCandidateSection = renderCandidateSection;
+})();
+
+</script>
+
+<!-- v15.9 5년 타임랩스 — 16개 구·군 + 가덕도 (시당+당협 공약 시간축 매핑) -->
+<script id="v15-timelapse16">
+/* ================================================================
+ * v15.9 — 부산 16개 구·군 5년 타임랩스
+ *   2026 → 2031 시간축으로 각 구의 시당+당협 공약이
+ *   어떻게 가시화·실현되는지 단계별로 표현
+ *
+ * 데이터 출처 (실제 공약):
+ *   - 부산시당 8대 공약 (가덕신공항·공공기관 2차 이전·글로벌허브특별법
+ *     ·부울경 행정통합·북항재개발·BuTX·환경재난·해양첨단)
+ *   - 16개 당협별 공약 (260506_부산_당협별_공약카드_최종본.pdf)
+ *
+ * 시간축 디자인:
+ *   2026 출발선 (현재 + 진행 중) → 2027 시동·착공 → 2028 가시화
+ *   → 2029 결정타 (가덕도 개항·핵심 시설 개관) → 2030 누적 효과 → 2031 완성·도약
+ * ================================================================ */
+(function () {
+  "use strict";
+
+  // ============================================================
+  // 1. 16개 구·군 + 광역(가덕도) 타임랩스 데이터
+  // ============================================================
+  const TL16 = {
+    // ───────── 광역 거점 ─────────
+    gadeok: {
+      label: "가덕도",
+      key: "gadeok",
+      heroColor: "#1E5BB5",
+      icon: "✈️",
+      2026: { tag: "출발선", desc: "가덕도는 매립 32%. 부산 시민은 김해공항에 의존하고 인천 환승이 일상입니다.",
+              stats: ["활주로 0m", "국제선 0편", "매립 32%"] },
+      2027: { tag: "매립 가속", desc: "26년 하반기 부지조성공사 우선시공분 착공. 매립 60%·활주로 1,200m 골조.",
+              stats: ["활주로 1,200m", "공기 단축 협의체", "매립 60%"] },
+      2028: { tag: "뼈대 완성", desc: "활주로 3,500m 뼈대 완성. 터미널·관제탑 공사 본격화.",
+              stats: ["활주로 3,500m", "터미널 70%", "매립 95%"] },
+      2029: { tag: "12월 개항", desc: "12월 개항. 첫 두바이 직항이 가덕에서 출발. 인천 환승 시대 종료.",
+              stats: ["개항 12월", "국제선 12편", "Tri-port 가동"] },
+      2030: { tag: "동남권 허브", desc: "국제선 50편. 인근 부산신항+철도와 Tri-port 복합물류 클러스터 본격화.",
+              stats: ["국제선 50편", "연 800만 명", "환승 0%"] },
+      2031: { tag: "북극항로 시대", desc: "북극항로 시범 운항 본격. 부산이 동북아 물류 중심 항만으로 도약.",
+              stats: ["국제선 80편", "연 1,200만 명", "5조 경제효과"] }
+    },
+
+    // ───────── 16개 구·군 ─────────
+    junggu: {
+      label: "중구", key: "junggu", heroColor: "#0A2540", icon: "🏙️",
+      2026: { tag: "출발선", desc: "원도심 공동화·인구 4만 명. 용두산공원·자갈치 인근 노후 상권.",
+              stats: ["인구 4만", "공실률 12%", "노후 건물 38%"] },
+      2027: { tag: "글로벌 창업허브 첫 삽", desc: "글로벌 창업허브 부산 조성 착공. 용두산공원 일원 관광 특화 시작.",
+              stats: ["창업허브 1", "외국인 창업 +30", "관광객 +12%"] },
+      2028: { tag: "트램 착공", desc: "중구·영도구 트램 착공. 자갈치~영도교 보행축 정비.",
+              stats: ["트램 공사", "보행축 +1.2km", "원도심 활력 +18%"] },
+      2029: { tag: "북항 1단계 준공", desc: "북항 1단계 준공으로 중구 인접 친수공원·마리나 개방. 글로벌허브특별법 효력 발생.",
+              stats: ["친수공원 1", "마리나 1", "외투 19조원 진입"] },
+      2030: { tag: "창업 생태계", desc: "글로벌 창업허브 본격 가동. 용두산공원 관광 콘텐츠 확장.",
+              stats: ["입주 기업 80", "외국인 거주 +25%", "야간경제 +40%"] },
+      2031: { tag: "원도심의 부활", desc: "공실률 절반·청년 창업가 1,000명 이상 진입. 중구가 부산의 첫 글로벌 게이트로.",
+              stats: ["공실률 6%", "창업 1,000+", "관광객 연 1,500만"] }
+    },
+
+    seogu: {
+      label: "서구", key: "seogu", heroColor: "#1E5BB5", icon: "🏥",
+      2026: { tag: "출발선", desc: "공동어시장 노후화·송도해수욕장 관광객 정체. 산복도로 르네상스 1기 종료.",
+              stats: ["공동어시장 1971년", "관광객 정체", "노후 어선 60%"] },
+      2027: { tag: "송도선 착공", desc: "송도선 노면전차 착공. 자갈치~공동어시장~송도~다대선 연결축.",
+              stats: ["송도선 착공", "공동어시장 현대화 시작", "웰니스 사업 1"] },
+      2028: { tag: "해사법원 착공", desc: "해사법원 신설 추진(2028 개청 목표). 해양수산부 신청사 유치 가시화.",
+              stats: ["해사법원 1", "해수부 신청사", "산복도로 시즌2"] },
+      2029: { tag: "해사법원 개청", desc: "부산 해사법원 개청. 해양수산관광벨트 1단계 개장. 글로벌허브 발효.",
+              stats: ["해사법원 가동", "관광벨트 1단계", "55보급창 이전 협의"] },
+      2030: { tag: "관광벨트 본격", desc: "공동어시장 현대화 완공. 국제 명품수산타운 + 송도선 개통.",
+              stats: ["수산타운 1", "송도선 개통", "관광객 +35%"] },
+      2031: { tag: "원도심 재생 완성", desc: "산복도로 르네상스 시즌2 완료. 서구가 의료관광·해양관광 도시로.",
+              stats: ["주민 만족 +40%", "방문객 연 800만", "55보급창 활용"] }
+    },
+
+    donggu: {
+      label: "동구", key: "donggu", heroColor: "#C8332A", icon: "🎨",
+      2026: { tag: "출발선", desc: "부산 디자인 수도 지정 효과 본격화 직전. 좌천2지구 노후주거지 정비 대기.",
+              stats: ["디자인 수도 지정", "좌천2지구 정비 대기", "공실률 14%"] },
+      2027: { tag: "디자인 재생 시동", desc: "디자인 수도 연계 원도심 재생사업 본격 착수. 문화복합스포츠시설 설계.",
+              stats: ["재생사업 1", "스포츠시설 설계", "디자인 거점 3"] },
+      2028: { tag: "문화복합 착공", desc: "문화복합스포츠시설 착공. 좌천2지구 정비 1단계 완료.",
+              stats: ["스포츠시설 1", "좌천2지구 1단계", "노후주택 -25%"] },
+      2029: { tag: "북항 1단계", desc: "인근 북항 1단계 준공으로 동구 일대 동서 보행축 활성화.",
+              stats: ["보행축 +1.5km", "관광객 +28%", "재생사업 본격"] },
+      2030: { tag: "디자인 수도", desc: "원도심 디자인 거점 5곳 가동. 동구가 부산 디자인 자산의 핵.",
+              stats: ["디자인 거점 5", "젊은 작가 +500", "공실률 7%"] },
+      2031: { tag: "5년 누적 변화", desc: "노후주택 정비율 60%·문화시설 가동. 동구가 \"오래된 동네\"에서 \"디자인 동네\"로.",
+              stats: ["정비율 60%", "문화시설 4", "주민 만족 +45%"] }
+    },
+
+    yeongdo: {
+      label: "영도구", key: "yeongdo", heroColor: "#1F7A4D", icon: "🚢",
+      2026: { tag: "출발선", desc: "한진중공업 부지는 비어 있고 깡깡이마을은 늙어갑니다. 평균연령 48세.",
+              stats: ["빈 부지 12만㎡", "평균연령 48세", "청년 -4.5%"] },
+      2027: { tag: "글로벌 R&D 유치", desc: "글로벌 R&D 캠퍼스 첫 유치. 영도다리 너머에 새 빛이 켜집니다.",
+              stats: ["R&D 1곳", "북극해 거점 지정", "예산 8천억"] },
+      2028: { tag: "청년 카페 라인", desc: "깡깡이마을 골목에 청년 카페·디자인 스튜디오. 봉래산 터널 공사 착수.",
+              stats: ["청년 점포 28", "관광객 +12%", "봉래산터널 공사"] },
+      2029: { tag: "캠퍼스 개교", desc: "글로벌 R&D 캠퍼스 개교 + 해양치유센터 1차 개장. 남항재개발 1단계.",
+              stats: ["캠퍼스 1", "연구원 1,200", "치유센터 1"] },
+      2030: { tag: "두 번째 캠퍼스", desc: "두 번째 R&D 캠퍼스 유치. 봉래산 터널 개통. 영도다리 양 끝 활성화.",
+              stats: ["R&D 2곳", "터널 개통", "평균연령 -3년"] },
+      2031: { tag: "연구의 섬", desc: "5년 만에 동북아 R&D 클러스터 후보로 거론. 체류형 관광 1번지.",
+              stats: ["R&D 5곳", "연구원 5천", "평균연령 42세"] }
+    },
+
+    busanjin: {
+      label: "부산진구", key: "busanjin", heroColor: "#B8860B", icon: "🚆",
+      2026: { tag: "출발선", desc: "부전역 광역복합환승센터 미정. 어린이대공원 동물원 폐장. 범천철도차량기지 도심 단절.",
+              stats: ["부전역 환승 0", "동물원 폐장 5년차", "차량기지 30만㎡"] },
+      2027: { tag: "환승센터 착공", desc: "부전역 광역복합환승센터 착공 + KTX 정차 추진. 동물원 재개장 설계.",
+              stats: ["환승센터 착공", "KTX 정차 협의", "동물원 설계"] },
+      2028: { tag: "동물원 재개장", desc: "어린이대공원 동물원 재개장. 도시철도 초읍선 신설 추진. 범천철도차량기지 이전 협상.",
+              stats: ["동물원 재개장", "초읍선 추진", "차량기지 이전 협상"] },
+      2029: { tag: "BuTX 부전 정차", desc: "BuTX 부전역 정차 확정. 경부선 지하화 1단계 본격. 개금레일스포츠파크 1차 개장.",
+              stats: ["BuTX 부전", "경부선 지하화", "스포츠파크 1차"] },
+      2030: { tag: "환승센터 가동", desc: "부전역 광역복합환승센터 가동. 부전~마산역 당감역 신설.",
+              stats: ["환승센터 가동", "당감역 1", "환승 -25분"] },
+      2031: { tag: "도심 재구조화", desc: "범천철도차량기지 이전 → 복합미래혁신지구 착공. 부산진이 동남권 교통 허브로.",
+              stats: ["혁신지구 착공", "일자리 +1.2만", "환승 -40분"] }
+    },
+
+    dongnae: {
+      label: "동래구", key: "dongnae", heroColor: "#0A2540", icon: "🏟️",
+      2026: { tag: "출발선", desc: "사직야구장 노후화·재건축 논의. 명장정수장 부지 미활용. 금강공원 시설 노후.",
+              stats: ["사직야구장 1985년", "명장정수장 미활용", "금강공원 노후"] },
+      2027: { tag: "사직 재건축 착공", desc: "사직야구장 재건축 착공. 사직종합운동장 일대 복합개발 마스터플랜 확정.",
+              stats: ["야구장 착공", "마스터플랜", "복합문화공간 설계"] },
+      2028: { tag: "정수장 재개발", desc: "명장정수장·동래통합사업소 부지 재개발 1단계. 금강공원 재개발 시동.",
+              stats: ["정수장 재개발 1단계", "금강공원 시동", "공원화 +5만㎡"] },
+      2029: { tag: "사직 재건축 완공", desc: "사직야구장 재건축 완공. 시민 친화 스포츠랜드마크 가동. 금정산 생태체험시설 개장.",
+              stats: ["야구장 신축", "체육시설 4", "생태시설 1"] },
+      2030: { tag: "랜드마크 가동", desc: "사직 일대 복합개발 본격 — 체육·상업·문화 시설 동시 가동.",
+              stats: ["복합시설 가동", "방문객 +60%", "지역경제 +25%"] },
+      2031: { tag: "스포츠·문화 1번지", desc: "동래가 부산의 스포츠·문화 1번지로. 금강공원 재개발 완공.",
+              stats: ["연 방문 800만", "금강공원 신축", "주민 만족 +40%"] }
+    },
+
+    namgu: {
+      label: "남구", key: "namgu", heroColor: "#1E5BB5", icon: "🚎",
+      2026: { tag: "출발선", desc: "원도심 해안축 교통 단절. 부산항선 트램 추진 단계. 오륙도 접근성 부족.",
+              stats: ["트램 미시공", "오륙도 정체", "교통 단절 3구간"] },
+      2027: { tag: "부산항선 트램 착공", desc: "부산항선 트램 착공 — 태종대~북항~문현~우암~용호~경성대 해안축 순환.",
+              stats: ["트램 착공", "노선 12.4km", "해안축 정비"] },
+      2028: { tag: "금융자율형사립고", desc: "금융자율형사립고 설립. 오륙도선 트램 추진 본격화.",
+              stats: ["금융자사고 1", "오륙도선 추진", "교육 거점 +1"] },
+      2029: { tag: "트램 1차 개통", desc: "부산항선 트램 1차 구간 개통. 북항 재개발 연계 관광·금융 시너지.",
+              stats: ["트램 개통", "관광객 +40%", "금융권역 형성"] },
+      2030: { tag: "오륙도선 연결", desc: "오륙도선 트램 연결. 해안축 순환 완성. 금융인재 양성 본격.",
+              stats: ["오륙도선 1", "순환 완성", "금융 인재 +500"] },
+      2031: { tag: "해안축 도시", desc: "남구가 트램 + 해안 + 금융이 결합된 부산의 해안 도시 1번지로.",
+              stats: ["연 관광 1,200만", "금융 일자리 +3천", "트램 일 5만 명"] }
+    },
+
+    bukgu: {
+      label: "북구", key: "bukgu", heroColor: "#C8332A", icon: "🌳",
+      2026: { tag: "출발선", desc: "만덕대로 상부 활용 안 됨. 만성 교통 혼잡. 화명·금곡 노후 아파트.",
+              stats: ["만덕대로 미활용", "교통 혼잡 1위", "노후 아파트 35%"] },
+      2027: { tag: "터널 개통", desc: "만덕~센텀시티 대심도 터널 개통. 만덕대로 상부 공원화 사업 시동.",
+              stats: ["대심도 터널 1", "공원화 시동", "출퇴근 -25분"] },
+      2028: { tag: "에코파크 조성", desc: "낙동선셋 화명에코파크 1차 개장. 화명마리나 조성 시작.",
+              stats: ["에코파크 1차", "마리나 시작", "관광객 +20%"] },
+      2029: { tag: "교육특구 지정", desc: "교육 국제화 특구 지정. 명문 자립형 공립고 유치. 노후 아파트 재개발 본격.",
+              stats: ["교육 국제화 특구", "공립고 1", "재개발 4단지"] },
+      2030: { tag: "공원화 완성", desc: "만덕대로 상부 테마공원 완공. 마리나 수상레포츠 가동.",
+              stats: ["테마공원 1", "마리나 가동", "체감 만족 +50%"] },
+      2031: { tag: "주거·교육·관광", desc: "북구가 주거·교육·관광이 결합된 명품 정주 도시로.",
+              stats: ["청년 +3.5%", "어르신 돌봄 +50%", "주택가격 안정"] }
+    },
+
+    haeundae: {
+      label: "해운대구", key: "haeundae", heroColor: "#1E5BB5", icon: "🏖️",
+      2026: { tag: "출발선", desc: "센텀2지구 도심융합특구 조성 중. 53사단 부지 미활용. 도시철도 2호선 장산역 종점.",
+              stats: ["센텀2지구 진행", "53사단 미이전", "장산역 종점"] },
+      2027: { tag: "53사단 이전 협의", desc: "해운대 53사단 이전 협의 + 첨단사이언스파크 마스터플랜.",
+              stats: ["이전 협의", "사이언스파크 1", "BuTX 추진"] },
+      2028: { tag: "센텀2 가시화", desc: "센텀2지구 도심융합특구 1차 개장. 공공기관·앵커기업 입주. 달맞이 명품공원 조성.",
+              stats: ["센텀2 1차", "앵커기업 5", "달맞이공원"] },
+      2029: { tag: "BuTX 센텀역", desc: "BuTX 센텀시티역 개통 + 도시철도 2호선 송정삼거리역 신설.",
+              stats: ["BuTX 센텀", "2호선 +1역", "관광객 +30%"] },
+      2030: { tag: "오시리아 연장", desc: "도시철도 2호선 오시리아 연장 완공. 사이언스파크 가동.",
+              stats: ["2호선 오시리아", "사이언스파크 가동", "수영강 친수공간"] },
+      2031: { tag: "첨단·관광 도시", desc: "해운대가 첨단·관광·해변이 결합된 글로벌 도시로. 53사단 부지 첨단클러스터.",
+              stats: ["첨단클러스터 1", "연 관광 2,000만", "재송 이음다리"] }
+    },
+
+    geumjeong: {
+      label: "금정구", key: "geumjeong", heroColor: "#1F7A4D", icon: "🏥",
+      2026: { tag: "출발선", desc: "(구)침례병원 부지 미활용. 부울경 광역철도 구상 단계. 금정산 관리 분산.",
+              stats: ["침례병원 부지", "광역철도 구상", "관리사무소 분산"] },
+      2027: { tag: "보험자병원 추진", desc: "(구)침례병원 → 국민건강보험공단 직영 '제2 보험자병원' 설계.",
+              stats: ["보험자병원 설계", "공공의료 거점 1", "관리소 유치"] },
+      2028: { tag: "관리소 유치", desc: "금정산 국립공원 관리사무소 금정구 유치(범어사 인근). 광역철도 예타 본격.",
+              stats: ["관리소 1", "광역철도 예타", "범어사 활성화"] },
+      2029: { tag: "보험자병원 개원", desc: "제2 보험자병원 개원. 부울경 광역철도(KTX 울산~양산 웅상~노포) 착공.",
+              stats: ["병원 개원", "광역철도 착공", "공공의료 +50%"] },
+      2030: { tag: "교통허브화", desc: "광역철도 1차 개통으로 금정구가 부울경 1시간 생활권 교통허브로.",
+              stats: ["광역철도 개통", "교통허브 1", "통근 -30분"] },
+      2031: { tag: "공공의료·교통", desc: "공공의료 + 교통허브 + 자연 결합. 금정구가 부울경의 관문 도시로.",
+              stats: ["연 의료 100만", "통근 30분권", "관광객 +40%"] }
+    },
+
+    gangseo: {
+      label: "강서구", key: "gangseo", heroColor: "#0A2540", icon: "🛫",
+      2026: { tag: "출발선", desc: "에코델타시티 진행 중. 가덕 매립 32%. 부전~마산 복선전철 예타 통과.",
+              stats: ["에코델타 진행", "매립 32%", "부전~마산 예타"] },
+      2027: { tag: "트라이포트 시동", desc: "서부산권 복합산업단지·트라이포트 복합물류지구 조속 착수. 부전~마산 개통.",
+              stats: ["트라이포트 시동", "부전마산 개통", "산단 부지 정비"] },
+      2028: { tag: "대저특구·강서선", desc: "대저연구개발특구 1차 개장. 강서선·하단~녹산선 착공. 어린이영어도서관 개관.",
+              stats: ["대저특구 1차", "강서선 착공", "영어도서관 1"] },
+      2029: { tag: "가덕 개항", desc: "가덕신공항 12월 개항. 강서가 동북아 물류·국제 게이트로. 제2에코델타 착공.",
+              stats: ["가덕 개항", "제2에코델타 착공", "외투 +10조"] },
+      2030: { tag: "공항복합도시", desc: "공항복합도시 1·2·3구역 본격 가동. 직주근접 신도시 형성.",
+              stats: ["복합도시 가동", "일자리 +5만", "주거 +3만 세대"] },
+      2031: { tag: "동북아 관문", desc: "강서가 부산을 넘어 동북아 물류·항공 관문 도시로. Tri-port 완성.",
+              stats: ["Tri-port 완성", "외투 50조", "GDP 효과 +6%"] }
+    },
+
+    yeonje: {
+      label: "연제구", key: "yeonje", heroColor: "#1E5BB5", icon: "🎓",
+      2026: { tag: "출발선", desc: "부산대·부산교대 통합 27년 예정. 시청앞 야외주차장 미활용. 배산 자연 미가공.",
+              stats: ["대학 통합 예정", "주차장 부지", "배산 미가공"] },
+      2027: { tag: "대학 통합", desc: "부산대·부산교대 통합 완료. NEW 대학로 프로젝트 시동. 배산 복합타운 설계.",
+              stats: ["대학 통합 1", "대학로 프로젝트", "복합타운 설계"] },
+      2028: { tag: "체육문화복합 착공", desc: "시청역 체육문화복합센터 착공. 교육·문화 거버넌스 본격 가동.",
+              stats: ["체육문화 1", "거버넌스", "대학생 +500"] },
+      2029: { tag: "복합타운 개장", desc: "배산 자연중심 문화콘텐츠 복합타운 1차 개장 (자연·교육·실버 결합).",
+              stats: ["복합타운 1차", "교육 거점", "실버 시설 1"] },
+      2030: { tag: "체육문화 가동", desc: "시청역 체육문화복합센터 가동. NEW 대학로가 부산 청년·교육 1번지로.",
+              stats: ["체육문화 가동", "대학로 활성", "청년 거주 +20%"] },
+      2031: { tag: "교육·문화 도시", desc: "연제구가 교육·문화·자연이 결합된 부산의 새 인재 도시로.",
+              stats: ["청년 인구 +25%", "교육 거점 5", "문화시설 4"] }
+    },
+
+    suyeong: {
+      label: "수영구", key: "suyeong", heroColor: "#C8332A", icon: "🎨",
+      2026: { tag: "출발선", desc: "금련산 방공터널 미활용. 수영강 휴먼브리지 주변 시설 부족. 전통시장 노후화.",
+              stats: ["방공터널 미활용", "주민시설 부족", "시장 노후"] },
+      2027: { tag: "미디어아트 시동", desc: "금련산 방공터널 미디어아트 관광터널 사업 착수. 수영강 휴먼브리지 디자인 공원 설계.",
+              stats: ["미디어터널 시동", "디자인공원 설계", "전통시장 사업"] },
+      2028: { tag: "푸드코트 개관", desc: "전통시장 푸드코트·교육관 개관. 수영강 디자인 공원 1차 개장.",
+              stats: ["푸드코트 1", "디자인공원 1차", "상인 교육"] },
+      2029: { tag: "미디어아트 개관", desc: "금련산 미디어아트 관광터널 개관 — 광안리와 연계해 야간관광 부각.",
+              stats: ["미디어터널 1", "야간관광 +50%", "관광객 +35%"] },
+      2030: { tag: "관광 본격", desc: "광안리·금련산·수영강이 하나의 관광축으로. 디자인 공원 완공.",
+              stats: ["관광축 1", "디자인공원 완공", "체류 시간 +1.5h"] },
+      2031: { tag: "K-콘텐츠 도시", desc: "수영구가 K-콘텐츠·미디어아트·해변이 결합된 부산의 야간 도시로.",
+              stats: ["연 관광 1,500만", "야간경제 +60%", "전통시장 활력"] }
+    },
+
+    sasang: {
+      label: "사상구", key: "sasang", heroColor: "#0A2540", icon: "🏭",
+      2026: { tag: "출발선", desc: "공장 굴뚝과 화물차로 가득한 새벽. 청년이 떠나는 동네. 평균 출근 1시간.",
+              stats: ["공장 1,200곳", "청년 -3.2%", "평균 출근 1h"] },
+      2027: { tag: "강서특별법 시동", desc: "글로벌허브특별법 통과. 사상·강서·기장이 한 산단으로 묶입니다. 자율형 공립고 추진.",
+              stats: ["특별법 통과", "신규 입주 12개", "공립고 추진"] },
+      2028: { tag: "데이터센터 진입", desc: "첫 글로벌 데이터센터 가동. 외투기업 5곳 추가 입주. 서부산 행정청사 착공.",
+              stats: ["외투 5곳", "일자리 8천", "행정청사 착공"] },
+      2029: { tag: "캠퍼스 개교", desc: "사상 ICT 캠퍼스 개교. 청년이 '부산 떠날 이유'를 잃기 시작합니다. 삼락생태공원 국가정원 지정.",
+              stats: ["캠퍼스 1", "청년 +2.1%", "국가정원 지정"] },
+      2030: { tag: "굴뚝의 변신", desc: "공장 굴뚝의 절반이 데이터센터로. 자율형 공립고·기숙형 중학교 개교.",
+              stats: ["전환 50%", "일자리 3만", "교육시설 2"] },
+      2031: { tag: "오는 동네", desc: "5만 일자리 달성. 사상이 '떠나는 동네'에서 '오는 동네'로.",
+              stats: ["일자리 5만", "청년 +6.8%", "외투 30곳"] }
+    },
+
+    saha: {
+      label: "사하구", key: "saha", heroColor: "#1F7A4D", icon: "🌊",
+      2026: { tag: "출발선", desc: "빈집 누적·신평역 철도기지창 도시 단절. 장림 하수처리장 노후. 을숙도 미가공.",
+              stats: ["빈집 1,200호", "기지창 미이전", "하수처리장 노후"] },
+      2027: { tag: "빈집 정비 시동", desc: "빈집 매입·정비 사업 본격화. 장림 하수처리장 현대화 1단계.",
+              stats: ["빈집 -300호", "하수처리 1단계", "정비 사업 1"] },
+      2028: { tag: "을숙도 국가공원", desc: "을숙도 제1호 국가도시공원 지정 추진 + 광역복합환승센터 시동.",
+              stats: ["국가공원 추진", "환승센터 시동", "공원 재정비"] },
+      2029: { tag: "기지창 이전", desc: "신평역 철도기지창 노포 이전 결정. 도시 공간 재구조화 1단계.",
+              stats: ["기지창 이전 결정", "재구조화 1단계", "환승센터 2단계"] },
+      2030: { tag: "환승센터 가동", desc: "서부산 광역복합환승센터 1차 가동. 1호선·BuTX·시내광역버스 통합.",
+              stats: ["환승센터 1차", "통합 환승", "출퇴근 -20분"] },
+      2031: { tag: "생태도시 사하", desc: "을숙도 국가도시공원 + 빈집 정비 + 환승 통합. 사하가 생태·교통 도시로.",
+              stats: ["국가공원 1", "빈집 -50%", "환승 5분권"] }
+    },
+
+    gijang: {
+      label: "기장군", key: "gijang", heroColor: "#B8860B", icon: "🌅",
+      2026: { tag: "출발선", desc: "정관선 예타 통과. 동부산 관광벨트 미완성. 방사선 의과학 산업단지 조성 중.",
+              stats: ["정관선 예타", "관광벨트 진행", "산단 조성 중"] },
+      2027: { tag: "정관선 착공", desc: "정관선 패스트트랙 방식 착공. 동부산 K-컬쳐타운 마스터플랜.",
+              stats: ["정관선 착공", "K-컬쳐타운 설계", "오션 블루레일 시동"] },
+      2028: { tag: "중입자 가속기", desc: "방사선 의과학 산업단지 중입자 가속기 치료센터 1차 가동. 오시리아 웰니스 의료관광 시동.",
+              stats: ["중입자 1차", "오시리아 웰니스", "의료관광 +30%"] },
+      2029: { tag: "정관선 개통", desc: "정관선 1차 개통. K-컬쳐타운 1차 개장. 가덕 개항 효과 동부산 흡수.",
+              stats: ["정관선 개통", "K-컬쳐타운 1차", "관광객 +40%"] },
+      2030: { tag: "관광벨트 완성", desc: "동부산 관광벨트 완성 — 오션 블루레일 + K-컬쳐 + 의료관광 융합.",
+              stats: ["관광벨트 완성", "체류 +2일", "관광객 +60%"] },
+      2031: { tag: "동남권 의료관광", desc: "기장이 동남권 의료관광·문화 1번지로. 원자력의학원 규모 확대 완료.",
+              stats: ["원자력의학원 확대", "의료관광 클러스터", "연 관광 1천만"] }
+    }
+  };
+
+  // ============================================================
+  // 2. 스타일 주입 (BIM 스타일 재활용 + 보강)
+  // ============================================================
+  function injectStyles() {
+    if (document.getElementById("v159-tl-style")) return;
+    const css = `
+      .tl16-modal{position:fixed;inset:0;background:rgba(10,37,64,0.85);z-index:10100;
+        display:flex;align-items:flex-start;justify-content:center;padding:0;overflow-y:auto;
+        backdrop-filter:blur(4px);}
+      .tl16-modal.show{display:flex;}
+      .tl16-sheet{background:#fff;width:100%;max-width:560px;margin:24px 0;
+        border-radius:18px;padding:18px 20px 22px;box-shadow:0 18px 50px rgba(0,0,0,0.35);
+        position:relative;}
+      .tl16-close{position:absolute;top:10px;right:12px;width:32px;height:32px;
+        background:#F1F4F9;border:0;border-radius:50%;font-size:18px;cursor:pointer;color:#0A2540;}
+      .tl16-title{font-size:18px;font-weight:800;color:#0A2540;margin-bottom:2px;
+        font-family:"Gowun Batang",serif;}
+      .tl16-sub{font-size:12px;color:#5B6B7A;margin-bottom:14px;}
+
+      .tl16-tabs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;
+        max-height:140px;overflow-y:auto;padding:6px;background:#FAFAF7;border-radius:8px;}
+      .tl16-tab{padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;
+        border:1px solid #E5E7EB;border-radius:14px;background:#fff;color:#5B6B7A;
+        transition:all 0.15s;white-space:nowrap;}
+      .tl16-tab:hover{background:#FFFCF5;border-color:#B8860B;}
+      .tl16-tab.active{background:#0A2540;color:#FFD166;border-color:#0A2540;}
+
+      .tl16-stage{background:linear-gradient(135deg,#FAF7F0,#FFFCF5);
+        border-radius:14px;padding:18px;margin-bottom:14px;
+        border:1px solid rgba(184,134,11,0.2);min-height:200px;position:relative;}
+      .tl16-stage.future{background:linear-gradient(135deg,#0A2540,#1E5BB5);
+        color:#fff;border-color:#0A2540;}
+      .tl16-stage.future .tl16-tag{color:#FFD166;}
+      .tl16-stage.future .tl16-y{color:#fff;}
+      .tl16-stage.future .tl16-d{color:rgba(255,255,255,0.9);}
+      .tl16-stage.future .tl16-stat{background:rgba(255,255,255,0.18);color:#fff;border-color:rgba(255,215,102,0.3);}
+
+      .tl16-icon{position:absolute;top:14px;right:14px;font-size:38px;opacity:0.4;}
+      .tl16-tag{font-size:10px;letter-spacing:0.3em;color:#B8860B;font-weight:800;
+        margin-bottom:6px;}
+      .tl16-y{font-size:36px;font-weight:900;color:#0A2540;line-height:1;
+        font-family:"Gowun Batang",serif;margin-bottom:8px;}
+      .tl16-d{font-size:13.5px;color:#1F2933;line-height:1.65;margin-bottom:14px;}
+      .tl16-stats{display:flex;gap:6px;flex-wrap:wrap;}
+      .tl16-stat{padding:6px 12px;background:#fff;border:1px solid #E5E7EB;
+        border-radius:14px;font-size:11px;font-weight:700;color:#0A2540;}
+
+      .tl16-sw{padding:8px 6px;}
+      .tl16-slider{width:100%;-webkit-appearance:none;height:6px;background:linear-gradient(90deg,#FFD166,#1E5BB5);
+        border-radius:3px;outline:none;}
+      .tl16-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;
+        background:#0A2540;border-radius:50%;cursor:pointer;border:3px solid #FFD166;}
+      .tl16-slider::-moz-range-thumb{width:22px;height:22px;background:#0A2540;
+        border-radius:50%;cursor:pointer;border:3px solid #FFD166;}
+      .tl16-yr-row{display:flex;justify-content:space-between;margin-top:8px;
+        font-size:11px;color:#5B6B7A;font-weight:600;}
+
+      .tl16-help{margin-top:12px;padding:8px 12px;background:#FFFCF5;
+        border-left:3px solid #B8860B;border-radius:6px;font-size:11px;
+        color:#5B6B7A;line-height:1.55;}
+
+      [data-theme="dark"] .tl16-sheet{background:#1F2635;}
+      [data-theme="dark"] .tl16-title{color:#F0F2F7;}
+      [data-theme="dark"] .tl16-tabs{background:#2A3344;}
+      [data-theme="dark"] .tl16-tab{background:#1F2635;color:#9AA5B1;border-color:#2A3344;}
+      [data-theme="dark"] .tl16-stage{background:linear-gradient(135deg,#1F2635,#2A3344);}
+      [data-theme="dark"] .tl16-y{color:#FFD166;}
+      [data-theme="dark"] .tl16-d{color:#F0F2F7;}
+      [data-theme="dark"] .tl16-stat{background:#2A3344;color:#F0F2F7;border-color:#3A4456;}
+    `;
+    const s = document.createElement("style");
+    s.id = "v159-tl-style";
+    s.textContent = css;
+    document.head.appendChild(s);
+  }
+
+  // ============================================================
+  // 3. 모달 본체
+  // ============================================================
+  function escapeHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, c =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function openTimelapse16(initialPlace) {
+    injectStyles();
+    const places = Object.keys(TL16);
+    let current = initialPlace && TL16[initialPlace] ? initialPlace : "gadeok";
+    let year = 2026;
+
+    // 기존 모달 있으면 제거
+    const existing = document.getElementById("tl16-modal");
+    if (existing) existing.remove();
+
+    const wrap = document.createElement("div");
+    wrap.className = "tl16-modal";
+    wrap.id = "tl16-modal";
+    wrap.innerHTML = `
+      <div class="tl16-sheet" onclick="event.stopPropagation()">
+        <button class="tl16-close" id="tl16-close">×</button>
+        <div class="tl16-title">⏱ 5년 타임랩스 — 우리 동네가 어떻게 바뀌나</div>
+        <div class="tl16-sub">
+          <b>16개 구·군 + 가덕도</b> 모두 포함. 슬라이더를 움직여 2026 → 2031을 비교하세요.
+          <span style="color:#B8860B;font-weight:700;">시당 8대 + 당협 공약 기반</span>
+        </div>
+        <div class="tl16-tabs" id="tl16-tabs">
+          ${places.map(p =>
+            `<div class="tl16-tab ${p === current ? "active" : ""}" data-place="${p}">
+              ${TL16[p].icon || "📍"} ${escapeHtml(TL16[p].label)}
+            </div>`).join("")}
+        </div>
+        <div class="tl16-stage" id="tl16-stage">
+          <div class="tl16-icon" id="tl16-icon"></div>
+          <div class="tl16-tag" id="tl16-tag"></div>
+          <div class="tl16-y" id="tl16-y"></div>
+          <div class="tl16-d" id="tl16-d"></div>
+          <div class="tl16-stats" id="tl16-stats"></div>
+        </div>
+        <div class="tl16-sw">
+          <input type="range" min="2026" max="2031" value="2026" step="1"
+            class="tl16-slider" id="tl16-slider">
+          <div class="tl16-yr-row">
+            <span>2026 (현재)</span>
+            <span>2027</span>
+            <span>2028</span>
+            <span>2029</span>
+            <span>2030</span>
+            <span>2031 (5년 후)</span>
+          </div>
+        </div>
+        <div class="tl16-help">
+          ℹ️ 데이터: 부산시당 8대 공약 + 16개 당협 고유 공약 + 가덕신공항 일정. 일부 일자는
+          예타·공관위 단계로 변동 가능.
+        </div>
+      </div>
+    `;
+    wrap.addEventListener("click", () => wrap.remove());
+    document.body.appendChild(wrap);
+
+    function update() {
+      const d = TL16[current][year];
+      if (!d) return;
+      wrap.querySelector("#tl16-tag").textContent = `${year} · ${d.tag}`;
+      wrap.querySelector("#tl16-y").textContent = year;
+      wrap.querySelector("#tl16-d").textContent = d.desc;
+      wrap.querySelector("#tl16-icon").textContent = TL16[current].icon || "";
+      wrap.querySelector("#tl16-stats").innerHTML = (d.stats || [])
+        .map(s => `<div class="tl16-stat">${escapeHtml(s)}</div>`).join("");
+      const stage = wrap.querySelector("#tl16-stage");
+      if (year >= 2029) stage.classList.add("future");
+      else stage.classList.remove("future");
+    }
+
+    wrap.querySelectorAll(".tl16-tab").forEach(t => {
+      t.onclick = (e) => {
+        e.stopPropagation();
+        wrap.querySelectorAll(".tl16-tab").forEach(x => x.classList.remove("active"));
+        t.classList.add("active");
+        current = t.dataset.place;
+        year = 2026;
+        wrap.querySelector("#tl16-slider").value = 2026;
+        update();
+      };
+    });
+
+    wrap.querySelector("#tl16-slider").addEventListener("input", e => {
+      year = parseInt(e.target.value);
+      update();
+    });
+
+    wrap.querySelector("#tl16-close").onclick = (e) => {
+      e.stopPropagation();
+      wrap.remove();
+    };
+
+    update();
+  }
+
+  // ============================================================
+  // 4. V15 진입점 + BIM.openTimelapse 교체
+  // ============================================================
+  function attach() {
+    if (!window.V15) window.V15 = {};
+    // V15.openTimelapse 교체 (integration_v15.js의 openCalculator 옆 위치)
+    window.V15.openTimelapse = openTimelapse16;
+    // BIM의 openTimelapse도 교체 (다른 곳에서 호출되는 경우 대비)
+    if (window.BIM) {
+      window.BIM.openTimelapse = openTimelapse16;
+    }
+    // 디버그 노출
+    window.V15.TL16 = TL16;
+    console.log("[v15.9] 5년 타임랩스 — 16개 구·군 + 가덕도 = 17개 거점 데이터 로드");
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(attach, 1000));
+  } else {
+    setTimeout(attach, 1000);
   }
 })();
 
