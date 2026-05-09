@@ -14883,14 +14883,17 @@ function sendMessage() {
         // LLM이 시스템 프롬프트를 무시하고 회피 표현을 만들었을 때 자동 교체
         aiText = sanitizeAiAvoidance(aiText);
 
-        // 🆕 v10.15 — AI 답변 라벨도 박형준 시장 페르소나 톤으로
-        answerResult.html = (answerResult.html || '') +
-          `<div style="margin-top:10px; padding:12px 14px; background:linear-gradient(135deg, #FFF7E0 0%, #FFFBEC 100%); border-left:4px solid var(--gold); border-radius:6px; font-size:13.5px; line-height:1.65;">
+        // 🆕 v10.19 P12 — 박형준 시장의 답변을 최상단으로, 관련 공약 및 시정 설명을 아래로
+        // (시민이 시장의 답변을 먼저 보고, 그 뒤에 공약 근거를 참고하는 자연스러운 흐름)
+        const _aiAnswerCard =
+          `<div style="margin-bottom:12px; padding:12px 14px; background:linear-gradient(135deg, #FFF7E0 0%, #FFFBEC 100%); border-left:4px solid var(--gold); border-radius:6px; font-size:13.5px; line-height:1.65;">
             <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
               <span style="display:inline-flex; padding:3px 9px; background:var(--navy); color:var(--gold); border-radius:999px; font-size:11px; font-weight:800;">🎙️ 박형준 시장의 답변</span>
             </div>
             ${escapeHtml(aiText).replace(/\n/g, '<br/>')}
           </div>`;
+        // 박형준 답변(위) + 관련 공약 및 시정 설명(아래) 순서로 결합
+        answerResult.html = _aiAnswerCard + (answerResult.html || '');
       }
       appendAiMessage({
         type, policy, confidence,
@@ -15816,8 +15819,10 @@ function scrollToTop() {
    — 인라인 SW로 CDN 폰트·외부 리소스 캐싱
    ========================================================= */
 (function setupPWA() {
-  // Service Worker 등록 (Blob URL 방식 — 별도 파일 없이 인라인)
-  if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+  // [v10.19 P11] Blob URL 기반 SW 등록은 모던 브라우저(Chrome 89+, Firefox 등)에서
+  // 보안 정책으로 차단됨. PWA 오프라인 캐싱은 Vercel CDN에 위임하고 SW 등록 시도 자체를
+  // 제거하여 콘솔을 깔끔하게 유지함. 홈 화면 설치(beforeinstallprompt)는 그대로 동작.
+  if (false /* SW disabled — v10.19 P11 */ && 'serviceWorker' in navigator && window.location.protocol !== 'file:') {
     const swCode = `
       const CACHE_NAME = 'busan-policy-v8-1';
       const CORE_ASSETS = [
@@ -16628,13 +16633,29 @@ async function saveToSupabase(input) {
       })
     });
     if (!response.ok) {
-      console.warn('Supabase 저장 실패:', await response.text());
+      // [v10.19 P11] HTTP 응답 실패도 1회만 경고 + 세션 disable
+      if (!window.__SUPABASE_DISABLED__) {
+        console.warn('[Supabase] 저장 실패 (HTTP ' + response.status + ') — 메모리 저장으로 폴백');
+        window.__SUPABASE_DISABLED__ = true;
+        try {
+          AI_CONFIG.supabaseUrl = '';
+          AI_CONFIG.supabaseKey = '';
+        } catch (_) {}
+      }
       return null;
     }
     const data = await response.json();
     return data[0]?.id || null;
   } catch (e) {
-    console.warn('Supabase 오류:', e.message);
+    // [v10.19 P11] 첫 실패 시 1회만 경고 + 세션 자동 disable
+    if (!window.__SUPABASE_DISABLED__) {
+      console.warn('[Supabase] 연결 실패 — 이 세션에서는 메모리 저장만 사용:', e.message);
+      window.__SUPABASE_DISABLED__ = true;
+      try {
+        AI_CONFIG.supabaseUrl = '';
+        AI_CONFIG.supabaseKey = '';
+      } catch (_) {}
+    }
     return null;
   }
 }
@@ -16679,7 +16700,11 @@ async function loadFromSupabase() {
     citizenInputs.sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
     console.log(`Supabase에서 ${imported.length}건 로드됨`);
   } catch (e) {
-    console.warn('Supabase 로드 오류:', e.message);
+    // [v10.19 P11] 로드 실패는 그냥 조용히 (이미 비활성화 됐을 수 있음)
+    if (!window.__SUPABASE_DISABLED__) {
+      console.warn('[Supabase] 로드 실패 — 메모리 저장으로 폴백:', e.message);
+      window.__SUPABASE_DISABLED__ = true;
+    }
   }
 }
 
@@ -17355,9 +17380,16 @@ async function busanApiRecent(limit = 30) {
 // 페이지 로드 직후 헬스체크 1회 (비동기, UI 블록 X)
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
+    // [v10.19 P11] URL 미설정 시 헬스체크 자체 skip
+    // — window.SUPABASE_URL_OVERRIDE가 주입된 경우에만 동작
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      // 미설정 환경에서는 조용히 비활성화 (콘솔 깔끔)
+      return;
+    }
     initSupabase();
     busanApiHealthCheck().then(ok => {
-      console.log('[v10.12] supabase healthy=' + ok + ' url=' + (SUPABASE_URL || '(미설정)'));
+      // 정상일 때만 한 번 출력, 실패 시 무음 (시민이 알 필요 없음)
+      if (ok) console.log('[v10.12] supabase healthy=true');
     });
   });
 }
