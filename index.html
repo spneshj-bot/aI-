@@ -28732,5 +28732,227 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
 
 </script>
 
+<!-- v15.12 우리 동네 카드 통합 — v12.4 카드 → V15 통합 모달 + 시정 4년 데이터 추가 -->
+<script id="v15-uridongne-integration">
+/* ================================================================
+ * v15.12 — "우리 동네에 오는 변화" 통합
+ *   v12.4 원본 카드 클릭 → V15 통합 지도 모달 (시당+당협+분구+후보)
+ *   + 박형준 시정 4년 데이터(done/doing/plan)도 추가 노출
+ *
+ * 통합 흐름:
+ *   1. v12.4의 openDistrictMap() 호출을 가로채서 V15.openDistrictMap() 실행
+ *   2. V15.showDistrictDetail()에 시정 4년 섹션 추가 (v12.4 원본 DISTRICT_DATA 활용)
+ *   3. 한글 키 ↔ V15 영문 ID 매핑 자동 처리
+ * ================================================================ */
+(function () {
+  "use strict";
+
+  // ============================================================
+  // 1. 한글 구·군 명 ↔ V15 영문 ID 매핑
+  // ============================================================
+  const KOREAN_TO_V15_ID = {
+    "중구": "junggu",
+    "서구": "seogu",
+    "동구": "donggu",
+    "영도구": "yeongdo",
+    "부산진구": "busanjin",
+    "동래구": "dongnae",
+    "남구": "namgu",
+    "북구": "bukgu",
+    "해운대구": "haeundae",
+    "사하구": "saha",
+    "금정구": "geumjeong",
+    "강서구": "gangseo",
+    "연제구": "yeonje",
+    "수영구": "suyeong",
+    "사상구": "sasang",
+    "기장군": "gijang"
+  };
+
+  // ============================================================
+  // 2. v12.4 원본 DISTRICT_DATA → V15 통합 모달 사용
+  // ============================================================
+
+  function escHtml(s) {
+    return String(s || "").replace(/[&<>"']/g, c =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  // v12.4 시정 4년 데이터를 컴팩트하게 렌더링
+  function renderShijeong4Years(districtId) {
+    // 한글 구 이름 추출 (V15 ID → 한글)
+    const koreanName = Object.keys(KOREAN_TO_V15_ID)
+      .find(k => KOREAN_TO_V15_ID[k] === districtId);
+    if (!koreanName) return "";
+
+    // v12.4의 글로벌 searchDistrict 함수 사용 (DISTRICT_DATA는 const 스코프에 갇혀있음)
+    let orig = null;
+    if (typeof window.searchDistrict === "function") {
+      orig = window.searchDistrict(koreanName);
+    }
+    // fallback: window.DISTRICT_DATA가 노출돼 있으면 직접
+    if (!orig && window.DISTRICT_DATA && window.DISTRICT_DATA[koreanName]) {
+      orig = window.DISTRICT_DATA[koreanName];
+    }
+    if (!orig) return "";
+    if (!orig.done && !orig.doing && !orig.plan) return "";
+
+    const sections = [
+      { key: "done", label: "✅ 완료된 사업", color: "#1F7A4D", items: orig.done || [] },
+      { key: "doing", label: "🔄 진행 중", color: "#1E5BB5", items: orig.doing || [] },
+      { key: "plan", label: "📋 계획", color: "#B8860B", items: orig.plan || [] }
+    ];
+
+    const totalCount = sections.reduce((s, sec) => s + sec.items.length, 0);
+    if (totalCount === 0) return "";
+
+    const sectionHtml = sections.filter(sec => sec.items.length > 0).map(sec => {
+      // 각 카테고리당 최대 5건만 노출 (펼치기 버튼 제공)
+      const visibleItems = sec.items.slice(0, 5);
+      const hiddenItems = sec.items.slice(5);
+
+      const itemHtml = (items) => items.map(item => `
+        <li style="padding: 8px 12px; margin-bottom: 5px; background: #fff;
+                   border-left: 3px solid ${sec.color}; border-radius: 4px;
+                   font-size: 12.5px; line-height: 1.55;">
+          <div style="font-weight: 700; color: #0A2540; margin-bottom: 3px;">
+            ${escHtml(item.title || "")}
+            ${item.tag ? `<span style="display: inline-block; padding: 1px 7px; background: ${sec.color}; color: #fff; border-radius: 8px; font-size: 9px; margin-left: 4px; vertical-align: middle;">${escHtml(item.tag)}</span>` : ""}
+          </div>
+          ${item.year ? `<div style="font-size: 11px; color: ${sec.color}; font-weight: 600; margin-bottom: 4px;">${escHtml(item.year)}</div>` : ""}
+          ${item.desc ? `<div style="font-size: 11.5px; color: #1F2933; line-height: 1.55;">${escHtml(item.desc)}</div>` : ""}
+        </li>
+      `).join("");
+
+      const moreHtml = hiddenItems.length > 0 ? `
+        <button class="v1512-more-btn" onclick="
+          const list = this.parentElement.querySelector('.v1512-hidden-list');
+          const isShow = list.classList.contains('show');
+          list.classList.toggle('show');
+          this.textContent = isShow ? '▼ ${hiddenItems.length}건 더 보기' : '▲ 접기';
+        " style="background: none; border: 1px dashed ${sec.color}; color: ${sec.color};
+                 padding: 5px 12px; border-radius: 18px; cursor: pointer;
+                 font-size: 11px; font-weight: 700; font-family: inherit; margin-top: 4px;">
+          ▼ ${hiddenItems.length}건 더 보기
+        </button>
+        <ul class="v1512-hidden-list" style="list-style: none; padding: 0; margin: 8px 0 0;
+                                              display: none;">
+          ${itemHtml(hiddenItems)}
+        </ul>
+      ` : "";
+
+      return `
+        <div style="margin-bottom: 14px;">
+          <div style="font-size: 12px; font-weight: 800; letter-spacing: 0.18em;
+                      color: ${sec.color}; margin-bottom: 8px; padding-bottom: 4px;
+                      border-bottom: 2px solid ${sec.color};">
+            ${escHtml(sec.label)} (${sec.items.length}건)
+          </div>
+          <ul style="list-style: none; padding: 0; margin: 0;">
+            ${itemHtml(visibleItems)}
+          </ul>
+          ${moreHtml}
+        </div>
+      `;
+    }).join("");
+
+    return `
+      <style>.v1512-hidden-list.show{display:block !important;}</style>
+      <div class="bd-section-title" style="color: #C8332A; border-bottom: 2px solid #C8332A;
+                                            font-size: 12px; font-weight: 800;
+                                            letter-spacing: 0.18em; margin: 18px 0 10px;
+                                            padding-bottom: 4px;">
+        ▸ 박형준 시정 4년 — ${escHtml(koreanName)}에서 진행한 사업 (총 ${totalCount}건)
+      </div>
+      ${sectionHtml}
+    `;
+  }
+
+  // ============================================================
+  // 3. V15.showDistrictDetail wrap — 시정 4년 섹션 추가
+  // ============================================================
+  function patchShowDetailV1512() {
+    if (!window.V15 || typeof window.V15.showDistrictDetail !== "function") {
+      setTimeout(patchShowDetailV1512, 300);
+      return;
+    }
+    if (window.__v1512_patched) return;
+    window.__v1512_patched = true;
+
+    const original = window.V15.showDistrictDetail;
+    window.V15.showDistrictDetail = function (districtId) {
+      original.call(this, districtId);
+      // 렌더 직후, 시정 4년 섹션을 후보 정보 섹션 위에 삽입
+      setTimeout(() => {
+        const card = document.querySelector(".bd-detail-card");
+        if (!card) return;
+
+        // 이미 추가됐으면 skip
+        if (card.querySelector(".v1512-shijeong-section")) return;
+
+        // 시정 4년 HTML 생성
+        const html = renderShijeong4Years(districtId);
+        if (!html) return; // 데이터 없으면 추가 안 함
+
+        // candidates 섹션 헤더 찾기 — 그 위에 삽입
+        const candidatesTitle = card.querySelector(".bd-section-title.candidates");
+        const insertWrap = document.createElement("div");
+        insertWrap.className = "v1512-shijeong-section";
+        insertWrap.innerHTML = html;
+
+        if (candidatesTitle) {
+          card.insertBefore(insertWrap, candidatesTitle);
+        } else {
+          card.appendChild(insertWrap);
+        }
+      }, 100);
+    };
+  }
+
+  // ============================================================
+  // 4. v12.4 원본 openDistrictMap() 함수 wrap
+  //    "우리 동네에 오는 변화" 카드 클릭 시 V15 통합 모달 열기
+  // ============================================================
+  function patchOpenDistrictMap() {
+    // V15.openDistrictMap이 준비되었는지 확인
+    if (!window.V15 || typeof window.V15.openDistrictMap !== "function") {
+      setTimeout(patchOpenDistrictMap, 300);
+      return;
+    }
+    if (window.__v1512_open_patched) return;
+    window.__v1512_open_patched = true;
+
+    // window.openDistrictMap (v12.4 원본 전역 함수) → V15.openDistrictMap으로 redirect
+    const v15Open = window.V15.openDistrictMap;
+    window.openDistrictMap = function () {
+      // v12.4 원본 모달이 열려 있으면 닫기 (충돌 방지)
+      const oldModal = document.getElementById("districtMapModal");
+      if (oldModal) {
+        oldModal.classList.remove("active");
+      }
+      document.body.style.overflow = "";
+      // V15 통합 모달 열기
+      v15Open();
+    };
+    console.log("[v15.12] 우리 동네 카드 → V15 통합 모달 redirect 완료");
+  }
+
+  // ============================================================
+  // 5. 부트
+  // ============================================================
+  function boot() {
+    patchShowDetailV1512();
+    patchOpenDistrictMap();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(boot, 1500));
+  } else {
+    setTimeout(boot, 1500);
+  }
+})();
+
+</script>
+
 </body>
 </html>
