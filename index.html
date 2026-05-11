@@ -2,10 +2,54 @@
 <!--
   ============================================================
   박형준 부산시장 후보 AI 정책비서
-  busan_ai_assistant v12.17 — Vercel 배포용 (index.html)
+  busan_ai_assistant v12.18 — Vercel 배포용 (index.html)
   ============================================================
   배포 환경: Vercel (메인 페이지 자동 인식)
-  원본 파일명: busan_ai_assistant_v12_17.html
+  원본 파일명: busan_ai_assistant_v12_18.html
+
+  v12.18 변경 사항 (2026.05.10) — 부산찬스 카드 텍스트 그림자 절제 (가독성 재개선):
+    🎯 사용자 피드백: "글씨가 black colour + heavy shadow로 가독성 떨어짐"
+
+    [v12.17의 부작용 - 과도한 그림자]
+    v12.17에서 가독성 강화를 위해 추가한 text-shadow가 오히려 글자를 흐릿하게 만듦
+    - blur 4-12px의 큰 그림자가 한글 획을 잠식
+    - alpha 0.50-0.70의 진한 그림자가 흰/노랑 글자보다 더 강하게 보임
+    - font-weight 900이 한글에는 답답하게 작용
+    - 결과: 텍스트 외곽이 검정으로 보이는 "ghost text" 현상
+
+    [v12.18 그림자 절제 - 선명한 분리만 유지]
+    ┌─────────────────────┬─────────────────────────┬─────────────────────┐
+    │ 요소                 │ v12.17 (과도)            │ v12.18 (적정)        │
+    ├─────────────────────┼─────────────────────────┼─────────────────────┤
+    │ eyebrow 그림자       │ 0 1px 3px + 0 0 8px      │ 0 1px 2px (단순)    │
+    │ headline 그림자      │ 0 2px 4px + 0 1px 2px    │ 0 1px 2px (단순)    │
+    │ headline alpha       │ 0.50 + 0.35              │ 0.30                │
+    │ strong 그림자        │ 0 2px 6px + 0 0 12px     │ 0 1px 2px (단순)    │
+    │ strong alpha         │ 0.70 + 0.40              │ 0.40                │
+    │ strong font-weight   │ 900                      │ 800                 │
+    │ strong 색상          │ #fff8c5 (옅은 노랑)       │ #ffe082 (또렷한 골드)│
+    │ desc 그림자          │ 0 1px 3px / 0.50         │ 0 1px 2px / 0.30    │
+    │ v(통계 숫자) 그림자   │ 0 1px 2px + 0 0 6px      │ 0 1px 1px (단순)    │
+    │ v alpha              │ 0.65                     │ 0.35                │
+    │ v font-weight        │ 900                      │ 800                 │
+    │ l(라벨) alpha        │ 0.55                     │ 0.30                │
+    │ cta 그림자           │ 0 1px 3px / 0.60         │ 0 1px 2px / 0.35    │
+    │ headline font-size   │ 18px                     │ 19px (살짝 키움)     │
+    │ v(통계 숫자) 크기     │ 16px                     │ 17px (살짝 키움)     │
+    └─────────────────────┴─────────────────────────┴─────────────────────┘
+
+    [핵심 원칙]
+    "선명한 분리"는 유지하되 "헤비한 블러"는 제거
+    - blur 12px+ 글로우 효과 완전 제거 (가독성 저해)
+    - 그림자 alpha 절반 감소 (글자 잠식 방지)
+    - font-weight 900 → 800 (한글 답답함 해소)
+    - 글자색 자체를 또렷하게 (그림자 의존도 감소)
+
+    [검증 절차]
+    Loop 1 [Planner]   : 그림자 blur·alpha·offset 측정 → 4가지 과도 요소 식별
+    Loop 1 [Generator] : 모든 .bch-promo-* 클래스 그림자 절제
+    Loop 2 [Evaluator] : 변경 적용 + 그림자 강도 정량 비교
+    Loop 3 [Evaluator] : 기존 기능 회귀 검증 + 시각 시뮬레이션
 
   v12.17 변경 사항 (2026.05.10) — 부산찬스 1호 공약 카드 가독성 강화:
     🎯 사용자 피드백: "부산찬스 공약 글자 색이 백그라운드에 묻혀 잘 안 보인다"
@@ -4859,31 +4903,31 @@
     margin-bottom: 6px;
     line-height: 1.4;
     padding-right: 80px;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.55), 0 0 8px rgba(0,0,0,0.35);  /* 노랑색 분리감 */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.35);  /* v12.18: blur 3→2, alpha 0.55→0.35, 글로우 제거 */
   }
   .bch-promo-headline {
-    font-size: 18px;
-    font-weight: 800;  /* 700 → 800 굵게 */
-    line-height: 1.4;
+    font-size: 19px;  /* v12.18: 18 → 19 살짝 키움 */
+    font-weight: 700;  /* v12.18: 800 → 700 (한글 답답함 해소) */
+    line-height: 1.45;
     margin-bottom: 6px;
     letter-spacing: -0.3px;
     color: #ffffff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.50), 0 1px 2px rgba(0,0,0,0.35);  /* 본문 헤드라인 그림자 */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.30);  /* v12.18: blur 4→2, alpha 0.50→0.30 (선명) */
   }
   .bch-promo-headline strong {
-    color: #fff8c5;  /* 더 밝고 부드러운 노랑 (이전 #ffd45b 너무 골드와 비슷) */
-    font-weight: 900;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.70), 0 0 12px rgba(0,0,0,0.40);  /* 강조 텍스트 강한 그림자 */
+    color: #ffe082;  /* v12.18: 더 진한 골드 (배경과 충분히 분리되는 노랑) */
+    font-weight: 800;  /* v12.18: 900 → 800 (한글 가독성) */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.40);  /* v12.18: blur 6→2, alpha 0.70→0.40, 글로우 제거 */
     border-bottom: 2px solid #ffd45b;
     padding-bottom: 1px;
   }
   .bch-promo-desc {
     font-size: 14.5px;
-    color: #ffffff;  /* rgba 88% → 100% 불투명 */
+    color: #ffffff;
     line-height: 1.55;
     margin-bottom: 14px;
-    font-weight: 500;  /* 가독성을 위한 약간 굵게 */
-    text-shadow: 0 1px 3px rgba(0,0,0,0.50);  /* 본문 그림자 */
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.30);  /* v12.18: blur 3→2, alpha 0.50→0.30 */
   }
   .bch-promo-stats {
     display: grid;
@@ -4905,32 +4949,32 @@
   }
   .bch-promo-v {
     display: block;
-    font-size: 16px;
-    font-weight: 900;
-    color: #fff8c5;  /* 더 밝은 노랑 */
+    font-size: 17px;  /* v12.18: 16 → 17 살짝 키움 */
+    font-weight: 800;  /* v12.18: 900 → 800 (한글 가독성) */
+    color: #ffe082;  /* v12.18: #fff8c5 → #ffe082 (배경 검정 박스에서 더 또렷한 골드) */
     letter-spacing: -0.3px;
-    line-height: 1.2;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.65), 0 0 6px rgba(0,0,0,0.30);  /* 숫자 강조 그림자 */
+    line-height: 1.25;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.35);  /* v12.18: blur 2→1, alpha 0.65→0.35, 글로우 제거 */
   }
   .bch-promo-l {
     display: block;
     font-size: 12.5px;
-    color: #ffffff;  /* 흰색 88% → 100% 불투명 */
+    color: #ffffff;
     line-height: 1.45;
     margin-top: 4px;
     letter-spacing: -0.1px;
-    font-weight: 500;  /* 가독성을 위해 약간 굵게 */
-    text-shadow: 0 1px 2px rgba(0,0,0,0.55);  /* 라벨 그림자 */
+    font-weight: 500;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.30);  /* v12.18: blur 2→1, alpha 0.55→0.30 */
   }
   .bch-promo-cta {
     text-align: right;
     font-size: 14.5px;
-    font-weight: 800;  /* 700 → 800 */
+    font-weight: 700;  /* v12.18: 800 → 700 */
     color: #ffd45b;
     letter-spacing: 0.2px;
     position: relative;
     z-index: 1;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.60);  /* CTA 그림자 */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.35);  /* v12.18: blur 3→2, alpha 0.60→0.35 */
   }
   @media (min-width: 640px) {
     .bch-promo-headline { font-size: 21px; }
