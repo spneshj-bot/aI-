@@ -2,10 +2,78 @@
 <!--
   ============================================================
   박형준 부산시장 후보 AI 정책비서
-  busan_ai_assistant v12.20 — Vercel 배포용 (index.html)
+  busan_ai_assistant v12.21 — Vercel 배포용 (index.html)
   ============================================================
   배포 환경: Vercel (메인 페이지 자동 인식)
-  원본 파일명: busan_ai_assistant_v12_20.html
+  원본 파일명: busan_ai_assistant_v12_21.html
+
+  v12.21 변경 사항 (2026.05.13) — 부산형 AI 4호 공약 번호·아이콘·강조 카드 통합 수정:
+    🎯 사용자 피드백 1: "부산형 AI 공약이 5번으로 되어있고 수정되지 않았다.
+                     아이콘도 비어 있다. 수정하라"
+    🎯 사용자 피드백 2: "부산찬스 공약처럼 핵심 내용들을 별도의 카드로 만들어라"
+
+    [문제 진단]
+    v12.20에서 공약 데이터는 업데이트했으나 세 가지 누락 발견:
+    1. 배열 순서: 부산형 AI가 5번째에 있어 화면에 "5호 공약 ★"로 표시
+       (발표 순서로는 4차이지만 no:5로 잘못 부여됨)
+    2. 아이콘 누락: MAIN6_ICONS는 'code' 키를 사용하는데,
+       부산형 AI의 code가 'ai-plus' → 'busan-ai'로 바뀌면서 매칭 실패
+       (이미지에서 부산형 AI 자리에 아이콘이 비어 있음)
+    3. 발표 시각 13:30 — 발표 이전 시각에 접속한 시민에게는 잠금 카드로 표시
+    4. 부산찬스(bch-promo)·BLH(blh-promo)처럼 별도 강조 카드 없음
+
+    [수정 1] 배열 순서 + no 값 교환 — 부산형 AI를 4번째로
+    ┌─────┬──────────────────────┬──────────────┬────────┐
+    │ no  │ title                │ 발표일        │ 발표순서│
+    ├─────┼──────────────────────┼──────────────┼────────┤
+    │  1  │ 부산찬스               │ 2026-04-29   │ 1차    │
+    │  2  │ 부산 특별시민           │ 2026-05-06   │ 2차    │
+    │  3  │ 월드클래스 부산          │ 2026-05-11   │ 3차    │
+    │  4  │ 부산형 AI ★ (이동)     │ 2026-05-13   │ 4차    │
+    │  5  │ 동서남북 골고루 성장 (이동)│ 2026-05-18   │ 5차    │
+    │  6  │ 내게 힘이 되는 부산      │ 추후 공지     │ 6차    │
+    └─────┴──────────────────────┴──────────────┴────────┘
+
+    [수정 2] MAIN6_ICONS에 'busan-ai' 키 추가
+    · 신규 아이콘: AI 칩 + 데이터 노드 (rect 박스 + 4개 데이터 점 + 12개 핀)
+
+    [수정 3] releaseDate 13:30 → 00:00 (당일 종일 노출)
+    · 발표 당일에는 종일 카드가 펼쳐진 상태로 보이도록
+    · 발표 직후 13:30보다 빠르게 시민에게 공개 (캠페인 노출 효과)
+
+    [수정 4 ★ 신규] 별도 강조 카드 bai-promo-banner 신설
+    부산찬스(bch-promo) 동일 패턴 적용 — 메인 페이지 상단 항상 노출
+    ┌─────────────────────────────────────────────────────┐
+    │ 🤖 1999년 인터넷이 도로였다면, 2026년 데이터가 도로다  │ [4호 공약 배지]
+    │ 수도권이 가져가던 부산 데이터, 이제 부산 AI가 만듭니다 │
+    │ 7대 AI 산업 × 5만 일자리 × 시민 1년차 체감             │
+    │ ┌───────────┬───────────┬───────────┐                │
+    │ │ 5만 일자리  │  7대 AI    │  2,800억  │                │
+    │ │ 임기 내 2만 │ 항만·해양··│ 5년 신규  │                │
+    │ │ +후속 3만   │ +해양방산★│ 0.47%     │                │
+    │ └───────────┴───────────┴───────────┘                │
+    │                              자세히 보기 →            │
+    └─────────────────────────────────────────────────────┘
+    · 색상: 보라 그라데이션 (#2E1065 → #6D28D9 → #3B0764)
+    · 골드 강조: #FFEB3B (부산찬스와 통일된 명도 240)
+    · 클릭 시: 메인 #4 부산형 AI 카드로 자동 스크롤·자동 펼침
+    · AI 비서 자동 질문: "부산형 AI 공약 — 7대 AI 산업과 5만 일자리..."
+
+    [디자인 일관성 — 별도 강조 카드 시리즈]
+    · 부산찬스(bch): 1호 공약 / 빨강 그라데이션 / 골드 #FFEB3B
+    · BLH(blh):     2호 공약 (특별시민 트랙) / 네이비+금색 / 골드
+    · 부산형 AI(bai): 4호 공약 / 보라 그라데이션 / 골드 #FFEB3B ★ 신규
+
+    [화면 변화]
+    Before: 4번 = 🔒 발표 예정 공약 / 5번 = 부산형 AI ★ (아이콘 빈칸)
+    After:  4번 = 🤖 부산형 AI ★ (AI 칩 아이콘) / 5번 = 🔒 발표 예정 공약
+            + 메인 상단에 보라 강조 카드 노출 (오늘 발표 4호 공약 강조)
+
+    [검증 절차]
+    Loop 1 [Planner]   : 사용자 캡처 분석 + 누락 4가지 원인 진단
+    Loop 1 [Generator] : 두 객체 swap + 아이콘 추가 + releaseDate 조정
+    Loop 2 [Generator] : bai-promo HTML 추가 + CSS 정의(부산찬스와 동형)
+    Loop 3 [Evaluator] : no=releaseOrder + 아이콘 + 강조 카드 + 회귀 검증
 
   v12.20 변경 사항 (2026.05.13) — 4호 공약 부산형 AI 발표 최종안 반영:
     🎯 사용자 요청: "4호공약 부산형 AI 발표를 오늘 진행한다. 발표 최종안 기반
@@ -5195,6 +5263,143 @@
     .blh-promo-l { font-size: 13px; }
   }
 
+  /* ============================================================
+     [v12.21] 부산형 AI 4호 공약 강조 띠 (bai-promo-*)
+     ============================================================
+     디자인: 부산찬스 카드(bch-promo) 동일 패턴 + 보라 톤
+     컬러: 보라 그라데이션 (#4C1D95 → #6D28D9 → #5B21B6)
+          + 골드 강조 (#FFEB3B - 부산찬스와 통일)
+     적용 가독성 강화: v12.19와 동일 (#FFEB3B 명도 240)
+     ============================================================ */
+  .bai-promo-banner {
+    background: linear-gradient(135deg, #2E1065 0%, #4C1D95 30%, #6D28D9 60%, #3B0764 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 22px 24px 20px;
+    margin: 20px 0 14px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 26px rgba(46, 16, 101, 0.45);
+    transition: all 0.25s ease;
+    border: 2px solid #FFEB3B;
+  }
+  .bai-promo-banner::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -30px;
+    width: 240px; height: 240px;
+    background: radial-gradient(circle, rgba(255, 235, 59, 0.22), transparent 70%);
+    pointer-events: none;
+  }
+  .bai-promo-banner::after {
+    content: '4호 공약';
+    position: absolute;
+    top: 14px; right: 18px;
+    background: #FFEB3B;
+    color: #2E1065;
+    font-size: 12.5px;
+    font-weight: 800;
+    padding: 4px 11px;
+    border-radius: 100px;
+    letter-spacing: 0.5px;
+    z-index: 2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  }
+  .bai-promo-banner:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 36px rgba(46, 16, 101, 0.55);
+    border-color: #fff;
+  }
+  .bai-promo-eyebrow {
+    font-size: 14px;
+    font-weight: 700;
+    color: #FFEB3B;
+    letter-spacing: -0.2px;
+    margin-bottom: 6px;
+    line-height: 1.4;
+    padding-right: 80px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.40);
+  }
+  .bai-promo-headline {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.45;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.30);
+  }
+  .bai-promo-headline strong {
+    color: #FFEE58;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.45);
+    border-bottom: 2px solid #FFEB3B;
+    padding-bottom: 1px;
+  }
+  .bai-promo-desc {
+    font-size: 14.5px;
+    color: #ffffff;
+    line-height: 1.55;
+    margin-bottom: 14px;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.30);
+  }
+  .bai-promo-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .bai-promo-stat {
+    background: rgba(0, 0, 0, 0.32);
+    border: 1.5px solid rgba(255, 235, 59, 0.65);
+    border-radius: 12px;
+    padding: 10px 8px 9px;
+    text-align: center;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .bai-promo-v {
+    display: block;
+    font-size: 17px;
+    font-weight: 800;
+    color: #FFEB3B;
+    letter-spacing: -0.3px;
+    line-height: 1.25;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.45);
+  }
+  .bai-promo-l {
+    display: block;
+    font-size: 12.5px;
+    color: #ffffff;
+    line-height: 1.45;
+    margin-top: 4px;
+    letter-spacing: -0.1px;
+    font-weight: 500;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.30);
+  }
+  .bai-promo-cta {
+    text-align: right;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #FFEB3B;
+    letter-spacing: 0.2px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.40);
+  }
+  @media (min-width: 640px) {
+    .bai-promo-headline { font-size: 21px; }
+    .bai-promo-eyebrow { font-size: 15px; }
+    .bai-promo-desc { font-size: 15.5px; }
+    .bai-promo-v { font-size: 19px; }
+    .bai-promo-l { font-size: 13px; }
+  }
+
   /* 배너 카드 */
   .main6-grid {
     display: grid;
@@ -7671,6 +7876,28 @@
       <div class="blh-promo-cta">자세히 보기 →</div>
     </div>
 
+    <!-- 🆕 v12.21 — 부산형 AI 4호 공약 강조 띠 (오늘 5/13 발표) -->
+    <div class="bai-promo-banner" id="baiPromoBanner" onclick="(function(){
+      const banners = document.querySelectorAll('.main6-banner');
+      const target = Array.from(banners).find(b => b.getAttribute('data-code')==='busan-ai');
+      if (target) {
+        document.querySelectorAll('.main6-banner.expanded').forEach(b => b.classList.remove('expanded'));
+        target.classList.add('expanded');
+        setTimeout(() => target.scrollIntoView({behavior:'smooth', block:'start'}), 100);
+      }
+      try{ if(typeof setInputAndAsk==='function') setTimeout(()=>setInputAndAsk('부산형 AI 공약 — 7대 AI 산업과 5만 일자리는 어떻게 만들어지나요?'), 700);}catch(e){}
+    })()" role="button" tabindex="0" aria-label="부산형 AI 4호 공약 자세히 보기">
+      <div class="bai-promo-eyebrow">🤖 1999년 인터넷이 도로였다면, 2026년 데이터가 도로다</div>
+      <div class="bai-promo-headline">수도권이 가져가던 부산 데이터, <strong>이제 부산 AI가 만듭니다</strong></div>
+      <div class="bai-promo-desc">7대 AI 산업 × 5만 일자리 × 시민 1년차 체감 · 박형준이 첫 삽을 떴고 임기 내 매듭짓는다</div>
+      <div class="bai-promo-stats">
+        <div class="bai-promo-stat"><span class="bai-promo-v">5만 일자리</span><span class="bai-promo-l">임기 내 2만 + 후속 3만 매듭 (2026~2035)</span></div>
+        <div class="bai-promo-stat"><span class="bai-promo-v">7대 AI</span><span class="bai-promo-l">항만·해양·조선·제조·금융·시민 + 해양방산 ★</span></div>
+        <div class="bai-promo-stat"><span class="bai-promo-v">2,800억</span><span class="bai-promo-l">5년 신규 재원 (일반회계 0.47%)</span></div>
+      </div>
+      <div class="bai-promo-cta">자세히 보기 →</div>
+    </div>
+
     <div class="main6-grid" id="main6Grid">
       <!-- JS로 6개 배너 자동 생성 -->
     </div>
@@ -8519,57 +8746,12 @@ const MAIN_PLEDGES_6 = [
   },
   {
     no: 4,
-    code: "balanced-growth",
-    title: "동서남북 골고루 성장",
-    subtitle: "내 동네에 살아도 부산이 가깝다",
-    headline: "6권역 동시 매듭 + B-Night Bus 24시간 이동권 (13가지 약속)",
-    coreMsg: "어느 한 지역도 늦지 않게, 그 지역 자산으로 그 지역 문제를 푼다",
-    releaseDate: "2026-05-18T14:30:00+09:00",
-    releaseLabel: "5차 공약 발표 (2026.05.18 월 14:30 시의회 브리핑룸)",
-    releaseOrder: 5,
-    keyNumbers: [
-      { v: "13가지 약속", l: "6권역(강서·강동·원도심·동래·해운대·기장) 동시 매듭" },
-      { v: "1km/30분 → 직선", l: "구만덕→신만덕 40년 단절 해소 (만덕대로 상부공원)" },
-      { v: "24시간 이동권", l: "B-Night Bus 4종 (2열 일반버스·야간 안심버스·청년 PM·귀가패스)" }
-    ],
-    promises: [
-      "💡 서부산(강서) — 낙동강 국가도시정원 1호(삼락 250만㎡, 28지정)·낙동강하구 국가도시공원(을숙도 230만㎡, 26하 신청)·에코델타시티 8,916세대",
-      "💡 강동(사상·사하) — 사상 스마트시티·구덕운동장·사상 만덕자산·청년주택·사상 장애인 통합돌봄",
-      "💡 원도심 — 산복도로 직선화·K-pop 아레나 2만석·동천축 6대 거점·BIFF·자갈치·국제여객터미널",
-      "💡 동래·북부산 — 구만덕↔신만덕 1km 40년 단절 해소·만덕대로 상부공원 1차(만덕IC~만덕사거리, 600~900m)",
-      "💡 해운대 — BTX 센텀역·동부산 디지털혁신타운·해운대 응급의료복합센터(임기 내 1단계 개원)",
-      "💡 기장 — 오시리아 BTX 종점·기장 부임자조기병원·정관 학교 인프라",
-      "🚌 B-Night Bus ① 2열 좌석형 일반버스 — 1년 100대, 3년 전면 전환",
-      "🚌 B-Night Bus ② 야간 안심버스(여성·대학생) — 23시~새벽2시, 대학가·원룸·병원, AI SafeWalk 연동",
-      "🚌 B-Night Bus ③ 청년 전기자전거·킥보드 무료 — 19~39세 월 1시간, 동백전 시민증 연동",
-      "🚌 B-Night Bus ④ 행사 후 귀가패스 — 부산불꽃축제·BIFF·콘서트 종료 후 시민 우선 셔틀",
-      "🌳 동천축 6대 거점 — 성지곡 → 서면 → 부전천 → 광무교 → 국제금융단지(부산문현) → 동천 하구",
-      "⚠️ 안전 트리거 — 26.4.5 만덕 인근 싱크홀 발생 → 주기적 지하 탐사 체계 구축 후 착공(조건부)",
-      "🏛️ 거버넌스 — 시장 직속 「6권역 동시 매듭 추진단」 (분기 시장 주재, 권역별 진척률 공개)"
-    ],
-    benefits: [
-      { who: "강서구 주민", amt: "낙동강 국가도시정원 1호·국가도시공원·에코델타 신주거", note: "서부산 변두리에서 부산 신중심으로 (정원·공원 480만㎡)" },
-      { who: "강동(사상·사하) 주민", amt: "사상 만덕자산·청년주택·장애인 통합돌봄", note: "구덕운동장·낙동강 자산 결합" },
-      { who: "원도심 어르신·청년", amt: "K-pop 아레나 2만석·산복도로 직선화·동천 6대 거점", note: "BIFF·자갈치·시민회관 연결축" },
-      { who: "동래·북구 주민", amt: "구만덕-신만덕 직선 개통·만덕대로 상부공원 1차", note: "40년 단절 해소 (서울 동부간선·국회대로 모델)" },
-      { who: "해운대·기장 주민", amt: "BTX 센텀·오시리아 종점·해운대 응급복합·기장 부임자조기", note: "동부산 의료·교통 통합 거점" },
-      { who: "야간 통근자·여성·대학생", amt: "B-Night Bus 24시간 시민 이동권", note: "AI SafeWalk 연동 안심귀가" }
-    ],
-    color: "#A16207",
-    accent: "#B8860B",
-    targetGroup: "16개 구·군 모든 시민 (서부산·강동·원도심·동래·해운대·기장 6권역)",
-    timeline: "2026 6권역 동시 착수·B-Night Bus 100대 → 2027 만덕대로 상부공원 1차 착공 → 2028 BTX 1단계 완공 → 2030 단계적 완성",
-    relatedCategories: ["교통편리", "도심개조", "맵씨부산"],
-    relatedPledges: ["만덕~센텀 대심도 개통(2026.2)", "에코델타시티 8,916세대 건립", "사상공업지역 전국 최초 산업혁신구역 지정", "낙동강하구 국가도시공원 1호 지정(을숙도, 26하 신청)", "부산낙동강 국가정원(삼락 250만㎡, 28지정)", "산복도로 르네상스·동천 문화하천화"]
-  },
-  {
-    no: 5,
     code: "busan-ai",
     title: "부산형 AI ★",
     subtitle: "부산만이 만들 수 있는 AI를 만들겠습니다",
     headline: "1999년 인터넷이 도로였다면, 2026년 데이터가 도로다. 박형준이 첫 삽을 떴다",
     coreMsg: "데이터가 길을 열고 · AI가 부산의 미래 먹거리를 만들고 · 청년 5만 일자리가 자란다",
-    releaseDate: "2026-05-13T13:30:00+09:00",
+    releaseDate: "2026-05-13T00:00:00+09:00",
     releaseLabel: "4차 공약 발표 (2026.05.13 수 13:30 시의회 브리핑룸)",
     releaseOrder: 4,
     keyNumbers: [
@@ -8650,6 +8832,51 @@ const MAIN_PLEDGES_6 = [
       title: "1999년 인터넷 → 2026년 데이터",
       story: "1999년 한국 정부가 인터넷망을 도로처럼 깔지 않았다면 네이버·카카오·K-콘텐츠는 자라지 못했습니다. 2026년 데이터는 'AI의 원유'가 아니라 'AI의 도로'입니다. 박형준 1기에 부산이 데이터 도로의 첫 삽을 떴습니다. 다음 시정의 과제는 그 도로 위에 차를 달리게 하는 것 — 산업과 일자리를 얹는 일입니다."
     }
+  },
+  {
+    no: 5,
+    code: "balanced-growth",
+    title: "동서남북 골고루 성장",
+    subtitle: "내 동네에 살아도 부산이 가깝다",
+    headline: "6권역 동시 매듭 + B-Night Bus 24시간 이동권 (13가지 약속)",
+    coreMsg: "어느 한 지역도 늦지 않게, 그 지역 자산으로 그 지역 문제를 푼다",
+    releaseDate: "2026-05-18T14:30:00+09:00",
+    releaseLabel: "5차 공약 발표 (2026.05.18 월 14:30 시의회 브리핑룸)",
+    releaseOrder: 5,
+    keyNumbers: [
+      { v: "13가지 약속", l: "6권역(강서·강동·원도심·동래·해운대·기장) 동시 매듭" },
+      { v: "1km/30분 → 직선", l: "구만덕→신만덕 40년 단절 해소 (만덕대로 상부공원)" },
+      { v: "24시간 이동권", l: "B-Night Bus 4종 (2열 일반버스·야간 안심버스·청년 PM·귀가패스)" }
+    ],
+    promises: [
+      "💡 서부산(강서) — 낙동강 국가도시정원 1호(삼락 250만㎡, 28지정)·낙동강하구 국가도시공원(을숙도 230만㎡, 26하 신청)·에코델타시티 8,916세대",
+      "💡 강동(사상·사하) — 사상 스마트시티·구덕운동장·사상 만덕자산·청년주택·사상 장애인 통합돌봄",
+      "💡 원도심 — 산복도로 직선화·K-pop 아레나 2만석·동천축 6대 거점·BIFF·자갈치·국제여객터미널",
+      "💡 동래·북부산 — 구만덕↔신만덕 1km 40년 단절 해소·만덕대로 상부공원 1차(만덕IC~만덕사거리, 600~900m)",
+      "💡 해운대 — BTX 센텀역·동부산 디지털혁신타운·해운대 응급의료복합센터(임기 내 1단계 개원)",
+      "💡 기장 — 오시리아 BTX 종점·기장 부임자조기병원·정관 학교 인프라",
+      "🚌 B-Night Bus ① 2열 좌석형 일반버스 — 1년 100대, 3년 전면 전환",
+      "🚌 B-Night Bus ② 야간 안심버스(여성·대학생) — 23시~새벽2시, 대학가·원룸·병원, AI SafeWalk 연동",
+      "🚌 B-Night Bus ③ 청년 전기자전거·킥보드 무료 — 19~39세 월 1시간, 동백전 시민증 연동",
+      "🚌 B-Night Bus ④ 행사 후 귀가패스 — 부산불꽃축제·BIFF·콘서트 종료 후 시민 우선 셔틀",
+      "🌳 동천축 6대 거점 — 성지곡 → 서면 → 부전천 → 광무교 → 국제금융단지(부산문현) → 동천 하구",
+      "⚠️ 안전 트리거 — 26.4.5 만덕 인근 싱크홀 발생 → 주기적 지하 탐사 체계 구축 후 착공(조건부)",
+      "🏛️ 거버넌스 — 시장 직속 「6권역 동시 매듭 추진단」 (분기 시장 주재, 권역별 진척률 공개)"
+    ],
+    benefits: [
+      { who: "강서구 주민", amt: "낙동강 국가도시정원 1호·국가도시공원·에코델타 신주거", note: "서부산 변두리에서 부산 신중심으로 (정원·공원 480만㎡)" },
+      { who: "강동(사상·사하) 주민", amt: "사상 만덕자산·청년주택·장애인 통합돌봄", note: "구덕운동장·낙동강 자산 결합" },
+      { who: "원도심 어르신·청년", amt: "K-pop 아레나 2만석·산복도로 직선화·동천 6대 거점", note: "BIFF·자갈치·시민회관 연결축" },
+      { who: "동래·북구 주민", amt: "구만덕-신만덕 직선 개통·만덕대로 상부공원 1차", note: "40년 단절 해소 (서울 동부간선·국회대로 모델)" },
+      { who: "해운대·기장 주민", amt: "BTX 센텀·오시리아 종점·해운대 응급복합·기장 부임자조기", note: "동부산 의료·교통 통합 거점" },
+      { who: "야간 통근자·여성·대학생", amt: "B-Night Bus 24시간 시민 이동권", note: "AI SafeWalk 연동 안심귀가" }
+    ],
+    color: "#A16207",
+    accent: "#B8860B",
+    targetGroup: "16개 구·군 모든 시민 (서부산·강동·원도심·동래·해운대·기장 6권역)",
+    timeline: "2026 6권역 동시 착수·B-Night Bus 100대 → 2027 만덕대로 상부공원 1차 착공 → 2028 BTX 1단계 완공 → 2030 단계적 완성",
+    relatedCategories: ["교통편리", "도심개조", "맵씨부산"],
+    relatedPledges: ["만덕~센텀 대심도 개통(2026.2)", "에코델타시티 8,916세대 건립", "사상공업지역 전국 최초 산업혁신구역 지정", "낙동강하구 국가도시공원 1호 지정(을숙도, 26하 신청)", "부산낙동강 국가정원(삼락 250만㎡, 28지정)", "산복도로 르네상스·동천 문화하천화"]
   },
   {
     no: 6,
@@ -22513,10 +22740,12 @@ const MAIN6_ICONS = {
   "special-citizen": `<svg class="duo-icon" viewBox="0 0 24 24"><circle class="bg" cx="12" cy="12" r="9"/><path class="stroke-fg" d="M12 7l1.5 3 3.3.5-2.4 2.3.6 3.3-3-1.6-3 1.6.6-3.3-2.4-2.3 3.3-.5z" stroke-linejoin="round"/></svg>`,
   // ③ 세계도시 부산 — 지구본
   "global-city": `<svg class="duo-icon" viewBox="0 0 24 24"><circle class="bg" cx="12" cy="12" r="9"/><circle class="stroke-fg" cx="12" cy="12" r="7"/><path class="stroke-fg" d="M5 12h14M12 5c2.5 3 2.5 11 0 14M12 5c-2.5 3-2.5 11 0 14"/></svg>`,
-  // ④ 동서남북 — 나침반
+  // ④ 부산형 AI — AI 칩 + 데이터 노드 (v12.21: 발표 순서 재배치)
+  "busan-ai": `<svg class="duo-icon" viewBox="0 0 24 24"><rect class="bg" x="5" y="5" width="14" height="14" rx="2"/><rect class="stroke-fg" x="8" y="8" width="8" height="8" rx="1" fill="none"/><path class="stroke-fg" d="M5 9h-2M5 12h-2M5 15h-2M21 9h-2M21 12h-2M21 15h-2M9 5v-2M12 5v-2M15 5v-2M9 21v-2M12 21v-2M15 21v-2"/><circle class="fg" cx="10" cy="10" r="0.8"/><circle class="fg" cx="14" cy="10" r="0.8"/><circle class="fg" cx="10" cy="14" r="0.8"/><circle class="fg" cx="14" cy="14" r="0.8"/></svg>`,
+  // 이전 명칭 호환 (v12.20 이전 — 부산형 AI)
+  "ai-plus": `<svg class="duo-icon" viewBox="0 0 24 24"><rect class="bg" x="5" y="5" width="14" height="14" rx="2"/><rect class="stroke-fg" x="8" y="8" width="8" height="8" rx="1" fill="none"/><path class="stroke-fg" d="M5 9h-2M5 12h-2M5 15h-2M21 9h-2M21 12h-2M21 15h-2M9 5v-2M12 5v-2M15 5v-2M9 21v-2M12 21v-2M15 21v-2"/><circle class="fg" cx="10" cy="10" r="0.8"/><circle class="fg" cx="14" cy="10" r="0.8"/><circle class="fg" cx="10" cy="14" r="0.8"/><circle class="fg" cx="14" cy="14" r="0.8"/></svg>`,
+  // ⑤ 동서남북 — 나침반
   "balanced-growth": `<svg class="duo-icon" viewBox="0 0 24 24"><circle class="bg" cx="12" cy="12" r="9"/><circle class="stroke-fg" cx="12" cy="12" r="7"/><path class="fg" d="M12 6.5l1.8 4 4 1.8-4 1.8-1.8 4-1.8-4-4-1.8 4-1.8z" stroke="currentColor" stroke-width="0.5"/></svg>`,
-  // ⑤ AI플러스 — 회로 + 상승 화살표
-  "ai-plus": `<svg class="duo-icon" viewBox="0 0 24 24"><rect class="bg" x="3" y="3" width="18" height="18" rx="3"/><path class="stroke-fg" d="M7 16l3-3 3 2 4-5M14 8h3v3"/><circle class="fg" cx="7" cy="16" r="1.5"/><circle class="fg" cx="10" cy="13" r="1.5"/><circle class="fg" cx="13" cy="15" r="1.5"/><circle class="fg" cx="17" cy="10" r="1.5"/></svg>`,
   // ⑥ 내게 힘이 되는 부산 — 손에 받쳐진 하트 (돌봄)
   "force-with-me": `<svg class="duo-icon" viewBox="0 0 24 24"><path class="bg" d="M3 13c0-1 1-2 2-2h14c1 0 2 1 2 2v3c0 2-2 3-4 3H7c-2 0-4-1-4-3z"/><path class="fg" d="M12 11s-3-2-3-4.5C9 5 10 4 11.2 4c.7 0 1.4.4 1.8 1 .4-.6 1.1-1 1.8-1C16 4 17 5 17 6.5 17 9 14 11 12 11z"/></svg>`
 };
