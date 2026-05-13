@@ -2,10 +2,74 @@
 <!--
   ============================================================
   박형준 부산시장 후보 AI 정책비서
-  busan_ai_assistant v12.19 — Vercel 배포용 (index.html)
+  busan_ai_assistant v12.20 — Vercel 배포용 (index.html)
   ============================================================
   배포 환경: Vercel (메인 페이지 자동 인식)
-  원본 파일명: busan_ai_assistant_v12_19.html
+  원본 파일명: busan_ai_assistant_v12_20.html
+
+  v12.20 변경 사항 (2026.05.13) — 4호 공약 부산형 AI 발표 최종안 반영:
+    🎯 사용자 요청: "4호공약 부산형 AI 발표를 오늘 진행한다. 발표 최종안 기반
+                   공약 업데이트 + 핵심 내용 별도 카드 + 전재수 비교 + 공약비교 업데이트"
+
+    [업데이트 1] MAIN_PLEDGES_6 #5 (부산형 AI) 발표 최종안 전면 반영
+    ┌─────────────────────────┬─────────────────────────────────────┐
+    │ 항목                     │ v12.20 발표 최종안 내용                │
+    ├─────────────────────────┼─────────────────────────────────────┤
+    │ title                    │ 부산형 AI ★ (AI+부산에서 명칭 통일)    │
+    │ subtitle                 │ 부산만이 만들 수 있는 AI를 만들겠습니다 │
+    │ headline                 │ 1999년 인터넷=도로 → 2026년 데이터=도로│
+    │ keyNumbers (3개)         │ 5만 일자리·7대 AI 산업·2,800억          │
+    │ promises (13개)          │ 4약속 구조 (데이터시티+7대 AI+5만+로드맵)│
+    │ benefits (6개 대상)      │ 청년/전 연령/시민/산업/스타트업/방산   │
+    │ keyHighlights (6장)      │ ⭐ 한눈에 보는 핵심 - 별도 카드 신규    │
+    │ historicMetaphor         │ 1999년 인터넷 → 2026년 데이터 비유 카드│
+    │ competitorCompare        │ 전재수 후보 비교 카드 (전면 신규)       │
+    └─────────────────────────┴─────────────────────────────────────┘
+
+    [업데이트 2] 새 UI 컴포넌트 신설 (2호 공약 스타일 별도 카드)
+    ┌─────────────────────┬─────────────────────────────────────┐
+    │ 컴포넌트              │ 역할                                  │
+    ├─────────────────────┼─────────────────────────────────────┤
+    │ .m6-highlights       │ ⭐ 6개 핵심 하이라이트 카드 그리드      │
+    │ .m6-metaphor         │ 📖 역사적 비유 박스 (Gowun Batang 글꼴) │
+    │ .m6-compare          │ ⚖️ 후보 비교 컨테이너                  │
+    │ .m6-compare-headlines│ 양측 한 줄 요약 (파랑/빨강 분리)        │
+    │ .m6-compare-table    │ 📊 5개 항목별 차이 비교 표              │
+    │ .m6-compare-only     │ ⭐ 박형준만 약속하는 5가지              │
+    │ .m6-compare-questions│ ❓ 시민이 묻고 싶은 3가지 질문          │
+    └─────────────────────┴─────────────────────────────────────┘
+
+    [업데이트 3] VS_TOPICS의 AI 비교 활성화
+    · jun 필드 null → 전재수 부산 AI 공약 내용 입력
+    · 전재수 점수 추가: detail=C, budget=C, timeline=C, feasibility=C
+    · 박형준 측 내용도 발표 최종안에 맞게 업데이트
+
+    [발표 내용 핵심 요소 모두 반영]
+    ✅ 부산만이 만들 수 있는 AI (THESIS)
+    ✅ 부산 데이터 시티 + AI Hub-Busan
+    ✅ 7대 AI 산업 (항만·해양·조선·제조·금융·시민생활 + 해양방산★)
+    ✅ 피지컬 AI + 해양반도체 (두 횡단축)
+    ✅ AI 일자리 5만 4단계 (임기 내 2만 + 후속 3만)
+    ✅ AI 1만 인재 양성 (청년 2천 + 재직자 5천 + 중장년 3천)
+    ✅ 시민 1년차 체감 5장면 (교통·재난·응급·돌봄·시민앱)
+    ✅ 실행 로드맵 4단계 (2026~2035)
+    ✅ 박형준 1기 자산 (3.6조 + 1.8조 + 세계 12위)
+    ✅ 1999년 인터넷 → 2026년 데이터 역사적 비유
+    ✅ 5년 2,800억 (일반회계 0.47%, 4종 재원 분산)
+
+    [전재수 비교 카드 핵심 요소]
+    ✅ 한 줄 요약 (이미 깐 길 vs 처음부터 시작)
+    ✅ 항목별 5개 차이 (큰 그림·돈·일자리·인재·시민 체감)
+    ✅ 박형준만 약속하는 5가지 (해양방산·해양반도체·피지컬·무료개방·체감)
+    ✅ 시민이 묻고 싶은 3가지 (10조 분담·아이토반 중복·UN허브 권한)
+
+    [검증 절차]
+    Loop 1 [Planner]   : 발표 최종안 PDF 분석 + 인포그래픽 비교본 검증
+    Loop 1 [Generator] : 공약 데이터 구조 설계 (keyHighlights·competitorCompare)
+    Loop 2 [Generator] : MAIN_PLEDGES_6 #5 전면 교체 + 카드 렌더링 확장
+    Loop 2 [Generator] : VS_TOPICS jun 필드 활성화 + 박형준 측 갱신
+    Loop 2 [Generator] : 신규 CSS 컴포넌트 7개 추가
+    Loop 3 [Evaluator] : JS 무결성 + 기능 회귀 + 시각 검증
 
   v12.19 변경 사항 (2026.05.10) — 부산찬스 카드 컬러 텍스트 명도 강화:
     🎯 사용자 피드백: "색깔 있는 글자의 밝기를 높여줘. 배경과 대비되게"
@@ -5365,7 +5429,329 @@
     color: #7a6940;
     margin-top: 2px;
   }
-  
+
+  /* ============================================================
+     [v12.20] 부산형 AI 공약 - 별도 카드 컴포넌트
+     ============================================================
+     ⭐ 한눈에 보는 핵심 (keyHighlights)
+     📖 역사적 비유 (historicMetaphor)
+     ⚖️ 후보 비교 (competitorCompare)
+     ============================================================ */
+
+  /* ⭐ 한눈에 보는 핵심 - 별도 하이라이트 카드 그리드 */
+  .m6-highlights {
+    background: linear-gradient(135deg, #f8f4ff 0%, #f3edff 100%);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border-left: 3px solid #7C3AED;
+  }
+  .m6-highlights-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #5B21B6;
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
+  }
+  .m6-highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 480px) {
+    .m6-highlights-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  .m6-highlight-card {
+    background: #fff;
+    border: 1.5px solid rgba(124, 58, 237, 0.2);
+    border-radius: 10px;
+    padding: 11px 12px;
+    display: flex;
+    gap: 10px;
+    transition: all 0.2s ease;
+  }
+  .m6-highlight-card:hover {
+    border-color: #7C3AED;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+  }
+  .m6-highlight-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .m6-highlight-body { flex: 1; min-width: 0; }
+  .m6-highlight-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #4C1D95;
+    margin-bottom: 3px;
+    line-height: 1.35;
+  }
+  .m6-highlight-note {
+    font-size: 12.5px;
+    color: #6B4C9A;
+    line-height: 1.5;
+  }
+
+  /* 📖 역사적 비유 (1999 → 2026) */
+  .m6-metaphor {
+    background: linear-gradient(135deg, #FFF8E7 0%, #FEEFD0 100%);
+    border-radius: 12px;
+    padding: 13px 15px;
+    margin-bottom: 12px;
+    border: 1.5px solid #C9A249;
+    position: relative;
+  }
+  .m6-metaphor::before {
+    content: '';
+    position: absolute;
+    top: -2px; left: -2px; right: -2px; bottom: -2px;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #C9A249, transparent);
+    z-index: -1;
+    opacity: 0.3;
+  }
+  .m6-metaphor-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #6B4500;
+    margin-bottom: 6px;
+    letter-spacing: 0.2px;
+  }
+  .m6-metaphor-story {
+    font-size: 13.5px;
+    color: #4d3500;
+    line-height: 1.65;
+    font-family: 'Gowun Batang', 'Noto Serif KR', serif;
+  }
+
+  /* ⚖️ 후보 비교 카드 (전재수와의 비교) */
+  .m6-compare {
+    background: linear-gradient(180deg, #fafbff 0%, #f5f7fb 100%);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1.5px solid #D1D5DB;
+  }
+  .m6-compare-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0B1E3F;
+    margin-bottom: 12px;
+    text-align: center;
+    letter-spacing: 0.3px;
+  }
+
+  /* 비교 — 헤드라인 (양측 한 줄 요약) */
+  .m6-compare-headlines {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  @media (max-width: 480px) {
+    .m6-compare-headlines { grid-template-columns: 1fr; }
+  }
+  .m6-compare-side {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    border: 2px solid;
+  }
+  .m6-compare-side.mine {
+    border-color: #1E5BB5;
+    background: linear-gradient(135deg, #EAF1FB 0%, #fff 100%);
+  }
+  .m6-compare-side.opponent {
+    border-color: #C8332A;
+    background: linear-gradient(135deg, #FCEEEE 0%, #fff 100%);
+  }
+  .m6-compare-side-name {
+    font-size: 12px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .m6-compare-side.mine .m6-compare-side-name { color: #1E5BB5; }
+  .m6-compare-side.opponent .m6-compare-side-name { color: #C8332A; }
+  .m6-compare-side-oneline {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0B1E3F;
+    margin-bottom: 4px;
+    line-height: 1.35;
+  }
+  .m6-compare-side-detail {
+    font-size: 12.5px;
+    color: #4B5563;
+    line-height: 1.5;
+  }
+
+  /* 비교 — 항목별 표 */
+  .m6-compare-table {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #E5E7EB;
+  }
+  .m6-compare-table-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #0B1E3F;
+    margin-bottom: 10px;
+  }
+  .m6-compare-row {
+    padding: 9px 0;
+    border-bottom: 1px dashed #E5E7EB;
+  }
+  .m6-compare-row:last-child { border-bottom: none; }
+  .m6-compare-row-topic {
+    font-size: 13px;
+    font-weight: 800;
+    color: #0B1E3F;
+    margin-bottom: 7px;
+  }
+  .m6-compare-row-cells {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  @media (max-width: 480px) {
+    .m6-compare-row-cells { grid-template-columns: 1fr; }
+  }
+  .m6-compare-cell {
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1px solid;
+  }
+  .m6-compare-cell.mine {
+    background: rgba(30, 91, 181, 0.04);
+    border-color: rgba(30, 91, 181, 0.25);
+    color: #0B1E3F;
+  }
+  .m6-compare-cell.opponent {
+    background: rgba(200, 51, 42, 0.04);
+    border-color: rgba(200, 51, 42, 0.25);
+    color: #581717;
+  }
+  .m6-compare-cell-tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 6px;
+    margin-right: 5px;
+    letter-spacing: 0.5px;
+  }
+  .m6-compare-cell.mine .m6-compare-cell-tag {
+    background: #1E5BB5;
+    color: #fff;
+  }
+  .m6-compare-cell.opponent .m6-compare-cell-tag {
+    background: #C8332A;
+    color: #fff;
+  }
+
+  /* 비교 — 박형준만 약속하는 N가지 */
+  .m6-compare-only {
+    background: linear-gradient(135deg, #EAF1FB 0%, #f6f9fd 100%);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1.5px solid #1E5BB5;
+  }
+  .m6-compare-only-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #0B1E3F;
+    margin-bottom: 10px;
+  }
+  .m6-compare-only-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .m6-compare-only-item {
+    background: #fff;
+    border: 1px solid rgba(30, 91, 181, 0.2);
+    border-radius: 8px;
+    padding: 9px 10px;
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+  }
+  .m6-compare-only-num {
+    background: #1E5BB5;
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .m6-compare-only-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .m6-compare-only-body { flex: 1; min-width: 0; }
+  .m6-compare-only-name {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #0B1E3F;
+    margin-bottom: 3px;
+  }
+  .m6-compare-only-note {
+    font-size: 12.5px;
+    color: #4B5563;
+    line-height: 1.5;
+  }
+
+  /* 비교 — 시민이 묻고 싶은 질문 */
+  .m6-compare-questions {
+    background: linear-gradient(135deg, #FFF4E8 0%, #fff9f0 100%);
+    border-radius: 10px;
+    padding: 12px;
+    border: 1.5px solid #F59E0B;
+  }
+  .m6-compare-questions-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #92400E;
+    margin-bottom: 10px;
+  }
+  .m6-compare-question {
+    background: #fff;
+    border-radius: 8px;
+    padding: 9px 11px;
+    margin-bottom: 7px;
+    border-left: 3px solid #F59E0B;
+  }
+  .m6-compare-question:last-child { margin-bottom: 0; }
+  .m6-compare-question-q {
+    font-size: 13px;
+    font-weight: 800;
+    color: #7C2D12;
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .m6-compare-question-a {
+    font-size: 12.5px;
+    color: #4B5563;
+    line-height: 1.55;
+  }
+
   /* 액션 버튼 */
   .m6-actions {
     display: flex;
@@ -8178,44 +8564,92 @@ const MAIN_PLEDGES_6 = [
   },
   {
     no: 5,
-    code: "ai-plus",
-    title: "AI+부산 (부산 데이터 시티) ★",
-    subtitle: "공공데이터를 도로처럼, 그 위에서 부산 AI 산업이 달린다",
-    headline: "1999년 한국이 인터넷망으로 IT 강국이 됐듯, 2026년 부산이 데이터로 AI 허브가 된다",
-    coreMsg: "부산만 갖춘 6대 버티컬 데이터 → 부산만 만들 AI → 부산 청년 5만 일자리",
+    code: "busan-ai",
+    title: "부산형 AI ★",
+    subtitle: "부산만이 만들 수 있는 AI를 만들겠습니다",
+    headline: "1999년 인터넷이 도로였다면, 2026년 데이터가 도로다. 박형준이 첫 삽을 떴다",
+    coreMsg: "데이터가 길을 열고 · AI가 부산의 미래 먹거리를 만들고 · 청년 5만 일자리가 자란다",
     releaseDate: "2026-05-13T13:30:00+09:00",
-    releaseLabel: "4차 공약 발표 (2026.05.13 수 13:30 5만 AI 일자리 + 2026.05.20 수 14:00 부산기업 企UP)",
+    releaseLabel: "4차 공약 발표 (2026.05.13 수 13:30 시의회 브리핑룸)",
     releaseOrder: 4,
     keyNumbers: [
-      { v: "5만 일자리", l: "AI 일자리 4단계 누적 (1단계 8천 → 2단계 2만 → 3단계 3.5만 → 4단계 5만, 2032~2035 매듭)" },
-      { v: "6대 버티컬", l: "항만(BPA)·해양(국가해양데이터센터)·조선·제조·금융(BIFC)·시민생활 — 부산만 갖춘 데이터" },
-      { v: "1999 → 2026", l: "한국 ADSL이 IT 강국 만들었듯, 부산 공공데이터가 AI 허브 만든다" }
+      { v: "5만 일자리", l: "AI 일자리 4단계 누적 (임기 내 2만 가시화 + 매듭 3만, 2032~2035 완성)" },
+      { v: "7대 AI 산업", l: "항만·해양·조선·제조·금융·시민생활 + 해양방산(7번째 기둥)" },
+      { v: "2,800억", l: "5년 신규 재원 (일반회계 0.47%, 시민세금 부담 최소)" }
     ],
     promises: [
-      "🏭 1000대 기업 100개 시대 — '본사 1개보다 R&D센터 5개', 부산이 본사를 만드는 도시",
-      "🏢 중견기업 300개 + 개방형 혁신기업 100개 신규 육성 (서울 외 최대 거점)",
-      "🚀 권역별 5대 창업허브 — 북항·센텀·부전역·하단역·노포역 + 라이콘펀드 50억 (AI 글로벌 허브 5대 거점)",
-      "🛒 소상공인 킬러콘텐츠 — 노란우산 연 48만원(전국 광역 1등) + 동백전 동네 단골제 + 신용보증 한도 상향",
-      "💾 6대 버티컬 데이터 — 항만 자율운항·해양 디지털트윈·조선·제조 AX·해양보험 블록체인·시민 AI 돌봄",
-      "🔓 AI Hub-Busan 신설 — NIA AI Hub 부산 분원 모델, 부산형 학습 데이터 200종+ 무료 개방 (청년 1,000명 직접 일자리)",
-      "🎓 부산 AI 1만 인재 양성 — 청년 2천 + 재직자 5천 + 중장년 3천 (글로벌허브특별법 인센티브)",
-      "📈 5만 일자리 4단계 누적 로드맵 — 1단계(26~27 항만 8천) → 2단계(28~29 조선·제조 2만) → 3단계(30~31 금융 3.5만) → 4단계(32~35 시민·MICE 5만)",
-      "🏗️ 시 자산 + 캠프 신규 = 1.5배 격상 — 시 4,877억(AI 종합전략) + 민간 7,587억 + 캠프 신규 2,800억 = 약 1.5조 (시민세금 부담 일반회계 0.5%)",
-      "🤝 부산 안에서 키우고 살아남는 순환 — 동백전 + 노란우산 + 부산기업 우선구매 + AI 솔루션 바우처 부산 기업 우대"
+      "🗺️ [약속 01] 부산 데이터 시티 — AI 산업의 첫 번째 인프라, 데이터 인프라를 깔겠습니다",
+      "🔌 산업·공공 데이터 인프라 정비 — 흩어진 6대 도시 데이터(항만·해양·조선·제조·금융·시민생활)를 AI 학습 형태로 표준화",
+      "🌐 AI Hub-Busan 구축 — 부산형 학습 데이터 200종+ 무료 개방 (빅-데이터웨이브 격상, NIA AI Hub 845종의 부산 특화 트랙)",
+      "🤝 개방형 AI 생태계 — 대학·스타트업·청년이 함께 쓰는 데이터 인프라, 글로벌 AI 인재가 모이는 환경 조성",
+      "🏭 [약속 02] 부산 7대 AI 산업 — 부산의 강점 산업 위에 7개의 AI 엔진을 얹겠습니다",
+      "⚓ 항만 AI(물류 흐름 최적화) · 해양 AI(안전·데이터) · 조선 AI(디지털 트윈 공정) · 제조 AI(스마트팩토리 고도화)",
+      "💰 금융 AI(데이터 기반 핀테크) · 시민생활/관광 AI(맞춤형 행정·복지) · 🛡️ 해양방산 AI(무인체계 시뮬레이션, 7번째 기둥 신설)",
+      "🤖 [횡단축 1] 피지컬 AI — AI가 화면을 넘어 항만·공장·조선소에서 움직인다 (사상=제조 실증구역 + 영도=해양 실증구역)",
+      "🧠 [횡단축 2] 해양반도체 — 7대 AI의 공통 두뇌, 시정 6년 2,940억 사업을 표준 설계로 격상",
+      "💼 [약속 03] AI 일자리 5만 개 — AI가 빼앗는 도시가 아니라 AI로 만드는 부산",
+      "📊 4단계 누적: 1단계 항만·해양 8천(26~27) → 2단계 조선·제조 +1.2만(28~29) → 3단계 금융 +1.5만(30~31) → 4단계 시민생활·트라이포트 +1.5만(32~35)",
+      "🎓 AI 1만 인재 양성 — 청년 2천명·재직자 5천명·중장년 3천명 (전 연령 AI 맞춤형 전환교육)",
+      "📅 [약속 04] 실행 로드맵 4단계 — 2026~2027 데이터 인프라 → 2028~2029 7대 실증 → 2030~2031 피지컬 산업화 → 2032~2035 글로벌 허브"
     ],
     benefits: [
-      { who: "💎 부산 청년 엔지니어", amt: "부산에서 일하는 R&D 일자리 5만개 (서울 안 가도 됨)", note: "100대 기업 R&D센터 100개 + 권역 5대 창업허브 = 청년 일자리 자동 창출" },
-      { who: "중견·창업기업", amt: "글로벌허브특별법 인센티브 + 센텀2 도심융합특구 + AI 펀드", note: "본사 1개보다 R&D 5개 가속 모델 (X-노믹스 허브)" },
-      { who: "우리 동네 가게", amt: "동백전·노란우산 48만원·AI 동네 단골제·부산기업 우선구매", note: "AI 기반 우리 동네 상권 추천 (소상공인 킬러콘텐츠 5종)" },
-      { who: "항만·조선 노동자", amt: "부산 데이터로 만든 부산 AI (수도권이 가져가지 않음)", note: "BPA 컨테이너·국가해양데이터센터·HD현대·한화오션 — 부산만 갖춘 학습 데이터" },
-      { who: "외국인 R&D 인재", amt: "글로벌 본사 인근 R&D 센터 + 권역 5대 창업허브 + Brain to Busan 정주 비자·세제", note: "Global Living + 외국인학교·다국어 의료" }
+      { who: "💎 부산 청년 엔지니어 (1순위 수혜자)", amt: "임기 내 가시화 2만 + 매듭 3만 = 5만 일자리", note: "데이터 라벨링→AI 엔지니어→해양로봇·항만 자동화·해양반도체 설계까지" },
+      { who: "🎓 청년·재직자·중장년 (전 연령)", amt: "AI 1만 인재 양성 (2천+5천+3천)", note: "부산 팹리스 아카데미 100명·산업수요 직업훈련 550명·디지털 인재양성 2,000명 결합" },
+      { who: "🚇 모든 시민 (1년 차부터 체감)", amt: "출근 10% 단축 + 자율 배수펌프 + 응급 AI 안내 + 시니어웰빙허브 16개소 AI 돌봄", note: "에코델타 6대 스마트서비스 2026 가동 → 교통·재난·복지·돌봄·관광 5장면 매일 체감" },
+      { who: "🏭 7대 산업 종사자", amt: "부산 데이터로 만든 부산 AI (수도권 유출 차단)", note: "BPA 컨테이너·국가해양데이터센터·HD현대·한화오션·BIFC·해군 결합 학습 데이터" },
+      { who: "🚀 스타트업·연구자", amt: "AI Hub-Busan 200종+ 무료 데이터셋", note: "1단계 50종→3단계 200종 누적, 7대 산업 특화 부산형 트랙" },
+      { who: "🛡️ 해양방산 분야 (한국 유일)", amt: "무인 해양 모니터링 490억 + 사이버 보안 185억", note: "데이터·산업·군 3조건 모두 갖춘 한국 유일 도시 (거제·진해 함정 건조와 영역 다름)" }
     ],
     color: "#7C3AED",
     accent: "#B8860B",
-    targetGroup: "청년 엔지니어·기업·소상공인·항만/조선 노동자·외국인 인재",
-    timeline: "2026 데이터혁신본부 신설 + AI Hub-Busan 착수 → 2027 R&D센터 1차·1단계 8천 일자리 → 2029 2단계 2만 일자리 + AI 펀드 1,000억 → 2032~2035 5만 일자리 매듭",
-    relatedCategories: ["AI전환", "활력경제", "해양개척", "청년산학"],
-    relatedPledges: ["부산 데이터 시티 종합실행계획(5년 1,900억)", "빅-데이터웨이브 + AI Hub-Busan 신설", "산업은행 부산 이전(단일 표기)", "센텀2 도심융합특구(글로벌 혁신거점)", "글로벌허브도시 특별법 인센티브"]
+    targetGroup: "청년 엔지니어·재직자·중장년·항만/조선 노동자·소상공인·시민(매일 체감)",
+    timeline: "2026~2027 데이터 인프라 구축 → 2028~2029 7대 AI 실증 확산 → 2030~2031 피지컬 AI 산업화 → 2032~2035 AI 글로벌 허브 도시 + 일자리 5만 매듭",
+    relatedCategories: ["AI전환", "활력경제", "해양개척", "청년산학", "시민체감"],
+    relatedPledges: ["에코델타 그린데이터센터 3.6조(역대 최대 단일 투자유치)", "명지녹산 AI 데이터센터 1.8조", "세계 스마트도시 12위·아시아 2위", "빅-데이터웨이브 격상 → AI Hub-Busan", "시 AI 종합전략 4,877억 + 민간투자 7,587억", "영남권 제조 AI 융합 3년 450억(110개 과제)", "해양반도체 클러스터 6년 2,940억", "WAVE 프로젝트 5년 1조원", "부산 팹리스 아카데미(BFA)·RISE 1.35조"],
+    competitorCompare: {
+      mine: {
+        oneLine: "이미 깐 길 위에서 부산 AI가 달립니다",
+        detail: "5년 동안 AI 도로(인프라)를 깔았고, 이제 그 위에 산업을 얹습니다",
+        keywords: ["매듭짓는 시장", "이미 길을 텄다", "임기 안에 끝낸다"]
+      },
+      opponent: {
+        name: "전재수 후보",
+        oneLine: "처음부터 새로 시작하겠습니다",
+        detail: "글로벌 기업을 부산에 유치해 새로운 AI 단지를 만들겠다는 약속",
+        keywords: ["처음부터 시작", "글로벌 기업·UN 유치", "분담 구조 비공개"]
+      },
+      diffPoints: [
+        { topic: "큰 그림", mine: "7대 산업을 부산 안에서 키운다 (항만·해양·조선·제조·금융·시민생활·해양방산) + 로봇 AI·해양반도체", opponent: "동·서부산 두 거점으로 묶는다 (동부산 미디어 AI 특구 + 서부산 제조 AI 센터)" },
+        { topic: "돈", mine: "5년 2,800억 (시 1년 예산 12조의 0.47%, 시 예산 1,000원 중 5원)", opponent: "5년 10조 — 시비/국비/민간 분담 구조 비공개" },
+        { topic: "일자리", mine: "5만 개 4단계 분리 (임기 내 2만 가시화 + 후속 3만)", opponent: "구체 수치 없음 (\"산학연 협력과 인재 양성\")" },
+        { topic: "인재 양성", mine: "AI 1만 인재 (청년 2천+재직자 5천+중장년 3천)", opponent: "구체 인원·시기 부재" },
+        { topic: "시민 체감", mine: "임기 1년차부터 교통·재난·응급·돌봄·시민앱 6가지 직접 체감", opponent: "횡단보도 신호·전세사기·아이토반·택시 통역(※아이토반은 박형준 시정 2023년 도입 시스템)" }
+      ],
+      onlyMine: [
+        { icon: "🛡️", title: "해양방산 AI", note: "진해 해군 + 부산 항만 + 영도 조선소가 결합해 무인구축함·해양 무인선을 부산이 만든다. K-방산의 약한 고리를 부산이 메운다" },
+        { icon: "🧠", title: "해양 AI·해양반도체", note: "극지·극한 해양에서 작동하는 특수 반도체 — 부산이 한국에서 유일하게 가진 카드, 2031년 차세대 해양반도체 글로벌 허브 비전" },
+        { icon: "🤖", title: "로봇·기계를 움직이는 AI (피지컬 AI)", note: "화면 속 AI가 아니라 무인 크레인·자율 무인선·공장 로봇·자율 배수펌프를 직접 움직이는 AI" },
+        { icon: "🔓", title: "AI 학습 데이터 무료 개방", note: "부산 청년·기업·연구자가 공공데이터 200종을 무료로 받아 쓰는 AI Hub-Busan 신설" },
+        { icon: "👥", title: "시민이 매일 받는 AI 서비스", note: "출퇴근 단축·침수 예방·응급의료·복지·돌봄·시민앱까지 임기 1년차부터 일상에서 만남" }
+      ],
+      threeQuestions: [
+        { q: "5년 10조 — 시민 세금은 얼마인가?", a: "부산시 1년 예산 12조 대비 약 17% 큰돈인데, 시비·국비·민간 분담 비율, 어느 기업이 언제 얼마 투자하는지 공식 발표 어디에도 답이 없음" },
+        { q: "부산형 아이토반은 이미 있는 사업 아닌가?", a: "전재수가 새로 한다는 부산형 아이토반(AI 신호체계)은 박형준 시정이 2023년 9월부터 '15분 도시' 스마트 신호시스템에 이미 도입·검증 완료한 같은 시스템" },
+        { q: "UN AI허브·글로벌 기업 유치는 시장이 할 수 있나?", a: "UN AI허브 유치는 외교부·국제기구 결정 영역, 분산에너지특구·기회발전특구 지정은 중앙정부 권한 — 시장 권한 밖" }
+      ]
+    },
+    keyHighlights: [
+      { icon: "🗺️", title: "부산 데이터 시티", note: "흩어진 6대 데이터(항만·해양·조선·제조·금융·시민생활)를 AI 학습 형태로 표준화 + AI Hub-Busan 신설" },
+      { icon: "🏭", title: "7대 AI 산업", note: "항만·해양·조선·제조·금융·시민생활 + 해양방산(7번째 기둥, 한국 유일)" },
+      { icon: "🤖", title: "피지컬 AI + 해양반도체", note: "일곱 산업의 손과 발(피지컬 AI) + 두뇌(해양반도체) — 부산만의 횡단축" },
+      { icon: "💼", title: "5만 일자리 4단계", note: "임기 내 2만 가시화 + 후속 3만 매듭 (2026~2035, 캠프 자체 추계)" },
+      { icon: "🎓", title: "AI 1만 인재", note: "청년 2천·재직자 5천·중장년 3천 = 전 연령 AI 맞춤형 전환교육" },
+      { icon: "🌆", title: "시민 1년차 체감", note: "출근 10% 단축·자율 배수펌프·AI 돌봄(시니어웰빙허브 16개소 결합)·응급 안내·시민앱 — 5장면 매일 만남" }
+    ],
+    historicMetaphor: {
+      title: "1999년 인터넷 → 2026년 데이터",
+      story: "1999년 한국 정부가 인터넷망을 도로처럼 깔지 않았다면 네이버·카카오·K-콘텐츠는 자라지 못했습니다. 2026년 데이터는 'AI의 원유'가 아니라 'AI의 도로'입니다. 박형준 1기에 부산이 데이터 도로의 첫 삽을 떴습니다. 다음 시정의 과제는 그 도로 위에 차를 달리게 하는 것 — 산업과 일자리를 얹는 일입니다."
+    }
   },
   {
     no: 6,
@@ -22168,7 +22602,99 @@ function renderMain6Banners() {
               </div>
             `).join('')}
           </div>
-          
+
+          ${p.keyHighlights ? `
+            <div class="m6-highlights">
+              <div class="m6-highlights-title">⭐ 한눈에 보는 핵심</div>
+              <div class="m6-highlights-grid">
+                ${p.keyHighlights.map(h => `
+                  <div class="m6-highlight-card">
+                    <div class="m6-highlight-icon">${h.icon}</div>
+                    <div class="m6-highlight-body">
+                      <div class="m6-highlight-title">${escapeHtml(h.title)}</div>
+                      <div class="m6-highlight-note">${escapeHtml(h.note)}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          ${p.historicMetaphor ? `
+            <div class="m6-metaphor">
+              <div class="m6-metaphor-title">📖 ${escapeHtml(p.historicMetaphor.title)}</div>
+              <div class="m6-metaphor-story">${escapeHtml(p.historicMetaphor.story)}</div>
+            </div>
+          ` : ''}
+
+          ${p.competitorCompare ? `
+            <div class="m6-compare">
+              <div class="m6-compare-title">⚖️ 박형준 vs ${escapeHtml(p.competitorCompare.opponent.name)}</div>
+
+              <div class="m6-compare-headlines">
+                <div class="m6-compare-side mine">
+                  <div class="m6-compare-side-name">박형준 (저)</div>
+                  <div class="m6-compare-side-oneline">${escapeHtml(p.competitorCompare.mine.oneLine)}</div>
+                  <div class="m6-compare-side-detail">${escapeHtml(p.competitorCompare.mine.detail)}</div>
+                </div>
+                <div class="m6-compare-side opponent">
+                  <div class="m6-compare-side-name">${escapeHtml(p.competitorCompare.opponent.name)}</div>
+                  <div class="m6-compare-side-oneline">${escapeHtml(p.competitorCompare.opponent.oneLine)}</div>
+                  <div class="m6-compare-side-detail">${escapeHtml(p.competitorCompare.opponent.detail)}</div>
+                </div>
+              </div>
+
+              <div class="m6-compare-table">
+                <div class="m6-compare-table-title">📊 항목별 차이</div>
+                ${p.competitorCompare.diffPoints.map(d => `
+                  <div class="m6-compare-row">
+                    <div class="m6-compare-row-topic">${escapeHtml(d.topic)}</div>
+                    <div class="m6-compare-row-cells">
+                      <div class="m6-compare-cell mine">
+                        <span class="m6-compare-cell-tag">박형준</span>
+                        ${escapeHtml(d.mine)}
+                      </div>
+                      <div class="m6-compare-cell opponent">
+                        <span class="m6-compare-cell-tag">전재수</span>
+                        ${escapeHtml(d.opponent)}
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+
+              ${p.competitorCompare.onlyMine ? `
+                <div class="m6-compare-only">
+                  <div class="m6-compare-only-title">⭐ 박형준만 약속하는 ${p.competitorCompare.onlyMine.length}가지</div>
+                  <div class="m6-compare-only-grid">
+                    ${p.competitorCompare.onlyMine.map((o, i) => `
+                      <div class="m6-compare-only-item">
+                        <div class="m6-compare-only-num">${i+1}</div>
+                        <div class="m6-compare-only-icon">${o.icon}</div>
+                        <div class="m6-compare-only-body">
+                          <div class="m6-compare-only-name">${escapeHtml(o.title)}</div>
+                          <div class="m6-compare-only-note">${escapeHtml(o.note)}</div>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+
+              ${p.competitorCompare.threeQuestions ? `
+                <div class="m6-compare-questions">
+                  <div class="m6-compare-questions-title">❓ ${escapeHtml(p.competitorCompare.opponent.name)} 공약, 시민이 묻고 싶은 ${p.competitorCompare.threeQuestions.length}가지</div>
+                  ${p.competitorCompare.threeQuestions.map((qa, i) => `
+                    <div class="m6-compare-question">
+                      <div class="m6-compare-question-q">Q${i+1}. ${escapeHtml(qa.q)}</div>
+                      <div class="m6-compare-question-a">${escapeHtml(qa.a)}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+
           <div class="m6-actions">
             <button class="m6-action primary" onclick="openMain6Calc('${p.code}')">🎯 내가 받는 혜택 계산</button>
             <button class="m6-action secondary" onclick="openMain6Related('${p.code}')">🔗 연결된 사업 보기</button>
@@ -23261,10 +23787,25 @@ const VS_TOPICS = [
     icon: '🤖',
     title: 'AI·미래산업',
     park: {
-      desc: '<strong>시민 모두의 AI 놀이터</strong><br/>데이터시티 조성<br/>투자유치 50조 목표',
-      scores: { detail: 'A', budget: 'A', timeline: 'B', feasibility: 'A' }
+      desc: '<strong>부산형 AI — 부산만이 만들 수 있는 AI</strong><br/>7대 산업(항만·해양·조선·제조·금융·시민생활·해양방산) + 피지컬 AI + 해양반도체<br/>AI 일자리 5만 (임기 내 2만 가시화 + 후속 3만 매듭)<br/>5년 2,800억 (일반회계 0.47%)',
+      scores: { detail: 'A', budget: 'A', timeline: 'A', feasibility: 'A' }
     },
-    jun: null
+    jun: {
+      desc: '<strong>처음부터 새로 시작 — 글로벌 기업·UN AI허브 유치</strong><br/>동·서부산 두 거점 (동부산 미디어 AI 특구 + 서부산 제조 AI 센터)<br/>일자리 구체 수치 부재 (\"산학연 협력과 인재 양성\")<br/>5년 10조 (시비/국비/민간 분담 구조 비공개)',
+      scores: { detail: 'C', budget: 'C', timeline: 'C', feasibility: 'C' }
+    },
+    parkOnly: [
+      '🛡️ 해양방산 AI (한국 유일 — 진해 해군 + 부산 항만 + 영도 조선소)',
+      '🧠 해양반도체 (시정 6년 2,940억 사업 → 7대 AI 공통 두뇌)',
+      '🤖 피지컬 AI (사상 제조 + 영도 해양 실증구역)',
+      '🔓 AI Hub-Busan 무료 데이터 200종 개방',
+      '🌆 1년차 시민 체감 6장면 (교통·재난·응급·돌봄·시민앱·관광)'
+    ],
+    junQuestions: [
+      '5년 10조 — 시비·국비·민간 분담은? 시민세금 얼마?',
+      '부산형 아이토반은 박형준 시정 2023년 도입 시스템 아닌가?',
+      'UN AI허브·글로벌 기업 유치는 시장 권한 영역인가?'
+    ]
   },
   {
     id: 'smallbiz',
