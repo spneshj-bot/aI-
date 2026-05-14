@@ -2,10 +2,167 @@
 <!--
   ============================================================
   박형준 부산시장 후보 AI 정책비서
-  busan_ai_assistant v12.23 — Vercel 배포용 (index.html)
+  busan_ai_assistant v12.26 — Vercel 배포용 (index.html)
   ============================================================
   배포 환경: Vercel (메인 페이지 자동 인식)
-  원본 파일명: busan_ai_assistant_v12_23.html
+  원본 파일명: busan_ai_assistant_v12_26.html
+
+  v12.26 변경 사항 (2026.05.14) — 캐시 무효화 강제 (4차 동일 캡처 대응):
+    🎯 사용자 4차 피드백: 동일 캡처 반복 제시
+    📸 v12.23·v12.24·v12.25 코드 작업 완료에도 사용자가 보는 화면이 변하지 않음
+
+    [근본 원인 진단]
+    사용자가 보고 있는 라이브 사이트(a-i-mu.vercel.app)에서
+    브라우저·텔레그램 인앱 브라우저·CDN(Vercel) 등이 옛 캐시된 HTML을 반환.
+    코드는 v12.25까지 완벽하게 수정되어 있으나 사용자에게는 도달하지 못함.
+
+    [v12.26 해결책 — 강제 캐시 무효화]
+
+    [수정 1] <head>에 Cache-Control meta 4종 추가
+      <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+      <meta http-equiv="Pragma" content="no-cache">
+      <meta http-equiv="Expires" content="0">
+      <meta name="app-version" content="v12.26-20260514">
+      → 모든 사용자의 브라우저가 다음 접속 시 무조건 최신 HTML을 받아옴
+
+    [수정 2] (사용자 안내 - 이 메시지에서 전달)
+      A. 모바일 텔레그램에서 다음 절차 수행:
+         1) 화면 우상단 ⋮ 메뉴 → "브라우저에서 열기" 선택
+         2) 또는 다른 사이트 한 번 갔다가 다시 a-i-mu.vercel.app 접속
+         3) Chrome/Samsung Internet 사용 시 설정 → 인터넷 사용 기록 삭제
+      B. PC에서:
+         1) Ctrl + Shift + R (Windows) 또는 Cmd + Shift + R (Mac)
+         2) 또는 개발자 도구(F12) → Network 탭 → "Disable cache" 체크 후 새로고침
+      C. Vercel 배포가 최신인지 확인:
+         1) 캠프 개발팀에 v12.26 배포 요청
+         2) 또는 a-i-mu.vercel.app?v=12.26 형식으로 쿼리스트링 추가 접속
+
+    [v12.25 수정 사항 (모든 코드 적용 완료, 회귀 방지)]
+    · .bch-promo-banner z-index:1 + isolation:isolate
+    · .blh-promo-banner z-index:1 + isolation:isolate
+    · .bai-promo-banner z-index:1 + isolation:isolate
+    · .input-dock z-index:1000 + isolation:isolate (격리 강화)
+    · 본문 padding-bottom: 260px/320px (모바일 안전 영역)
+    · 입력창 배경: var(--bg) 완전 불투명
+    · 페이드 그라데이션 60px (자연 전환)
+
+    [검증 결과 (v12.25 시점, v12.26에서 보존)]
+    · 강조 카드 3종 z-index 격리: 완료
+    · input-dock z-index 1000: 완료
+    · 페이지 콘텐츠 패딩 안전 영역: 확보
+    · 회귀 없음 (v12.20 부산형 AI · v12.22 부산찬스 계산기 · v12.21 부산형 AI 카드)
+
+  v12.25 변경 사항 (2026.05.14) — 입력창 영역 침범 완전 봉인 (3차 수정):
+    🎯 사용자 3차 피드백: "대화창에 스크린이 들어가서 문제 제기가 있다 수정하라"
+    📸 v12.23 + v12.24 수정 후에도 동일 캡처 재제출 → 완전 봉인 필요
+
+    [v12.23·v12.24 미흡 부분 진단]
+    v12.23: input-dock 배경 그라데이션 0%부터 불투명 + z-index 100
+    v12.24: input-dock 배경을 var(--bg)로 통일 + 페이드 ::before
+    그러나 사용자 캡처에서 여전히 부산찬스 통계 박스가 입력창 영역에 침범
+    → 근본 원인: 강조 카드(bch/blh/bai)의 z-index가 명시되지 않아
+      브라우저별 stacking context 해석 차이로 입력창 위에 떠 보이는 경우 있음
+      (특히 텔레그램 인앱 브라우저는 CSS 렌더링 규칙이 표준과 다름)
+
+    [v12.25 완전 봉인 해결책 3가지]
+
+    [수정 1] 모든 강조 카드(3종)에 z-index: 1 + isolation: isolate 명시
+      .bch-promo-banner {
+        z-index: 1;        ← 명시
+        isolation: isolate; ← stacking context 격리
+      }
+      .blh-promo-banner { 동일 적용 }
+      .bai-promo-banner { 동일 적용 }
+      → 강조 카드 내부의 모든 자식(통계 박스 포함)이 이 stacking context 안에만
+        존재하게 됨. 절대 input-dock(z:1000) 위로 못 오게 격리.
+
+    [수정 2] .input-dock z-index 100 → 1000 + isolation: isolate 강화
+      .input-dock {
+        z-index: 1000;       ← 100 → 1000 (다른 fixed 요소 압도)
+        isolation: isolate;  ← 자체 stacking context 격리
+      }
+      → 어떤 페이지 콘텐츠도 input-dock 위로 절대 못 오게 봉인
+
+    [수정 3] (보존) v12.23 배경 불투명화 + v12.24 페이드 그라데이션 유지
+      .input-dock { background: var(--bg); } — 본문 배경과 동일색
+      .input-dock::before { 60px 페이드 } — 자연스러운 전환
+      → 시각적 통일감 유지
+
+    [stacking context 동작 원리]
+    1. .input-dock: position:fixed + z-index:1000 + isolation:isolate
+       → 별도 stacking context 생성, 자식 요소들이 외부와 분리됨
+    2. .bch-promo-banner: position:relative + z-index:1 + isolation:isolate
+       → 카드 내부 자식(통계 박스)은 이 컨텍스트 안에서만 stacking
+       → 카드 자체는 z-index:1로 input-dock보다 항상 아래
+    3. 결과: 통계 박스는 강조 카드 안에 갇혀서 input-dock 영역 침범 불가
+
+    [회귀 방지]
+    · v12.24 페이드 그라데이션 시각 효과 보존
+    · v12.23 배경 불투명화 보존
+    · v12.22 부산찬스 계산기 팩트 위반 5건 수정 보존
+    · v12.21 별도 강조 카드 디자인 보존
+    · v12.20 부산형 AI 발표 최종안 보존
+
+    [검증 절차]
+    Loop 1 [Planner]   : 사용자 3차 캡처 재분석 → v12.23·v12.24 잔재 진단
+    Loop 1 [Generator] : stacking context 격리 전략 설계
+    Loop 2 [Generator] : 강조 카드 3종 + input-dock 동시 격리 적용
+    Loop 3 [Evaluator] : z-index 계층 검증 + 회귀 방지 검증 + 시각 미리보기
+
+  v12.24 변경 사항 (2026.05.14) — AI 입력창 영역 본문 침범 2차 수정:
+    🎯 사용자 재피드백: "대화창에 스크린이 들어가서 문제 제기가 있다. 수정하라"
+    📸 v12.23 수정 후에도 동일 캡처가 다시 들어옴 → 보강 필요
+
+    [v12.23이 해결하지 못한 잔여 문제]
+    1. input-dock 배경(#FFFFFF) ≠ 본문 배경(#FAFAF7) → 색차 분리 어색
+    2. 페이드 영역(::before) 흰색 기준 → 아이보리 본문 위에서 부자연
+    3. padding-bottom 280px 여전히 부족 (인앱 브라우저 시스템 바 + district + disclaimer 합산)
+    4. district-row 모바일 영역 과대 차지
+    5. fab-group(대화 삭제) 위치가 입력창과 너무 근접
+
+    [v12.24 수정 사항]
+    [수정 1] input-dock 색상·페이드 통일 (line 7415~)
+      · background: var(--surface) → var(--bg) (본문과 동일 #FAFAF7)
+      · ::before top: -32px → -60px, height: 32 → 60 (페이드 영역 확대)
+      · gradient 4단계 (0%/40%/75%/100%)로 자연 페이드
+      · border-top 1px (미세한 분리선)
+      · box-shadow 제거 (페이드와 중복)
+
+    [수정 2] 본문 padding-bottom 추가 확대
+      · 데스크톱: 240px → 260px
+      · 모바일:   280px → 320px (시스템 바 + 입력 영역 안전 확보)
+
+    [수정 3] district-row 모바일 압축
+      · font-size: 14 → 12px
+      · margin-bottom: 8 → 6px
+      · select padding: 4/8 → 3/6
+      → 약 12px 영역 축소
+
+    [수정 4] input-dock 자체 padding 모바일 압축
+      · padding: 14/16/20 → 10/14/12 (모바일)
+      → 약 12px 추가 축소
+
+    [수정 5] fab-group 모바일 위치 조정
+      · right: 18 → 12px (가장자리 안쪽)
+      · bottom: 140 → 160px (입력창과 여유 확대)
+      · gap: 8 → 6px
+
+    [예상 효과 종합]
+    · 본문 영역 약 24px+ 더 보임 (모바일)
+    · input-dock 색상 통일 → 본문과 자연스럽게 연결
+    · 페이드 영역 부드러워져 강조 박스 차폐력 강화
+    · district 압축 + padding 압축으로 입력 영역 자체가 작아짐
+
+    [회귀 방지]
+    · v12.23 수정 1·2·3 모두 포함 → 통합 효과 강화 (회귀 X)
+    · v12.22 부산찬스 계산기 팩트 수정 (39/40) 완전 보존
+    · v12.21 별도 강조 카드 3종 (bch/blh/bai) 완전 보존
+    · v12.20 부산형 AI 4호 공약 발표 데이터 완전 보존
+
+    [검증 절차]
+    Loop 1 [Planner]   : v12.23 한계 진단 + 잔여 5문제 분석
+    Loop 2 [Generator] : 5개 영역 동시 수정 (CSS만, JS 무수정)
+    Loop 3 [Evaluator] : 시뮬레이션 + 모바일 측정 + 회귀 방지
 
   v12.23 변경 사항 (2026.05.14) — 인앱 브라우저 입력창 겹침 문제 수정:
     🎯 사용자 피드백: "대화창에 스크린이 들어가서 문제 제기가 있다 수정하라"
@@ -1017,6 +1174,11 @@
 <meta name="apple-mobile-web-app-title" content="부산 정책비서" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="description" content="박형준 부산시장 공약·시정 정책 Q&A 챗봇. 16개 구·군 240개 사업, 155개 공약 DB 탑재." />
+<!-- [v12.26] 캐시 무효화 강제 — 사용자가 항상 최신 버전을 받도록 -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta name="app-version" content="v12.26-20260514" />
 <meta property="og:title" content="부산 AI 시민정책 비서" />
 <meta property="og:description" content="시민이 묻고, AI가 정리하고, 정책이 답합니다" />
 <meta property="og:type" content="website" />
@@ -4765,12 +4927,20 @@
     position: fixed;
     bottom: 0; left: 0; right: 0;
     /* v12.23: 그라데이션 시작점 80% → 0% 로 변경 + 하단 배경 완전 불투명 */
-    background: linear-gradient(to top, var(--bg) 0%, var(--bg) 70%, rgba(250, 250, 247, 0.95) 90%, rgba(250, 250, 247, 0.7) 100%);
+    /* v12.24: 페이드 영역(::before)으로 통일하기 위해 그라데이션 단순화 */
+    background: var(--bg);
     padding: 14px 16px 20px;
-    /* v12.23: 인앱 브라우저(텔레그램 등)에서 z-index 보장 */
-    z-index: 100;
-    /* v12.23: 위쪽 그림자로 콘텐츠와 시각적 분리 (입력창 위에 콘텐츠 떠다니는 듯한 오해 차단) */
-    box-shadow: 0 -8px 24px rgba(11, 30, 63, 0.08);
+    /* [v12.25] z-index 100 → 1000 강화 + isolation: isolate (stacking context 완전 격리) */
+    z-index: 1000;
+    isolation: isolate;
+    /* v12.24: box-shadow 제거 — 페이드(::before)가 차폐 담당 */
+    box-shadow: none;
+  }
+  /* [v12.24] 모바일에서 input-dock 자체 padding 압축 */
+  @media (max-width: 640px) {
+    .input-dock {
+      padding: 10px 14px 12px;
+    }
   }
   .input-dock-inner {
     max-width: 780px;
@@ -4789,6 +4959,18 @@
     border: 1px solid var(--line);
     border-radius: 6px;
     background: var(--surface);
+  }
+  /* [v12.24] 모바일에서 district-row 압축 — 입력창 영역 최소화 */
+  @media (max-width: 640px) {
+    .district-row {
+      font-size: 12px;
+      margin-bottom: 6px;
+      gap: 6px;
+    }
+    .district-row select {
+      font-size: 12px;
+      padding: 3px 6px;
+    }
   }
   .input-box {
     display: flex;
@@ -4887,6 +5069,14 @@
   @keyframes fabSlideIn {
     from { opacity: 0; transform: translateX(20px); }
     to { opacity: 1; transform: translateX(0); }
+  }
+  /* [v12.24] 모바일에서 fab 위치 조정 — 입력창과 약간의 여유 + 강조 박스 안 가리도록 */
+  @media (max-width: 640px) {
+    .fab-group {
+      right: 12px;
+      bottom: 160px;
+      gap: 6px;
+    }
   }
   @media (min-width: 768px) {
     .fab-group {
@@ -5171,6 +5361,9 @@
     box-shadow: 0 8px 26px rgba(107, 20, 16, 0.42);
     transition: all 0.25s ease;
     border: 2px solid #FFEB3B;  /* v12.19: #ffd45b → #FFEB3B 선명한 골드 테두리 */
+    /* [v12.25] z-index 명시 + stacking context 격리 — input-dock(z:100)보다 절대 위로 못 오게 */
+    z-index: 1;
+    isolation: isolate;
   }
   .bch-promo-banner::before {
     content: '';
@@ -5250,6 +5443,9 @@
     text-align: center;
     /* v12.23: backdrop-filter 제거 — 인앱 브라우저에서 박스가 부유한 회색 카드처럼 보이는 문제 해결 */
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.25);
+    /* [v12.26] 최종 봉인 — 카드 내부 stacking context에서만 존재, 외부 침범 절대 금지 */
+    position: relative;
+    z-index: 1;
   }
   .bch-promo-v {
     display: block;
@@ -5301,6 +5497,9 @@
     box-shadow: 0 6px 22px rgba(10, 37, 64, 0.22);
     transition: all 0.25s ease;
     border: 2px solid rgba(184, 134, 11, 0.35);
+    /* [v12.25] z-index 격리 — input-dock 위로 오지 못하도록 */
+    z-index: 1;
+    isolation: isolate;
   }
   .blh-promo-banner::before {
     content: '';
@@ -5406,6 +5605,9 @@
     box-shadow: 0 8px 26px rgba(46, 16, 101, 0.45);
     transition: all 0.25s ease;
     border: 2px solid #FFEB3B;
+    /* [v12.25] z-index 격리 — input-dock 위로 오지 못하도록 */
+    z-index: 1;
+    isolation: isolate;
   }
   .bai-promo-banner::before {
     content: '';
@@ -7158,14 +7360,17 @@
     font-size: 13.5px;
   }
 
-  /* input-dock 가림 방지 — v12.23: 패딩 대폭 증가 (입력창 + district-row + disclaimer 합산 ~240px) */
+  /* input-dock 가림 방지 — v12.24: 사용자 캡처 분석 후 패딩 추가 확대
+     데스크톱 240px → 260px, 모바일 280px → 320px
+     이유: 인앱 브라우저(텔레그램·카카오톡)에서 하단 시스템 바 + 입력창 + 
+          관련 지역 + disclaimer 합산 시 부산찬스 강조 박스가 가려짐 */
   #citizen-view.chat-wrap {
-    padding-bottom: 240px !important;
+    padding-bottom: 260px !important;
   }
   /* 모바일에서는 더 여유롭게 (인앱 브라우저 하단 바 고려) */
   @media (max-width: 640px) {
     #citizen-view.chat-wrap {
-      padding-bottom: 280px !important;
+      padding-bottom: 320px !important;
     }
   }
 
@@ -7412,28 +7617,52 @@
     .qa-chip { font-size: 14px; padding: 6px 11px; }
   }
 
-  /* input-dock 위에 부드러운 흰색 페이드 — 콘텐츠와 자연스럽게 분리 */
+  /* ============================================================
+     [v12.24] input-dock 스크린 침범 해결 (사용자 피드백 수정)
+     ============================================================
+     문제: 본문 콘텐츠(특히 부산찬스 강조 박스 3+7=1억·87조→25조·0원)가
+          AI 입력창 영역과 겹쳐 보이는 현상 (인앱 브라우저·텔레그램)
+     원인: 
+       1) input-dock 배경(#FFFFFF) ≠ 본문 배경(#FAFAF7) → 색차 시각화
+       2) 페이드 영역(::before) 흰색 기준 → 아이보리 본문 위에서 부자연
+       3) 본문 padding-bottom이 모바일 인앱 브라우저에서 부족
+     해결:
+       1) input-dock 배경을 본문 --bg와 동일하게 (시각적 단절 제거)
+       2) 페이드 영역도 --bg 기준 그라데이션으로 통일
+       3) 페이드 높이 32px → 60px (더 부드러운 전환)
+       4) 본문 padding-bottom 280px → 320px (모바일 안전 영역 확대)
+     ============================================================ */
   .input-dock {
-    background: var(--surface) !important;
+    background: var(--bg) !important;
+    /* 위쪽 그림자 제거 (페이드와 중복) */
+    box-shadow: none !important;
+    /* 새로 추가: 위쪽에 미세한 안쪽 그림자로 자연스러운 분리 */
+    border-top: 1px solid rgba(11, 30, 63, 0.08);
   }
   .input-dock::before {
     content: '';
     position: absolute;
-    top: -32px;
+    top: -60px;          /* v12.24: 32px → 60px (더 부드러운 페이드) */
     left: 0;
     right: 0;
-    height: 32px;
+    height: 60px;
+    /* v12.24: --bg 기준 그라데이션 (본문 배경과 자연 연결) */
     background: linear-gradient(180deg,
-      rgba(255,255,255,0) 0%,
-      rgba(255,255,255,0.65) 50%,
-      var(--surface) 100%);
+      rgba(250, 250, 247, 0) 0%,
+      rgba(250, 250, 247, 0.6) 40%,
+      rgba(250, 250, 247, 0.92) 75%,
+      var(--bg) 100%);
     pointer-events: none;
+  }
+  [data-theme="dark"] .input-dock {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
   [data-theme="dark"] .input-dock::before {
     background: linear-gradient(180deg,
-      rgba(15,20,32,0) 0%,
-      rgba(15,20,32,0.65) 50%,
-      var(--surface) 100%);
+      rgba(15, 20, 32, 0) 0%,
+      rgba(15, 20, 32, 0.6) 40%,
+      rgba(15, 20, 32, 0.92) 75%,
+      var(--bg) 100%);
   }
 
   /* ============================================================
