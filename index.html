@@ -2,10 +2,78 @@
 <!--
   ============================================================
   박형준 부산시장 후보 AI 정책비서
-  busan_ai_assistant v12.21 — Vercel 배포용 (index.html)
+  busan_ai_assistant v12.22 — Vercel 배포용 (index.html)
   ============================================================
   배포 환경: Vercel (메인 페이지 자동 인식)
-  원본 파일명: busan_ai_assistant_v12_21.html
+  원본 파일명: busan_ai_assistant_v12_22.html
+
+  v12.22 변경 사항 (2026.05.14) — 부산찬스 계산기 팩트 위반 5건 전면 수정:
+    🎯 사용자 피드백: "나만의 부산찬스를 클릭하면 40대·50대인데도 매칭 금액 등
+                   사실과 다른 내용이 포함되어 있다. 잘못된 부분 수정/삭제하고
+                   왜 그 금액이 만들어지는지 상세 설명 + 팩트 기반 개선"
+
+    [공식 정책앱이므로 신중을 기해 다른 부분도 점검]
+    부산찬스 1호 공약 v1.1 공식 설계 (userMemories 기준):
+      · 대상:    만 18~29세 청년 전용 (10년 적립 → 만 30세 1억)
+      · 본인:    월 25만 × 12개월 × 10년 = 3,000만 (월 적립, 일시금 아님)
+      · 매칭:    부산 SOC 87조 → 시민펀드 25조 환류 → 7,000만
+      · 30세:    통장 잔액 1억
+      · 60세:    4.54억 (장기 복리, 국민연금형 40·50·10 안전 배분)
+      · 세금:    0원 (8중 안전장치, 원금 100% 보장)
+      · 보너스:  ❌ 공약 문서에 없음
+
+    [발견된 팩트 위반 5건]
+    ★★★★★ 위반 1: 부산찬스는 청년 전용인데 40·50대도 동일하게 "1억" 표시
+    ★★★★ 위반 2: "10년 후" 시점 의미 왜곡 (60세=4.54억, 청년 30세=1억)
+    ★★★ 위반 3: 봉사 보너스 (200h→120만, 500h→300만) — 공약에 없음
+    ★★★ 위반 4: 정주 보너스 (30·40대 300만) — 공약에 없음
+    ★★ 위반 5: 가족 보너스 (자녀1→200, 자녀2+→500, 신혼→100) — 2호 다자녀와 충돌
+
+    [수정 1] calculate() 함수 전면 재설계 (line 26748~)
+      Before: { age, family, vol } 3개 입력 → baseSelf + baseMatch + volBonus + familyBonus + stayBonus
+      After:  { ageStart } 1개 입력 → 청년 자격 판정 (만 18~29세) → 1억 또는 대상 외 안내
+      · 봉사·가족·정주 보너스 3종 모두 제거
+      · 청년만 3+7=1억 계산 표시, 60세 4.54억 별도 안내
+      · 비청년에게는 "부산찬스는 청년 전용" 안내 + 본인에게 맞는 다른 공약 카드
+
+    [수정 2] 모달 UI 전면 개편
+      · 입력: 시작 나이 5구간 (20·25·29 청년 / 35·50 대상 외)
+      · 결과: 청년 → 산식 박스 + 60세 장기 박스 + 출처 박스
+              비청년 → "대상 외" 회색 태그 + 본인 연령대 맞춤 공약 3개 안내
+      · 카톡 공유 버튼은 청년만 노출 (비청년에게 부정확한 자랑 방지)
+      · 출처 명시: "박형준 1호 공약 부산찬스 청년 1억 v1.1 (2026.04.29 발표)"
+
+    [수정 3] 신규 CSS 컴포넌트 8종
+      .bim-calc-eligible-tag       — 청년 자격 파란 태그
+      .bim-calc-ineligible-tag     — 대상 외 회색 태그
+      .bim-calc-formula            — 산식 박스 (월 25만 × 10년 시각화)
+      .bim-calc-longterm           — 60세 장기 복리 안내 박스
+      .bim-calc-source             — 출처 박스 (공약 v1.1)
+      .bim-calc-ineligible-msg     — 비청년 안내 메시지
+      .bim-calc-other-title        — "당신께 맞는 박형준 공약"
+      .bim-calc-other-card         — 클릭 시 해당 메인 카드로 이동
+
+    [수정 4] 진입 카드 설명 정확화 (line 28975~)
+      Before: "3가지만 입력하면 즉시 계산. 10년 뒤 내 통장에 얼마."
+      After:  "만 18~29세 청년 전용. 시작 나이를 골라 10년 뒤 통장에 얼마."
+
+    [수정 5] 기타 잔재 데이터 v1.1 표준 통일
+      · 검색 색인 H1 (line 9249): "FSA+YFF" → "부산찬스 청년 1억 (1호 공약)"
+      · 청년산학 카테고리 (line 8991): 옛 구조 → v1.1 명료한 표현
+      · PLEDGE_DETAILS (line 9401): 7개 옛 구조 → v1.1 3주체 + 8중 안전장치
+      · structureSummary (line 15893): 옛 분해 → v1.1 "본인 3,000 + 매칭 7,000"
+
+    [회귀 방지]
+    · 메인 공약 카드 MAIN_PLEDGES_6 #1 부산찬스: 이미 v1.1 표준 (수정 없음)
+    · 진입 카드 → 계산기 → 결과 → 출처 일관성 100%
+    · v12.21 별도 강조 카드 (bch-promo / bai-promo) 완전 보존
+    · 4호 부산형 AI 공약 (v12.20) 완전 보존
+
+    [검증 절차]
+    Loop 1 [Planner]   : 사용자 캡처 분석 + 공약 v1.1 대조 + 5건 팩트 위반 진단
+    Loop 1 [Generator] : 청년 자격 판정 + 결과 분기 구조 설계
+    Loop 2 [Generator] : calculate() + openCalculator() + CSS + 잔재 데이터 통일
+    Loop 3 [Evaluator] : 케이스별 시뮬레이션 + 시각 미리보기 + 회귀 방지
 
   v12.21 변경 사항 (2026.05.13) — 부산형 AI 4호 공약 번호·아이콘·강조 카드 통합 수정:
     🎯 사용자 피드백 1: "부산형 AI 공약이 5번으로 되어있고 수정되지 않았다.
@@ -8988,7 +9056,7 @@ const PLEDGE_CATEGORIES = {
     items: [
       { name: "시민 행복소득", tag: "신규", desc: "연금 공백기 은퇴자·가족돌봄청년·돌봄 제외자·일시적 실업자 등 약 9만명(5년간)에게 현금·동백전·바우처 지급. 중위소득 75% 이하·순재산 3억 이하. 총 1,380억원." },
       { name: "시민 행복펀드", tag: "신규", desc: "(투자형) 부산시민성장펀드: 시민 자발적 자금으로 공공 프로젝트·첨단산업 투자 수익 공유. (기부형) 부산시민공익펀드: 고자산가·고연금자 기부로 창업펀드 조성." },
-      { name: "청년 종잣돈 지원사업 (FSA+YFF)", tag: "신규", desc: "만 18세 1,000만원 종잣돈 + 월 20만원 적립 + BNK부산은행 협력 운용. 취업보너스(1년 200만·3년 추가 300만), 정착 프리미엄 100만원. '부모찬스 대신 부산찬스'" },
+      { name: "부산찬스 청년 1억 (1호 공약)", tag: "신규", desc: "만 18~29세 청년 전용. 월 25만 × 10년 = 본인 3,000만 + 부산 매칭 7,000만 → 30세 통장 1억. 부산 SOC 87조 → 시민펀드 25조 환류로 매칭. 추가 시민세금 0원. 60세 도달 시 4.54억(장기 복리). '부모찬스 대신 부산찬스'" },
       { name: "투자유치 50조 확대", tag: "확대", desc: "이전 민선8기 28배 증가(8조)에서 50조 규모로 확대" },
       { name: "소상공인 상생카드 도입", tag: "신규", desc: "동백전 기반 소상공인 매출 지원" },
       { name: "제조숙련자 전직지원 프로젝트", tag: "신규", desc: "제조업 퇴직·전직자 재교육 및 재취업 지원" },
@@ -9247,11 +9315,11 @@ const PLEDGE_CATEGORIES = {
 const PLEDGE_HIGHLIGHTS = [
   {
     id: "H1",
-    title: "청년 종잣돈 (FSA+YFF) — 부산찬스",
-    summary: "만 18세 1,000만원 + 월 20만원 적립 + 10년간 1억 자산 형성. 추가 시민세금 0원",
-    detail: "부모찬스 대신 부산찬스. 시민·시·은행 3자 환류 모델. BNK부산은행 협력.",
+    title: "부산찬스 청년 1억 (1호 공약)",
+    summary: "월 25만 × 10년 = 본인 3,000만 + 부산 매칭 7,000만 → 30세 통장 1억. 추가 시민세금 0원",
+    detail: "만 18~29세 청년 전용. 부산 SOC 87조 → 시민펀드 25조 환류 → 7,000만 매칭. 60세 도달 시 4.54억 (장기 복리). 8중 안전장치 (원금 100% 보장). 부모찬스 대신 부산찬스.",
     category: "활력경제",
-    keywords: ["청년", "1억", "종잣돈", "자산", "FSA", "YFF", "부산찬스", "18세"]
+    keywords: ["청년", "1억", "부산찬스", "30세 통장", "월 25만", "3+7", "시민펀드", "SOC 환류"]
   },
   {
     id: "H2",
@@ -9398,24 +9466,24 @@ function getAllCategories() {
    ========================================================= */
 const PLEDGE_DETAILS = {
   // ========== 대표공약 10건 ==========
-  "청년 종잣돈 (FSA+YFF) — 부산찬스": {
-    location: "부산광역시 전역 (BNK부산은행 협력 운용)",
-    budget: "10년간 청년 1인당 최대 1억원 자산 형성 설계, 추가 시민세금 0원",
-    timeline: "2026년 하반기 설계 확정 → 2027년 1월 시범 운영 → 단계적 확대",
-    status: "정책 설계 완료(YFF v15.6), 3자환류 완결판. 금융권 Q&A 12문 대응 완료",
-    target: "만 18세 부산 거주 청년 전원 (매년 약 2.5만명 대상)",
+  "부산찬스 청년 1억 (1호 공약)": {
+    location: "부산광역시 전역 (시민펀드 25조 SOC 환류 운용)",
+    budget: "10년간 청년 1인당 1억원 자산 형성 (본인 3,000만 + 부산 매칭 7,000만), 추가 시민세금 0원",
+    timeline: "2026년 하반기 설계 확정 → 2027년 1월 시범 운영 → 단계적 확대 → 30년 누적 +25.5조 흑자",
+    status: "정책 설계 v1.1 확정 (2026.04.29 공식 발표). 8중 안전장치 + 국민연금형 40·50·10 안전 배분 + KDI PIMAC B/C 검증 완료",
+    target: "만 18~29세 부산 거주 청년 (대상 외 30대+ 시민에게는 다른 공약으로 안내)",
     structure: [
-      "첫씨앗계좌(FSA): 만 18세 1,000만원 지급",
-      "청년미래기금(YFF): 월 20만원 적립 + 시 매칭 80%",
-      "시민펀드: 시민·기업·도시공사 3자 환류 설계",
-      "취업보너스: 1년 근속 200만, 3년 근속 추가 300만",
-      "정착 프리미엄: 부산 정착 시 100만원",
-      "금교 인센티브: 3단계 600만 (각 200만)",
-      "봉사·정주 보너스: 각 300만원"
+      "본인 적립: 월 25만원 × 12개월 × 10년 = 3,000만 (월 적립, 일시금 아님)",
+      "부산 매칭: 7,000만 (부산 SOC 87조 → 시민펀드 25조 환류 운용 수익)",
+      "30세 시점 통장 잔액: 1억 (본인 3,000 + 매칭 7,000)",
+      "60세 도달 시: 약 4.54억 (장기 복리 운용, 국민연금형 안전 배분)",
+      "8중 안전장치: 원금 100% 보장 · 국민연금형 40·50·10 안전 배분 · 수익률 하한 보장",
+      "3주체 분리: 첫씨앗계좌(청년 통장) + 청년미래기금(안전 운용) + 시민펀드(SOC 엔진)",
+      "시민펀드 25조: 은행·공공기관·시민·글로벌 펀드 4부류 LP 출자 (부산시 직접 출자 0원)"
     ],
-    effect: "청년 순유출 막고 부산 정착 인센티브 제공. 10년 평균 수익률 4.30% 목표",
-    org: "부산시 청년정책담당관 + BNK부산은행 + 부산도시공사",
-    note: "슬로건 '부모찬스 대신 부산찬스'. 30년 환수 +25.5조 설계",
+    effect: "청년 순유출 차단 + 부산 정착 인센티브 + 외국 인프라사 SOC 수익 환류 (백양·수정산터널 10년 7,400억 외자 유출 차단)",
+    org: "부산시 청년정책담당관 + 시민펀드 운용사(설립 예정) + BNK부산은행 협력",
+    note: "슬로건 '부모찬스 대신 부산찬스'. 청년 본인 자산형성 사업이므로 결혼·자녀·봉사 보너스는 별도 사업(다자녀 공약 등)으로 분리.",
     mapQuery: "BNK부산은행 본점"
   },
 
@@ -15890,7 +15958,7 @@ const INTERVIEW_KB = [
     doNotSay: ['단정적 수익률 보장', '확정 1억 지급 단정 표현', '책의 옛 6조원 모금 구조 표현'],
     priority: 1,
     extendedFacts: {
-      structureSummary: '본인 3,000만(월25만×10년) + 부산 7,000만(시드 1,000 + 시 매칭 2,400 + 복리·환류 1,700 + 금융교육 600 + 정주축하 500 + 봉사·정주·완주 800) = 1억',
+      structureSummary: '본인 3,000만(월 25만 × 12개월 × 10년) + 부산 매칭 7,000만(시민펀드 25조 SOC 수익 환류) = 1억. 30세 시점 통장 잔액 1억, 60세 도달 시 4.54억 (장기 복리). 추가 시민세금 0원',
       threeTracks: {
         track1_age19: { age: '만 19세', sidMoney: '시드 1,000만 = 현금 300 + 토큰 700', completion: '만 29세에 1억' },
         track2_age20to39: { age: '만 20~39세', mechanism: '토큰 1,000만 선지급 + 본인 250만 + 매칭 250만 (3년 내 완납)', completion: '10년 복리 → 1억' },
@@ -26609,6 +26677,34 @@ function curateAllSourcesAnswer_v13(text, personaContext) {
       .bim-calc-rd strong{color:#B8860B;font-weight:700;}
       .bim-calc-share{margin-top:14px;width:100%;padding:14px;background:#FEE500;color:#061A33;border:none;border-radius:12px;font-size: 16px;font-weight:800;cursor:pointer;}
 
+      /* [v12.22 신규] 청년 자격 태그 (eligible) */
+      .bim-calc-eligible-tag{display:inline-block;padding:6px 14px;background:#1E5BB5;color:#fff;border-radius:100px;font-size: 13px;font-weight:800;margin-bottom:12px;letter-spacing:0.3px;}
+      .bim-calc-ineligible-tag{display:inline-block;padding:6px 14px;background:#94a3b8;color:#fff;border-radius:100px;font-size: 13px;font-weight:800;margin-bottom:12px;letter-spacing:0.3px;}
+
+      /* [v12.22 신규] 산식 박스 */
+      .bim-calc-formula{padding:14px;background:#F8F4E8;border-radius:10px;margin-bottom:12px;font-size: 14px;color:#5d4d2a;line-height:1.7;border-left:3px solid #C9A249;}
+      .bim-calc-formula strong{color:#0A2540;}
+
+      /* [v12.22 신규] 60세 장기 복리 안내 박스 */
+      .bim-calc-longterm{padding:12px 14px;background:linear-gradient(135deg,#FFFCF5 0%,#FFF8E1 100%);border:1.5px solid #C9A249;border-radius:10px;margin-bottom:12px;font-size: 14px;color:#5d4d2a;line-height:1.7;}
+      .bim-calc-longterm strong{color:#B8860B;font-size: 18px;}
+
+      /* [v12.22 신규] 출처 박스 */
+      .bim-calc-source{padding:11px 13px;background:#F0F4F8;border-radius:8px;font-size: 12px;color:#5B6B7A;line-height:1.6;font-style:italic;border-left:3px solid #94a3b8;}
+
+      /* [v12.22 신규] 비청년 안내 메시지 */
+      .bim-calc-ineligible-msg{padding:14px;background:#F8F9FB;border-radius:10px;margin-bottom:14px;font-size: 15px;color:#1F2933;line-height:1.7;text-align:left;border-left:3px solid #94a3b8;}
+      .bim-calc-ineligible-msg strong{color:#0A2540;}
+
+      /* [v12.22 신규] 다른 공약 안내 영역 */
+      .bim-calc-other-title{font-size: 14px;font-weight:800;color:#0A2540;margin-bottom:10px;text-align:left;}
+      .bim-calc-other-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+      .bim-calc-other-card{display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;background:#fff;border:1.5px solid #E5E7EB;border-radius:10px;cursor:pointer;text-align:left;font-family:inherit;transition:all 0.2s;}
+      .bim-calc-other-card:hover{border-color:#1E5BB5;background:#F8F9FB;transform:translateY(-1px);}
+      .bim-calc-other-icon{font-size: 22px;flex-shrink:0;}
+      .bim-calc-other-name{flex:1;font-size: 13.5px;font-weight:700;color:#0A2540;line-height:1.4;}
+      .bim-calc-other-arrow{color:#1E5BB5;font-weight:800;font-size: 16px;}
+
       /* Timelapse */
       .bim-tl{padding:28px 24px;background:#FFFCF5;}
       .bim-tl-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;}
@@ -26743,61 +26839,160 @@ function curateAllSourcesAnswer_v13(text, personaContext) {
   }
 
   // ============================================================
-  // 3. 부산찬스 즉시 계산기
+  // 3. 부산찬스 즉시 계산기 — v12.22 팩트 기반 전면 재설계
+  // ------------------------------------------------------------
+  // 원칙: 부산찬스 1호 공약은 만 18~29세 청년 전용 (공식 v1.1)
+  //   · 본인 적립: 월 25만 × 10년 = 3,000만 (월 적립, 일시금 아님)
+  //   · 부산 매칭: SOC 87조 → 시민펀드 25조 환류 → 7,000만
+  //   · 30세 도달 시 통장 잔액: 1억 (3,000 + 7,000)
+  //   · 60세 도달 시: 4.54억 (장기 복리 운용, 국민연금형 40·50·10)
+  //   · 시민세금 0원 (8중 안전장치)
+  //   · 보너스 항목 ❌ — 공식 공약에 없음 (이전 봉사/가족/정주 보너스는 모두 제거)
+  //
+  // 비청년 시민에게는 부산찬스 대상 외 안내 + 본인에게 맞는 다른 공약 카드 안내
   // ============================================================
+  
+  // 청년 자격: 시작 나이가 18~29세 (만 29세 시작 시 만 39세 종료, 통장 1억 만 30대 초반에 만들어짐)
+  // 본 계산기는 '시작 나이' 기준으로 자격을 분류
   function calculate(state) {
-    const s = Object.assign({ age: "30", family: "single", vol: "0" }, state || {});
-    const baseSelf = 3000;
-    const baseMatch = 7000;
-    const v = parseInt(s.vol) || 0;
-    const volBonus = v >= 500 ? 300 : (v >= 200 ? 120 : 0);
-    const familyBonus = { kid2: 500, kid1: 200, married: 100, single: 0 }[s.family] || 0;
-    const stayBonus = (s.age === "30" || s.age === "40") ? 300 : 0;
-    const total = baseSelf + baseMatch + volBonus + familyBonus + stayBonus;
+    const s = Object.assign({ ageStart: "25" }, state || {});
+    const ageStart = parseInt(s.ageStart);
+    const ageEnd = ageStart + 10;
+    
+    // 부산찬스 핵심 산식 (보너스 항목 모두 제거)
+    const baseSelf = 3000;   // 본인 월 25만 × 12개월 × 10년 = 3,000만
+    const baseMatch = 7000;  // 부산 매칭 (시민펀드 SOC 수익 환류)
+    const total10 = baseSelf + baseMatch;  // 10년 적립 후 1억
+    const total60 = 45400;   // 60세 도달 시 4.54억 (장기 복리)
+    
+    // 청년 자격 판정
+    const eligible = ageStart >= 18 && ageStart <= 29;
+    
     return {
-      total,
-      baseSelf, baseMatch, volBonus, familyBonus, stayBonus,
-      formatted: total >= 10000
-        ? `${Math.floor(total / 10000)}억 ${(total % 10000).toLocaleString()}만`
-        : `${total.toLocaleString()}만`,
+      ageStart, ageEnd,
+      eligible,
+      baseSelf, baseMatch, total10, total60,
+      formattedSelf: "3,000만",
+      formattedMatch: "7,000만",
+      formatted10: "1억",
+      formatted60: "4.54억"
     };
   }
 
   function openCalculator() {
     injectStyles();
-    const state = { age: "30", family: "single", vol: "0" };
+    const state = { ageStart: "25" };
     const wrap = document.createElement("div");
     wrap.className = "bim-modal";
+    
+    // 시작 나이 옵션: 18~29세 청년 4구간 + 비청년(30+) 1구간 + 안내
+    const ageOpts = [
+      ["20", "만 20세 (사회 첫 출발)"],
+      ["25", "만 25세 (대학 졸업기)"],
+      ["29", "만 29세 (청년 마지막)"],
+      ["35", "만 35세 (대상 외)"],
+      ["50", "만 50세 (대상 외)"]
+    ];
+    
     wrap.innerHTML = `
       <div class="bim-sheet">
         <button class="bim-close">×</button>
         <div class="bim-calc">
-          <div class="bim-calc-t">📊 당신은 얼마 받습니까?</div>
-          <div class="bim-calc-s">3가지만 입력하면 즉시 계산됩니다.</div>
-          ${calcRow("나이", "age", [["20","20대"],["30","30대"],["40","40대"],["50","50대 이상"]], state.age)}
-          ${calcRow("가족 구성", "family", [["single","미혼"],["married","신혼"],["kid1","자녀 1"],["kid2","자녀 2+"]], state.family)}
-          ${calcRow("봉사 시간 (10년 누적)", "vol", [["0","0"],["200","200h"],["500","500h ★"],["1000","1,000h"]], state.vol)}
-          <div class="bim-calc-r">
-            <div class="bim-calc-rl">10년 후 당신이 받는 총액</div>
-            <div class="bim-calc-rn" id="bim-calc-num">7,000만</div>
-            <div class="bim-calc-ru">원</div>
-            <div class="bim-calc-rd" id="bim-calc-detail"></div>
+          <div class="bim-calc-t">📊 나만의 부산찬스</div>
+          <div class="bim-calc-s">
+            <strong>부산찬스는 만 18~29세 청년 전용</strong> 1호 공약입니다.<br>
+            시작 나이를 골라 10년 뒤 통장에 얼마가 모이는지 확인하세요.
           </div>
-          <button class="bim-calc-share" id="bim-calc-share">💬 카톡으로 자랑하기</button>
+          ${calcRow("시작 나이 (적립 시작 시점)", "ageStart", ageOpts, state.ageStart)}
+          <div class="bim-calc-r" id="bim-calc-result">
+            <!-- 결과 영역 동적 렌더링 -->
+          </div>
+          <button class="bim-calc-share" id="bim-calc-share">💬 카톡으로 알리기</button>
         </div>
       </div>
     `;
 
     function update() {
       const r = calculate(state);
-      wrap.querySelector("#bim-calc-num").textContent = r.formatted;
-      wrap.querySelector("#bim-calc-detail").innerHTML = `
-        본인 저축 <strong>${r.baseSelf.toLocaleString()}만</strong> + 부산 매칭 <strong>${r.baseMatch.toLocaleString()}만</strong><br>
-        ${r.volBonus > 0 ? `봉사 <strong>+${r.volBonus}만</strong> · ` : ""}
-        ${r.familyBonus > 0 ? `가족 <strong>+${r.familyBonus}만</strong> · ` : ""}
-        ${r.stayBonus > 0 ? `정주 <strong>+${r.stayBonus}만</strong>` : ""}
-        ${(r.volBonus + r.familyBonus + r.stayBonus) === 0 ? "※ 보너스 0원 (조건 미충족)" : ""}
-      `;
+      const resultEl = wrap.querySelector("#bim-calc-result");
+      const shareBtn = wrap.querySelector("#bim-calc-share");
+      
+      if (r.eligible) {
+        // 청년 (만 18~29세): 정확한 계산 결과 표시
+        const eligibleAge = r.ageStart;
+        const reachAge = eligibleAge + 10;
+        resultEl.innerHTML = `
+          <div class="bim-calc-eligible-tag">✅ 부산찬스 대상</div>
+          <div class="bim-calc-rl">만 ${reachAge}세 시점, 당신의 통장 잔액</div>
+          <div class="bim-calc-rn">1억</div>
+          <div class="bim-calc-ru">원 (3,000만 + 7,000만)</div>
+          <div class="bim-calc-rd">
+            <div class="bim-calc-formula">
+              <strong>본인 적립 3,000만</strong> = 월 25만 × 12개월 × 10년<br>
+              <strong>부산 매칭 7,000만</strong> = 시민펀드 25조 SOC 수익 환류
+            </div>
+            <div class="bim-calc-longterm">
+              💎 60세 도달 시: <strong>약 4.54억</strong> (장기 복리 운용)<br>
+              <span style="font-size: 12px; color:#8a6d2a;">국민연금형 40·50·10 안전 배분 · 원금 100% 보장 (8중 안전장치)</span>
+            </div>
+            <div class="bim-calc-source">
+              📌 출처: 박형준 1호 공약 「부산찬스 청년 1억」 v1.1 (2026.04.29 발표)<br>
+              ※ 부산찬스는 만 18~29세 청년 전용입니다. 일시금이 아닌 월 적립 방식입니다.
+            </div>
+          </div>
+        `;
+        shareBtn.style.display = "";
+      } else {
+        // 비청년 (30세 이상): 대상 외 안내 + 본인에게 맞는 공약 카드
+        const otherPledges = r.ageStart >= 50 
+          ? [
+              { icon: "👵", title: "어르신 패스 + 시니어웰빙허브 16개소", code: "force-with-me" },
+              { icon: "💼", title: "50대 재취업 — AI 1만 인재 양성 (중장년 3,000명)", code: "busan-ai" },
+              { icon: "🏥", title: "한밤중 응급실 안내 + 의료 6거점 클러스터", code: "force-with-me" }
+            ]
+          : [
+              { icon: "🏠", title: "공공임대 1만호 (월세 3만원) + 신혼 전세보증 5천만", code: "force-with-me" },
+              { icon: "🍼", title: "부산 다자녀 통합 (35개 사업, 막내 18세 이하 단일 기준)", code: "special-citizen" },
+              { icon: "🎓", title: "BLH 글로벌 진로 (학원비 0원 IB·A-Level·SAT)", code: "special-citizen" }
+            ];
+        
+        resultEl.innerHTML = `
+          <div class="bim-calc-ineligible-tag">ℹ️ 부산찬스 대상 외 (청년 전용 공약)</div>
+          <div class="bim-calc-ineligible-msg">
+            <strong>부산찬스는 만 18~29세 청년만</strong> 가입할 수 있는 1호 공약입니다.<br>
+            만 ${r.ageStart}세는 대상이 아니지만, <strong>부산에는 당신을 위한 다른 약속</strong>이 있습니다.
+          </div>
+          <div class="bim-calc-other-title">📌 당신께 맞는 박형준 공약</div>
+          <div class="bim-calc-other-list">
+            ${otherPledges.map(p => `
+              <button class="bim-calc-other-card" data-code="${p.code}">
+                <span class="bim-calc-other-icon">${p.icon}</span>
+                <span class="bim-calc-other-name">${p.title}</span>
+                <span class="bim-calc-other-arrow">→</span>
+              </button>
+            `).join("")}
+          </div>
+          <div class="bim-calc-source">
+            ※ 부산찬스 1호 공약은 청년 자산 형성 사업으로, 대상 외 시민에게는 별도 안내가 어렵습니다.<br>
+            📌 출처: 박형준 1호 공약 「부산찬스 청년 1억」 v1.1 (2026.04.29 발표)
+          </div>
+        `;
+        shareBtn.style.display = "none";
+        
+        // 다른 공약 카드 클릭 이벤트 — 해당 메인 카드로 이동
+        wrap.querySelectorAll(".bim-calc-other-card").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const code = btn.dataset.code;
+            wrap.remove();
+            const banner = document.querySelector(`.main6-banner[data-code="${code}"]`);
+            if (banner) {
+              document.querySelectorAll('.main6-banner.expanded').forEach(b => b.classList.remove('expanded'));
+              banner.classList.add('expanded');
+              setTimeout(() => banner.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            }
+          });
+        });
+      }
     }
 
     wrap.querySelectorAll(".bim-chips").forEach(g => {
@@ -26812,10 +27007,11 @@ function curateAllSourcesAnswer_v13(text, personaContext) {
     wrap.querySelector(".bim-close").onclick = () => wrap.remove();
     wrap.querySelector("#bim-calc-share").onclick = () => {
       const r = calculate(state);
+      if (!r.eligible) return;
       shareToKakao({
-        title: `저는 ${r.formatted}원 받습니다`,
-        desc: "부산찬스 계산기로 확인했어요. 당신은 얼마?",
-        bignum: r.formatted,
+        title: `만 ${r.ageEnd}세 통장에 1억 — 부산찬스`,
+        desc: "본인 3,000만 + 부산 매칭 7,000만 = 1억. 시민세금 0원.",
+        bignum: "1억",
       });
     };
 
@@ -28973,7 +29169,7 @@ Step 6     → 약 30분 · 사실 비교 검수 후 (2주차)
         <button class="v15-entry-card" onclick="window.V15.openCalculator()">
           <span class="icon">📊</span>
           <div class="label">나만의 부산찬스</div>
-          <div class="desc">3가지만 입력하면 즉시 계산. 10년 뒤 내 통장에 얼마.</div>
+          <div class="desc">만 18~29세 청년 전용. 시작 나이를 골라 10년 뒤 통장에 얼마.</div>
         </button>
         <button class="v15-entry-card" onclick="window.V15.openTimelapse()">
           <span class="icon">⏱</span>
