@@ -2,10 +2,60 @@
 <!--
   ============================================================
   박형준 부산시장 후보 AI 정책비서
-  busan_ai_assistant v12.22 — Vercel 배포용 (index.html)
+  busan_ai_assistant v12.23 — Vercel 배포용 (index.html)
   ============================================================
   배포 환경: Vercel (메인 페이지 자동 인식)
-  원본 파일명: busan_ai_assistant_v12_22.html
+  원본 파일명: busan_ai_assistant_v12_23.html
+
+  v12.23 변경 사항 (2026.05.14) — 인앱 브라우저 입력창 겹침 문제 수정:
+    🎯 사용자 피드백: "대화창에 스크린이 들어가서 문제 제기가 있다 수정하라"
+    📷 캡처 환경: 텔레그램 인앱 브라우저 (a-i-mu.vercel.app)
+
+    [문제 진단]
+    부산찬스 강조 카드(bch-promo-banner)의 3개 통계 박스
+    (3+7=1억 · 87조→25조 · 0원)가 화면 하단 고정 입력창 위에
+    회색 카드 형태로 떠다니듯 겹쳐 보이는 현상
+
+    [근본 원인 3가지]
+    1. .input-dock의 배경 그라데이션이 80% 지점에서 시작되어
+       하단 일부만 불투명, 상단 ~20%는 transparent → 페이지 콘텐츠
+       (강조 카드 통계 박스)가 입력창 영역까지 비쳐 보임
+    2. .chat-wrap padding-bottom: 180px이 모바일에서 부족
+       (입력창 + district-row + disclaimer 합산 ~220px)
+    3. .bch-promo-stat·.blh-promo-stat·.bai-promo-stat의
+       backdrop-filter: blur(6px)가 텔레그램 인앱 브라우저에서
+       지원되지 않거나 깨져서 박스가 부유한 회색 카드처럼 렌더링
+
+    [수정 1] .input-dock 배경 불투명화 (line 4715~)
+      Before: linear-gradient(to top, var(--bg) 80%, transparent)
+      After:  linear-gradient(to top, var(--bg) 0%, var(--bg) 70%,
+              rgba(250,250,247,0.95) 90%, rgba(250,250,247,0.7) 100%)
+      + z-index: 100 (인앱 브라우저 보장)
+      + box-shadow: 0 -8px 24px rgba(11,30,63,0.08) (시각적 분리)
+
+    [수정 2] 페이지 하단 패딩 증가 (3곳)
+      .chat-wrap                       : 180 → 240 (PC)
+      #citizen-view.chat-wrap          : 140 → 240 (기본)
+      #citizen-view.chat-wrap (모바일) : 180 → 280 (인앱 브라우저)
+      @media .chat-wrap                : 180 → 280
+
+    [수정 3] 강조 카드 backdrop-filter 제거 + 배경 강화 (3종)
+      .bch-promo-stat (부산찬스)  : rgba(0,0,0,0.32) → rgba(20,10,5,0.55), backdrop 제거
+      .blh-promo-stat (BLH)      : rgba(255,255,255,0.10) → 0.16, backdrop 제거
+      .bai-promo-stat (부산형 AI) : rgba(0,0,0,0.32) → rgba(20,10,40,0.55), backdrop 제거
+      → 텔레그램·카톡 등 인앱 브라우저에서도 동일한 모습 보장
+
+    [회귀 방지]
+    · v12.22 부산찬스 계산기 팩트 위반 수정 (39/40 통과) 완전 보존
+    · v12.21 별도 강조 카드 3종(bch/blh/bai) 색상·구조 보존
+    · v12.20 부산형 AI 4호 공약 발표 최종안 보존
+    · 모든 메인 콘텐츠 영역 영향 없음 (입력창 시각 분리만 강화)
+
+    [검증 절차]
+    Loop 1 [Planner]   : 캡처 분석 + 입력창 z-index/배경/패딩 진단
+    Loop 1 [Generator] : 3개 영역 동시 수정 방안 설계
+    Loop 2 [Generator] : input-dock 배경 + chat-wrap 패딩 + 강조 카드 backdrop 제거
+    Loop 3 [Evaluator] : 수정 전후 시뮬레이션 + 회귀 방지 검증
 
   v12.22 변경 사항 (2026.05.14) — 부산찬스 계산기 팩트 위반 5건 전면 수정:
     🎯 사용자 피드백: "나만의 부산찬스를 클릭하면 40대·50대인데도 매칭 금액 등
@@ -1242,10 +1292,10 @@
   .chat-wrap {
     max-width: 820px;
     margin: 0 auto;
-    padding: 20px 20px 180px;
+    padding: 20px 20px 240px;  /* v12.23: 180 → 240 (input-dock 가림 방지 강화) */
   }
   @media (min-width: 1200px) {
-    .chat-wrap { padding: 28px 40px 180px; }
+    .chat-wrap { padding: 28px 40px 240px; }
   }
   .hero {
     text-align: center;
@@ -4710,12 +4760,17 @@
   }
   .action-row button:hover { border-color: var(--navy); color: var(--navy); }
 
-  /* 입력창 (하단 고정) */
+  /* 입력창 (하단 고정) - v12.23: 배경 완전 불투명화 (강조 카드 통계 박스가 입력창과 겹쳐 보이는 문제 해결) */
   .input-dock {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    background: linear-gradient(to top, var(--bg) 80%, transparent);
+    /* v12.23: 그라데이션 시작점 80% → 0% 로 변경 + 하단 배경 완전 불투명 */
+    background: linear-gradient(to top, var(--bg) 0%, var(--bg) 70%, rgba(250, 250, 247, 0.95) 90%, rgba(250, 250, 247, 0.7) 100%);
     padding: 14px 16px 20px;
+    /* v12.23: 인앱 브라우저(텔레그램 등)에서 z-index 보장 */
+    z-index: 100;
+    /* v12.23: 위쪽 그림자로 콘텐츠와 시각적 분리 (입력창 위에 콘텐츠 떠다니는 듯한 오해 차단) */
+    box-shadow: 0 -8px 24px rgba(11, 30, 63, 0.08);
   }
   .input-dock-inner {
     max-width: 780px;
@@ -5036,8 +5091,8 @@
     .filter-bar { gap: 6px; }
     .filter-bar select, .filter-bar input { font-size: 15.5px; } /* iOS 확대 방지 16px */
     .input-box textarea { font-size: 16px; } /* iOS 자동확대 방지 */
-    /* 입력창 하단 여백 (iOS 홈바) */
-    .chat-wrap { padding-bottom: 180px; }
+    /* 입력창 하단 여백 (iOS 홈바) v12.23: 180 → 280 (인앱 브라우저 보완) */
+    .chat-wrap { padding-bottom: 280px; }
   }
   @media (max-width: 380px) {
     .hero h2 { font-size: 20px; }
@@ -5187,13 +5242,13 @@
     z-index: 1;
   }
   .bch-promo-stat {
-    background: rgba(0, 0, 0, 0.32);  /* v12.19: 0.28 → 0.32 (검정 박스 더 진하게 → 노랑 더 선명) */
-    border: 1.5px solid rgba(255, 235, 59, 0.65);  /* v12.19: 골드 테두리도 #FFEB3B로 통일 */
+    /* v12.23: 인앱 브라우저(텔레그램·카톡 등) backdrop-filter 호환성 강화 — 단색 배경으로 대체 */
+    background: rgba(20, 10, 5, 0.55);  /* v12.19: 0.32 → v12.23: 0.55 (backdrop-filter 없이도 노랑 선명) */
+    border: 1.5px solid rgba(255, 235, 59, 0.65);  /* v12.19: 골드 테두리 #FFEB3B */
     border-radius: 12px;
     padding: 10px 8px 9px;
     text-align: center;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    /* v12.23: backdrop-filter 제거 — 인앱 브라우저에서 박스가 부유한 회색 카드처럼 보이는 문제 해결 */
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.25);
   }
   .bch-promo-v {
@@ -5291,12 +5346,12 @@
     z-index: 1;
   }
   .blh-promo-stat {
-    background: rgba(255,255,255,0.10);
-    border: 1px solid rgba(255,212,91,0.25);
+    /* v12.23: 인앱 브라우저 호환성 — backdrop-filter 제거 + 단색 배경 강화 */
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,212,91,0.40);
     border-radius: 10px;
     padding: 8px 8px 7px;
     text-align: center;
-    backdrop-filter: blur(4px);
   }
   .blh-promo-v {
     display: block;
@@ -5422,13 +5477,12 @@
     z-index: 1;
   }
   .bai-promo-stat {
-    background: rgba(0, 0, 0, 0.32);
+    /* v12.23: 인앱 브라우저 호환성 — backdrop-filter 제거 + 단색 배경 강화 */
+    background: rgba(20, 10, 40, 0.55);
     border: 1.5px solid rgba(255, 235, 59, 0.65);
     border-radius: 12px;
     padding: 10px 8px 9px;
     text-align: center;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 2px 8px rgba(0,0,0,0.25);
   }
   .bai-promo-v {
@@ -7104,14 +7158,14 @@
     font-size: 13.5px;
   }
 
-  /* input-dock 가림 방지 — chat-wrap 마지막에 충분한 공간 확보 */
+  /* input-dock 가림 방지 — v12.23: 패딩 대폭 증가 (입력창 + district-row + disclaimer 합산 ~240px) */
   #citizen-view.chat-wrap {
-    padding-bottom: 140px !important;
+    padding-bottom: 240px !important;
   }
-  /* 모바일에서는 더 여유롭게 */
+  /* 모바일에서는 더 여유롭게 (인앱 브라우저 하단 바 고려) */
   @media (max-width: 640px) {
     #citizen-view.chat-wrap {
-      padding-bottom: 180px !important;
+      padding-bottom: 280px !important;
     }
   }
 
